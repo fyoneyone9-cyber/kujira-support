@@ -18,7 +18,7 @@ export async function gemini(prompt: string): Promise<string> {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 2048 },
+            generationConfig: { maxOutputTokens: 8192 },
           }),
         }
       )
