@@ -74,6 +74,33 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {/* Quick Links */}
+      <div className="bg-slate-800 rounded-2xl border border-slate-700 mb-8">
+        <div className="p-5 border-b border-slate-700">
+          <h2 className="text-base font-semibold text-white">🔗 リンク集</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5">
+          {[
+            { label: 'シフト管理スプレッドシート', url: 'https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=602309486#gid=602309486', icon: '📊' },
+            { label: '勤怠管理システム', url: 'https://attendance-app-prod-716327310989.asia-northeast1.run.app/login', icon: '🕐' },
+            { label: '現場管理システム', url: 'https://d1zlma8f7wwwsg.cloudfront.net/login', icon: '🏗️' },
+            { label: 'DXP リモートデスクトップ', url: 'https://dxp2800-b53d.jp9.ug.link/desktop/?os=ugospro#/', icon: '🖥️' },
+          ].map((link) => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 rounded-xl transition-colors group"
+            >
+              <span className="text-xl">{link.icon}</span>
+              <span className="text-sm text-slate-200 group-hover:text-white transition-colors font-medium">{link.label}</span>
+              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-xs">↗</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
       {/* Two columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Logs */}
