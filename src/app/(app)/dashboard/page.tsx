@@ -81,10 +81,10 @@ export default async function DashboardPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5">
           {[
-            { label: 'シフト管理スプレッドシート', url: 'https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=602309486#gid=602309486', icon: '📊' },
+            { label: '工程管理シート', url: 'https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=602309486#gid=602309486', icon: '📊' },
             { label: '勤怠管理システム', url: 'https://attendance-app-prod-716327310989.asia-northeast1.run.app/login', icon: '🕐' },
-            { label: '現場管理システム', url: 'https://d1zlma8f7wwwsg.cloudfront.net/login', icon: '🏗️' },
-            { label: 'DXP リモートデスクトップ', url: 'https://dxp2800-b53d.jp9.ug.link/desktop/?os=ugospro#/', icon: '🖥️' },
+            { label: 'くじらCRM', url: 'https://d1zlma8f7wwwsg.cloudfront.net/login', icon: '🐋' },
+            { label: 'NASサーバー', url: 'https://dxp2800-b53d.jp9.ug.link/desktop/?os=ugospro#/', icon: '🖥️' },
           ].map((link) => (
             <a
               key={link.url}
