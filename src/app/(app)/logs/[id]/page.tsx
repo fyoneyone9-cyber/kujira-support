@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import LogAiPanel from './LogAiPanel'
 
 export default async function LogDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient()
@@ -26,22 +27,18 @@ export default async function LogDetailPage({ params }: { params: { id: string }
             {new Date(log.created_at).toLocaleString('ja-JP')}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link
-            href={`/logs/${log.id}/edit`}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-xl transition-colors"
-          >
-            ✏️ 編集
-          </Link>
-          <Link
-            href={`/manuals/new?from_log=${log.id}`}
-            className="px-4 py-2 bg-green-600/30 hover:bg-green-600/50 text-green-400 text-sm font-medium rounded-xl transition-colors"
-          >
-            📋 マニュアル化
-          </Link>
-        </div>
+        <Link
+          href={`/logs/${log.id}/edit`}
+          className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-xl transition-colors"
+        >
+          ✏️ 編集
+        </Link>
       </div>
 
+      {/* AI Panel */}
+      <LogAiPanel logId={log.id} title={log.title} content={log.content} />
+
+      {/* Content */}
       <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
         <pre className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap font-mono">
           {log.content}
