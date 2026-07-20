@@ -26,7 +26,7 @@ export default async function ManualsPage({
     .select('category')
     .not('category', 'is', null)
 
-  const uniqueCategories = [...new Set(categories?.map((m) => m.category).filter(Boolean))]
+  const uniqueCategories = Array.from(new Set(categories?.map((m) => m.category).filter(Boolean) ?? []))
 
   return (
     <div>
