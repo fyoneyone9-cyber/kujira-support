@@ -86,6 +86,7 @@ export default async function DashboardPage() {
             { label: 'くじらCRM', url: 'https://d1zlma8f7wwwsg.cloudfront.net/login', icon: '🐋' },
             { label: 'NASサーバー', url: 'https://dxp2800-b53d.jp9.ug.link/desktop/?os=ugospro#/', icon: '🖥️' },
             { label: 'くじら社内Wiki', url: 'https://www.notion.so/kujira-device-agency/Wiki-dc27874409f24d549bb439103f852185', icon: '📖' },
+            { label: 'Gmail（rukidouto）', url: 'https://mail.google.com', icon: '📧' },
           ].map((link) => (
             <a
               key={link.url}
