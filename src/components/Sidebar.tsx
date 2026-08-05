@@ -10,6 +10,7 @@ const navItems = [
   { href: '/logs', label: 'Slackログ', icon: '💬' },
   { href: '/manuals', label: 'マニュアル', icon: '📋' },
   { href: '/nippou', label: '日報作成', icon: '📝' },
+  { href: '/teleapo', label: 'テレアポ', icon: '📞' },
   { href: '/automations', label: '自動化', icon: '⚡' },
   { href: '/admin', label: 'メンバー管理', icon: '👥' },
 ]
