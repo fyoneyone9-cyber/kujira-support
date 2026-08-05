@@ -1,6 +1,55 @@
 'use client'
 import { useState } from 'react'
 
+// 切り返しデータ
+const OBJECTION_TREE: Record<string, { label: string; response: string; followups?: string[] }> = {
+  'root': { label: '', response: '' },
+  // ── カテゴリ ──
+  'cat_busy':      { label: '「今は忙しい」', response: '' },
+  'cat_nointerest':{ label: '「興味がない」', response: '' },
+  'cat_other':     { label: '「他社を使っている」', response: '' },
+  'cat_price':     { label: '「高そう」「お金がかかる」', response: '' },
+  'cat_key':       { label: '「カードキーでないとダメ」', response: '' },
+  'cat_custom':    { label: '「うちの業態に合わない」', response: '' },
+  'cat_pms':       { label: '「PMSと連携できる？」', response: '' },
+  'cat_unmanned':  { label: '「無人にはできない」', response: '' },
+  'cat_person':    { label: '「担当者不在」', response: '' },
+  'cat_email':     { label: '「メールが届かない」', response: '' },
+  // ── 切り返し本文 ──
+  'busy_later':    { label: 'いつならよいか確認する', response: '「承知いたしました。では、またお時間のよいときにご連絡させていただいてもよろしいでしょうか？いつ頃でしたらよろしいでしょうか？」' },
+  'busy_short':    { label: '30秒だけお願いする', response: '「お忙しいところ大変恐れ入ります。30秒だけお時間いただけますでしょうか。資料をメールでお送りするだけでも、させていただければと思っております。」' },
+  'nointerest_reason': { label: '理由を聞く', response: '「興味が無いのは、具体的に何か理由はございますか？もし導入コストや業態の面でご懸念がございましたら、解決できる事例もご用意しております。」' },
+  'nointerest_seminar': { label: 'セミナーに誘う', response: '「弊社は週2回、オンラインの説明会を開催しております（水曜11時・金曜13時）。1時間程度で、費用・導入事例なども詳しくご説明できます。一度いかがでしょうか？」' },
+  'nointerest_future':  { label: '将来的な興味を確認', response: '「将来的にも、ご興味はないでしょうか？近年、全国からのお問い合わせが去年よりかなり多くなってきておりまして、参考情報だけでもお送りさせていただければと思っております。」' },
+  'other_maker':   { label: 'どのメーカーか聞く', response: '「あ、そうでございましたか。もし差し支えないようでしたら、どちらのメーカー様をご利用されているか、参考までに教えて頂きたいのですが…」' },
+  'other_consider':{ label: '今後の検討を提案', response: '「現在の飲食業やホテル業界は、人手不足や人件費の高騰で厳しい状況と伺っております。無人チェックイン機で省人化・コスト削減に貢献できると考えていますが、こういったシステムにご興味はございませんでしょうか？」' },
+  'price_subsidy': { label: 'IT補助金を案内する', response: '「補助金を弊社で申請できます。IT補助金活用でKIOSK筐体が最安48万円〜、タブレット型は13万円〜でご導入可能です。また、使用しない月は月額0円になるプランもございます。」' },
+  'price_running': { label: '月額費用の説明', response: '「月額費用はKIOSK型で19,600円＋部屋数×200円、タブレット型は1室500円です。繁忙期のみ使用で使わない月は0円、日割り計算も可能です。実際の費用感をメールでお送りしてもよろしいでしょうか？」' },
+  'key_cylinder':  { label: 'シリンダー錠対応をPR', response: '「弊社の強みは、シリンダー錠（物理キー）にも対応可能なことです！別売りのキーボックスで、清算が終わると自動でキーボックスが開き、セルフで鍵のお渡しが可能になります。カードキーへの変更は不要です。」' },
+  'key_smartlock': { label: 'スマートロックを提案', response: '「もしご興味があれば、クラウドスマートロックもご提案できます。暗証番号で開錠でき、チェックイン機から排出されるレシートに暗証番号が自動で印字されます。」' },
+  'custom_order':  { label: 'オーダーメイドをPR', response: '「普段スタッフが口頭でご説明していることを、チェックイン機にカスタマイズして組み込むことが可能です。弊社は自社開発のため、御社専用のオーダーメイドをご提供できます。」' },
+  'custom_example':{ label: '導入事例を提示', response: '「弊社では接客の質を落とさずに手続きだけをスマート化して、顧客満足度を上げた事例がございます。同業態の導入事例を資料でお送りしてもよろしいでしょうか？」' },
+  'pms_list':      { label: 'PMS連携実績を案内', response: '「弊社はPMS（ホテルシステム）との連携開発に近年力を入れています。実績として、ステイシー・スイートブック・ベッツ24がございます。お客様のご要望によりかなりの頻度で開発連携が進んでいますので、御社のPMSも今後連携開発を進めます。」' },
+  'unmanned_pr':   { label: '省人化・効率化で言い換える', response: '「フロントでの事務的なオペレーションを削減することで、スタッフの方々がお客様との対話時間を増やし、館内施設や観光案内などの接客サービスをより一層手厚く行うことが可能になります。」' },
+  'person_time':   { label: 'いる時間帯を聞く', response: '「承知いたしました。失礼いたしました。何時（何日）ごろでしたら担当様とお話できますでしょうか？」' },
+  'person_front':  { label: 'フロントに資料送付を提案', response: '「では、フロントの方にお願いして、担当の支配人様にご一読いただけるよう資料をメールでお送りしてもよろしいでしょうか？メールアドレスをお教えいただけますか？」' },
+  'email_spam':    { label: '迷惑メールを確認してもらう', response: '「もしかしますと迷惑メールフォルダに入っている可能性がございます。「迷惑メールでないことを報告」をクリックしていただきますと、今後は受信ボックスに届くようになります。」' },
+  'email_recheck': { label: 'アドレスを再確認する', response: '「念のためメールアドレスをもう一度ご確認させていただけますでしょうか？正しいアドレスでも届かない場合は、一度フロントの方のアドレスから弊社へ送信していただくと、今後スムーズに送受信できるようになります。」' },
+}
+
+const CATEGORY_ITEMS = [
+  { id: 'cat_busy',       children: ['busy_later', 'busy_short'] },
+  { id: 'cat_nointerest', children: ['nointerest_reason', 'nointerest_seminar', 'nointerest_future'] },
+  { id: 'cat_other',      children: ['other_maker', 'other_consider'] },
+  { id: 'cat_price',      children: ['price_subsidy', 'price_running'] },
+  { id: 'cat_key',        children: ['key_cylinder', 'key_smartlock'] },
+  { id: 'cat_custom',     children: ['custom_order', 'custom_example'] },
+  { id: 'cat_pms',        children: ['pms_list'] },
+  { id: 'cat_unmanned',   children: ['unmanned_pr'] },
+  { id: 'cat_person',     children: ['person_time', 'person_front'] },
+  { id: 'cat_email',      children: ['email_spam', 'email_recheck'] },
+]
+
 const TABS = [
   { id: 'hubspot', label: '📊 HubSpot手順', icon: '📊' },
   { id: 'script', label: '📞 トークスクリプト', icon: '📞' },
@@ -13,11 +62,22 @@ const TABS = [
 export default function TeleapoPage() {
   const [activeTab, setActiveTab] = useState('hubspot')
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  const [selectedCat, setSelectedCat] = useState<string | null>(null)
+  const [selectedResponse, setSelectedResponse] = useState<string | null>(null)
 
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text)
     setCopiedKey(key)
     setTimeout(() => setCopiedKey(null), 2000)
+  }
+
+  const selectCat = (id: string) => {
+    setSelectedCat(id === selectedCat ? null : id)
+    setSelectedResponse(null)
+  }
+
+  const selectResponse = (id: string) => {
+    setSelectedResponse(id === selectedResponse ? null : id)
   }
 
   return (
@@ -198,6 +258,71 @@ export default function TeleapoPage() {
       {/* ─── TAB: トークスクリプト ─── */}
       {activeTab === 'script' && (
         <div className="space-y-6">
+
+          {/* ── 切り返しナビ ── */}
+          <div className="bg-slate-800 rounded-2xl border border-blue-800/40 p-6">
+            <h2 className="text-base font-bold text-white mb-1">⚡ 切り返しナビ</h2>
+            <p className="text-xs text-slate-400 mb-4">相手の反応をクリック → 対応方法を選ぶ → トークが表示されます</p>
+
+            {/* カテゴリボタン */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {CATEGORY_ITEMS.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => selectCat(cat.id)}
+                  className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                    selectedCat === cat.id
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600'
+                  }`}
+                >
+                  {OBJECTION_TREE[cat.id]?.label}
+                </button>
+              ))}
+            </div>
+
+            {/* サブ選択 */}
+            {selectedCat && (
+              <div className="border-t border-slate-700 pt-4">
+                <p className="text-xs text-blue-400 font-bold mb-3">どう対応しますか？</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {CATEGORY_ITEMS.find(c => c.id === selectedCat)?.children.map(childId => (
+                    <button
+                      key={childId}
+                      onClick={() => selectResponse(childId)}
+                      className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                        selectedResponse === childId
+                          ? 'bg-green-600 text-white shadow-lg'
+                          : 'bg-slate-700/70 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600'
+                      }`}
+                    >
+                      {OBJECTION_TREE[childId]?.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* トーク表示 */}
+                {selectedResponse && (
+                  <div className="bg-green-950/50 border border-green-700/60 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs text-green-400 font-bold">💬 切り返しトーク</p>
+                      <button
+                        onClick={() => copy(OBJECTION_TREE[selectedResponse]?.response || '', 'objection')}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                          copiedKey === 'objection' ? 'bg-green-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                        }`}
+                      >
+                        {copiedKey === 'objection' ? '✅ コピー済み' : '📋 コピー'}
+                      </button>
+                    </div>
+                    <p className="text-sm text-slate-100 leading-relaxed">
+                      {OBJECTION_TREE[selectedResponse]?.response}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* パターンA */}
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
