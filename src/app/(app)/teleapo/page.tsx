@@ -1,197 +1,730 @@
+'use client'
+import { useState } from 'react'
+
+const TABS = [
+  { id: 'hubspot', label: '📊 HubSpot手順', icon: '📊' },
+  { id: 'script', label: '📞 トークスクリプト', icon: '📞' },
+  { id: 'status', label: '🏷️ ステータス一覧', icon: '🏷️' },
+  { id: 'knowledge', label: '💡 商品知識', icon: '💡' },
+  { id: 'checklist', label: '✅ チェックリスト', icon: '✅' },
+  { id: 'mail', label: '✉️ メールテンプレ', icon: '✉️' },
+]
+
 export default function TeleapoPage() {
+  const [activeTab, setActiveTab] = useState('hubspot')
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  const copy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedKey(key)
+    setTimeout(() => setCopiedKey(null), 2000)
+  }
+
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">テレアポ</h1>
-        <p className="text-slate-400 text-sm mt-1">HubSpot 架電業務マニュアル（スマートチェックイン）</p>
+        <p className="text-slate-400 text-sm mt-1">株式会社デバイスエージェンシー ／ 自動チェックイン機 架電業務マニュアル</p>
       </div>
 
-      {/* Step Flow */}
-      <div className="mb-8">
-        <h2 className="text-lg font-bold text-white mb-4">📋 架電業務フロー</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          {[
-            { step: '1', title: 'ビュー設定', desc: 'テーブルビューに切替・フィルター設定', color: 'blue' },
-            { step: '2', title: '列の編集', desc: '前回の連絡・優先度を追加してソート', color: 'purple' },
-            { step: '3', title: '対象選定', desc: '優先度「高」「中」はスキップ・上から順に', color: 'yellow' },
-            { step: '4', title: '架電・更新', desc: '担当者変更→電話→ステージ更新', color: 'green' },
-          ].map((item) => (
-            <div key={item.step} className={`bg-slate-800 rounded-2xl border border-slate-700 p-5 relative`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-3 ${
-                item.color === 'blue' ? 'bg-blue-600 text-white' :
-                item.color === 'purple' ? 'bg-purple-600 text-white' :
-                item.color === 'yellow' ? 'bg-yellow-600 text-white' :
-                'bg-green-600 text-white'
-              }`}>
-                {item.step}
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
+              activeTab === tab.id
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-700'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ─── TAB: HubSpot手順 ─── */}
+      {activeTab === 'hubspot' && (
+        <div className="space-y-6">
+
+          {/* フロー */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            {[
+              { step: '1', title: 'ビュー設定', desc: 'テーブルビューに切替・フィルター設定', color: 'blue' },
+              { step: '2', title: '列の編集', desc: '前回の連絡・優先度を追加してソート', color: 'purple' },
+              { step: '3', title: '対象選定', desc: '優先度「高」「中」はスキップ・上から順に', color: 'yellow' },
+              { step: '4', title: '架電・更新', desc: '担当者変更→電話→ステージ更新', color: 'green' },
+            ].map(item => (
+              <div key={item.step} className="bg-slate-800 rounded-2xl border border-slate-700 p-5">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-3 ${
+                  item.color === 'blue' ? 'bg-blue-600 text-white' :
+                  item.color === 'purple' ? 'bg-purple-600 text-white' :
+                  item.color === 'yellow' ? 'bg-yellow-600 text-white' : 'bg-green-600 text-white'
+                }`}>{item.step}</div>
+                <p className="text-white font-bold text-sm mb-1">{item.title}</p>
+                <p className="text-slate-400 text-xs leading-relaxed">{item.desc}</p>
               </div>
-              <p className="text-white font-bold text-sm mb-1">{item.title}</p>
-              <p className="text-slate-400 text-xs leading-relaxed">{item.desc}</p>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* STEP1 */}
+            <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold text-white">1</span>
+                <h2 className="text-base font-bold text-white">ビューの設定とフィルター</h2>
+              </div>
+              <div className="space-y-3">
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-blue-400 font-bold mb-2">① テーブルビューに切り替え</p>
+                  <p className="text-sm text-slate-300">HubSpot CRM の「取引」画面を開き、表示形式を<span className="text-blue-300 font-medium">「テーブルビュー」</span>に変更する。</p>
+                </div>
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-blue-400 font-bold mb-2">② 詳細フィルターを設定</p>
+                  <p className="text-sm text-slate-300 mb-2">「楽天トラベル（未架電）」＋「担当者：未割り当て」または「不在」でフィルター</p>
+                  <div className="bg-slate-900 rounded-lg px-3 py-2">
+                    <p className="text-yellow-300 text-sm font-medium">楽天トラベル（不在）（スマートチェックイン）</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* STEP2 */}
+            <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold text-white">2</span>
+                <h2 className="text-base font-bold text-white">表示列の編集と並び替え</h2>
+              </div>
+              <div className="space-y-3">
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-purple-400 font-bold mb-1">① 「前回の連絡」を追加</p>
+                  <p className="text-sm text-slate-300">「列を編集」から「前回の連絡」を検索して追加。</p>
+                </div>
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-purple-400 font-bold mb-1">② 「優先度」を追加</p>
+                  <p className="text-sm text-slate-300">同様に「優先度」を追加。架電スキップの判断に使う。</p>
+                </div>
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-purple-400 font-bold mb-1">③ 「前回の連絡」で昇順ソート</p>
+                  <p className="text-sm text-slate-300">矢印をクリックし、<span className="text-white font-medium">過去のものから順（昇順）</span>に並び替え。</p>
+                </div>
+              </div>
+            </div>
+
+            {/* STEP3 */}
+            <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="w-7 h-7 bg-yellow-600 rounded-full flex items-center justify-center text-xs font-bold text-white">3</span>
+                <h2 className="text-base font-bold text-white">架電対象の選定ルール</h2>
+              </div>
+              <div className="space-y-3">
+                <div className="bg-red-950/50 border border-red-800/50 rounded-xl p-4">
+                  <p className="text-xs text-red-400 font-bold mb-1">⚠️ スキップ</p>
+                  <p className="text-sm text-slate-300">優先度<span className="text-red-300 font-bold">「高」または「中」</span>は架電不要。進行中案件の可能性が高い。</p>
+                </div>
+                <div className="bg-green-950/50 border border-green-800/50 rounded-xl p-4">
+                  <p className="text-xs text-green-400 font-bold mb-1">✅ 架電順序</p>
+                  <p className="text-sm text-slate-300">リストの<span className="text-green-300 font-bold">上から順番</span>に架電を進める。</p>
+                </div>
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-slate-400 font-bold mb-1">💡 効率化テク</p>
+                  <p className="text-sm text-slate-300">ブラウザのタブを複製しておくと、リスト画面と詳細画面を素早く行き来できる。</p>
+                </div>
+              </div>
+            </div>
+
+            {/* STEP4 */}
+            <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center text-xs font-bold text-white">4</span>
+                <h2 className="text-base font-bold text-white">架電の実施フロー</h2>
+              </div>
+              <div className="space-y-3">
+                <div className="bg-red-950/50 border border-red-800/50 rounded-xl p-4">
+                  <p className="text-xs text-red-400 font-bold mb-1">★ 必須：担当者変更</p>
+                  <p className="text-sm text-slate-300">架電前に必ず担当者を<span className="text-red-300 font-bold">「自分の名前」</span>に変更！</p>
+                </div>
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-green-400 font-bold mb-1">① 電話をかける</p>
+                  <p className="text-sm text-slate-300">通話ボタン →「電話をかける」をクリックして発信。</p>
+                </div>
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-green-400 font-bold mb-1">② 取引ステージを更新</p>
+                  <div className="flex gap-2 flex-wrap mt-1">
+                    {['楽天トラベル（不在）', 'お断り', '資料送付', '本社へ', '架電クレーム', '他社製品使用'].map(s => (
+                      <span key={s} className="text-xs bg-slate-600/60 text-slate-300 border border-slate-500 rounded-lg px-2 py-0.5">{s}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-yellow-950/50 border border-yellow-800/50 rounded-xl p-4">
+                  <p className="text-xs text-yellow-400 font-bold mb-1">📌 不在時は必ずタスク設定</p>
+                  <p className="text-sm text-slate-300">いる時間帯・日を聞き出し【アクティビティ】→【タスク】を必ず設定すること。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 資料送付フロー */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-4">📧 資料送付に至った場合の手順</h2>
+            <ol className="space-y-2">
+              {[
+                '取引の物件を表示→概要から下にスクロール→「コンタクト」を開く',
+                'コンタクトのプレビューを開き、Eメール欄にアドレスを入力',
+                '担当者の【姓】に「〇〇」、【名】に「様」を追記',
+                '電話番号の追加がある場合は「携帯番号」に追記',
+                '「チェックイン機資料送付」の定型文をコピペして送付',
+                '資料送付メール作成時は【挿入】→【署名】で署名を自動入力',
+                '取引ステージを【資料送付】に変更',
+                '会社プレビュー→【会社の担当者】に自分の名前を入力',
+                'リードステータスを「資料送付3週間」または「資料送付インセンなし」に変更',
+                'タスク期限を3週間後に設定（件名：「資料送付 〇/〇」）',
+              ].map((item, i) => (
+                <li key={i} className="flex gap-3 text-sm text-slate-300">
+                  <span className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5">{i + 1}</span>
+                  {item}
+                </li>
+              ))}
+            </ol>
+            <div className="mt-4 bg-red-950/50 border border-red-800/50 rounded-xl p-3">
+              <p className="text-xs text-red-400 font-bold">⚠️ インセン条件：受付・担当者の名前を両方聞けて初めて100円。メモ例：【担当受付共に〇●】</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB: トークスクリプト ─── */}
+      {activeTab === 'script' && (
+        <div className="space-y-6">
+
+          {/* パターンA */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-white">📞 アポイント用トーク（瀬戸パターン）</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="bg-slate-700/50 rounded-xl p-4">
+                <p className="text-xs text-blue-400 font-bold mb-2">オープニング</p>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  お忙しい所恐れ入ります。わたくし、株式会社デバイスエージェンシーの瀬戸です。お世話になっております。<br/>
+                  弊社でございますが、お客様のチェックインからお帰りまでのフロント業務を省力化するセルフチェックイン機を、開発から、販売、メンテナンスに至るまで、ワンストップで行っている会社でございます。
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-blue-950/50 border border-blue-800/50 rounded-xl p-4">
+                  <p className="text-xs text-blue-400 font-bold mb-2">分岐①　担当者へ繋いでもらう場合</p>
+                  <p className="text-sm text-slate-300">「この件につきまして、お話しをさせて頂ける支配人様か担当の方がおられましたら、おつなぎをお願い出来ませんでしょうか？」</p>
+                </div>
+                <div className="bg-purple-950/50 border border-purple-800/50 rounded-xl p-4">
+                  <p className="text-xs text-purple-400 font-bold mb-2">分岐②　ヒアリング先行の場合</p>
+                  <p className="text-sm text-slate-300">「今現在ですが、このようなチェックインシステムをご利用されていたり、近いうちに端末機などの導入をご検討されたりしていらっしゃいますでしょうか？」</p>
+                </div>
+              </div>
+              <div className="bg-slate-700/50 rounded-xl p-4">
+                <p className="text-xs text-green-400 font-bold mb-2">資料送付・セミナー案内</p>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  「弊社ではWebページで商品の詳細をご覧いただけるカタログと価格表をご用意しております。また端末を設置した場合の操作手順もご覧いただける動画も配信しております。資料だけでもご覧になって頂きたいので、メールで送らせて頂けないでしょうか？また毎週月・水・金曜日にZoomでセミナーを開催しておりますので、こちらへもお気軽にご参加ください。」
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* パターンB */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-4">💬 会話形式ヒアリング（橋本パターン）</h2>
+            <div className="space-y-3">
+              {[
+                { label: '①', text: '「株式会社デバイスエージェンシー橋本でございます。」', color: 'blue' },
+                { label: '②', text: '「ホテル向けのIoT製品の件で、ご担当者様お手すきでしょうか？」\n※「IoT製品とは？」→「自動チェックイン機やクラウドスマートロック、ルームタブレットです」', color: 'blue' },
+                { label: '③', text: '（支配人・社長・マネージャーにつながったら）\n「お世話になっております。デバイスエージェンシー橋本と申します。今お電話大丈夫でしょうか？」', color: 'green' },
+                { label: '④ NO', text: '「失礼いたしました。何時（何日）ごろでしたらお電話可能でしょうか？」', color: 'red' },
+                { label: '④ YES', text: '「ありがとうございます。弊社は自動チェックイン機、クラウドスマートロック、ルームタブレットを自社開発・リリースしております。これらの製品は業務効率改善や、人手不足の懸念点を解消します。」', color: 'green' },
+                { label: '⑤ ヒアリング', text: '「現在、何か業務上運用の課題点や、人手不足について懸念されていることはございますでしょうか？」', color: 'purple' },
+              ].map((item, i) => (
+                <div key={i} className={`rounded-xl p-4 ${
+                  item.color === 'blue' ? 'bg-blue-950/40 border border-blue-800/40' :
+                  item.color === 'green' ? 'bg-green-950/40 border border-green-800/40' :
+                  item.color === 'red' ? 'bg-red-950/40 border border-red-800/40' :
+                  'bg-purple-950/40 border border-purple-800/40'
+                }`}>
+                  <p className={`text-xs font-bold mb-2 ${
+                    item.color === 'blue' ? 'text-blue-400' :
+                    item.color === 'green' ? 'text-green-400' :
+                    item.color === 'red' ? 'text-red-400' : 'text-purple-400'
+                  }`}>{item.label}</p>
+                  <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">{item.text}</p>
+                </div>
+              ))}
+              <div className="bg-slate-700/50 rounded-xl p-4">
+                <p className="text-xs text-yellow-400 font-bold mb-2">ヒアリングで拾う課題例</p>
+                <div className="flex flex-wrap gap-2">
+                  {['鍵渡しの手間', 'スタッフの高齢化', '精算の間違い', '人件費の削減', '人員不足', 'ワンオペ業務過多', '繁忙期の人員不足'].map(c => (
+                    <span key={c} className="text-xs bg-yellow-900/40 text-yellow-300 border border-yellow-700/50 rounded-lg px-2 py-1">{c}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* パターンC: インサイト営業 */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-2">🎯 ヒアリング主導型（インサイト営業）</h2>
+            <p className="text-xs text-slate-400 mb-4">「売り込まない」スタンスで警戒心を下げ、ネガティブな本音を引き出してから提案につなげる方式</p>
+            <div className="space-y-3">
+              <div className="bg-slate-700/50 rounded-xl p-4">
+                <p className="text-xs text-blue-400 font-bold mb-2">導入（受付突破）</p>
+                <p className="text-sm text-slate-300 leading-relaxed">「お忙しいところ恐れ入ります、デバイスエージェンシーの〇〇と申します。本日はホテルの自動チェックインシステムについて、<span className="text-yellow-300 font-medium">売り込みではなく</span>、実際に支配人様が率直にどう感じられているか、現場の本音をお伺いしたくお電話いたしました。支配人様（またはフロント責任者様）にお繋ぎいただけますでしょうか？」</p>
+              </div>
+              <div className="bg-slate-700/50 rounded-xl p-4">
+                <p className="text-xs text-purple-400 font-bold mb-2">本題（支配人につながったら）</p>
+                <p className="text-sm text-slate-300 leading-relaxed">「多くの支配人様から『正直、うちの規模や業態には合わないんじゃないか』『かえって手間が増えるのでは』といったネガティブな本音をいただくことがあります。〇〇様からご覧になって、自動チェックイン機に対して<span className="text-yellow-300 font-medium">『ここがネックになりそうだな』といったネガティブな印象や疑問</span>って、何かお持ちだったりしますか？」</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  { label: 'パターンA：「人件費二重」', text: '「やはりそこですよね！一番多いご意見です。結局、機械の横に人が立っていたら意味がないですよね。人件費を〇％削減できた事例がございまして、データをメールでお送りしてもよろしいでしょうか？」', color: 'blue' },
+                  { label: 'パターンB：「業態に合わない」', text: '「おっしゃる通りです。弊社では接客の質を落とさずに、手続きだけをスマート化して顧客満足度を上げた事例がございまして、こちらの資料を一度メールでお送りさせていただければと思います。」', color: 'green' },
+                  { label: 'パターンC：「鍵がネック」', text: '「まさにスマートロックや鍵の連携部分ですね。既存の鍵のままでフロント業務を効率化した最新の連携事例がございまして、こちらの解説資料をメールでお送りしてもよろしいでしょうか？」', color: 'yellow' },
+                ].map((p, i) => (
+                  <div key={i} className={`rounded-xl p-4 ${
+                    p.color === 'blue' ? 'bg-blue-950/40 border border-blue-800/40' :
+                    p.color === 'green' ? 'bg-green-950/40 border border-green-800/40' :
+                    'bg-yellow-950/40 border border-yellow-800/40'
+                  }`}>
+                    <p className={`text-xs font-bold mb-2 ${
+                      p.color === 'blue' ? 'text-blue-400' :
+                      p.color === 'green' ? 'text-green-400' : 'text-yellow-400'
+                    }`}>{p.label}</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{p.text}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-green-950/50 border border-green-800/50 rounded-xl p-4">
+                <p className="text-xs text-green-400 font-bold mb-2">アドレス回収トーク</p>
+                <p className="text-sm text-slate-300 leading-relaxed">「では、〇〇様のメールアドレスを教えていただけますでしょうか？……ありがとうございます。本日お聞きした『〇〇（懸念点）』の解決に特に関連する部分に印をつけて、本日中に私からダイレクトにお送りさせていただきます。」</p>
+              </div>
+              <div className="bg-yellow-950/50 border border-yellow-800/50 rounded-xl p-4">
+                <p className="text-xs text-yellow-400 font-bold mb-2">💡 成功のポイント</p>
+                <p className="text-sm text-slate-300">ネガティブな意見が出たとき、すぐに「弊社の製品ならそれは解決できます！」と反論しない。「まさにそこが課題ですよね」と一度100%同意し、「その課題をクリアした事例が手元にある」というスタンスを崩さない。</p>
+              </div>
+            </div>
+          </div>
+
+          {/* よくある断り文句と切り返し */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-4">🔄 よくある断り文句と切り返し</h2>
+            <div className="space-y-3">
+              {[
+                { objection: '他社導入済みの場合', response: '「もしこれからご検討されるようでしたら、是非わたくしどもの製品をと思っていたのですが、残念です。もし差し支えないようでしたら、どちらのメーカー様をご利用されているか、参考までに教えて頂きたいのですが…」' },
+                { objection: '「興味がない」', response: '「興味が無いのは、具体的に何か理由はございますか？弊社は週3回、オンラインの説明会を…」' },
+                { objection: '「料金が高そう」', response: '「補助金を弊社で申請できます。IT補助金活用でKIOSK筐体48万円〜、タブレット型13万円〜でご導入可能です。」' },
+                { objection: '「シリンダー錠なので対応できない」', response: '「弊社はシリンダー錠（物理キー）に対応可能です！別売りのキーボックスで、清算後に自動で鍵の受渡しができます。」' },
+                { objection: '「カスタマイズできない」', response: '「普段スタッフが口頭説明していることをチェックイン機にカスタマイズできます。御社専用のオーダーメイドをご提供できます。」' },
+              ].map((item, i) => (
+                <div key={i} className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-red-400 font-bold mb-2">❌ {item.objection}</p>
+                  <p className="text-sm text-slate-300 leading-relaxed">✅ {item.response}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB: ステータス一覧 ─── */}
+      {activeTab === 'status' && (
+        <div className="space-y-6">
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-4">✅ 使用するステータス（取引ステージ）</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    <th className="text-left text-slate-400 font-medium py-2 pr-4">ステータス</th>
+                    <th className="text-left text-slate-400 font-medium py-2">用途</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-700/50">
+                  {[
+                    { status: '楽天トラベル（未架電）', desc: 'ターゲットリスト', badge: 'blue' },
+                    { status: '楽天トラベル（不在）', desc: '担当者不在時（資料送付後の不在は移動不要）', badge: 'yellow' },
+                    { status: '楽天トラベル（断り）', desc: '断られた場合', badge: 'red' },
+                    { status: '楽天トラベル（本社へ）', desc: '本社が決済の場合', badge: 'purple' },
+                    { status: '楽天トラベル（1回目）', desc: '1回目のアプローチ', badge: 'slate' },
+                    { status: '資料送付', desc: '架電後に資料送付に至った場合', badge: 'green' },
+                    { status: '架電クレーム', desc: '「かけてくるな」など言われた場合', badge: 'red' },
+                    { status: '架電リスト（他社製品使用）', desc: 'すでに他社製品を導入済みの場合', badge: 'slate' },
+                    { status: '連絡不可・IVR', desc: '閉業や電話番号が使われていない場合', badge: 'slate' },
+                    { status: 'セミナー予定', desc: 'アポイント獲得〜当日まで', badge: 'green' },
+                    { status: 'セミナー参加', desc: '実際に参加した場合', badge: 'green' },
+                    { status: 'セミナーキャンセル', desc: 'キャンセルが発生した場合', badge: 'red' },
+                  ].map((row, i) => (
+                    <tr key={i}>
+                      <td className="py-3 pr-4">
+                        <span className={`text-xs font-medium px-2 py-1 rounded-lg ${
+                          row.badge === 'blue' ? 'bg-blue-900/60 text-blue-300' :
+                          row.badge === 'green' ? 'bg-green-900/60 text-green-300' :
+                          row.badge === 'yellow' ? 'bg-yellow-900/60 text-yellow-300' :
+                          row.badge === 'red' ? 'bg-red-900/60 text-red-300' :
+                          row.badge === 'purple' ? 'bg-purple-900/60 text-purple-300' :
+                          'bg-slate-700 text-slate-300'
+                        }`}>{row.status}</span>
+                      </td>
+                      <td className="text-slate-300 py-3 text-sm">{row.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-4">🔒 リードステータスの種別</h2>
+            <div className="space-y-3">
+              {[
+                { label: '資料送付3週間以内', desc: 'タスクを設定。件名「資料送付 〇/〇」。期限は3週間後。資料送付数の計算に使う。', color: 'blue' },
+                { label: '資料送付インセンティブなし', desc: 'アポイントを取りに行くためにタスクを設定。担当者・受付の双方の名前を聞けなかった場合はインセンなし。', color: 'yellow' },
+                { label: '資料送付＋セミナー参加', desc: 'セミナー参加インセンティブ獲得時。取引ステージは【セミナー予定】へ。', color: 'green' },
+              ].map((item, i) => (
+                <div key={i} className={`rounded-xl p-4 ${
+                  item.color === 'blue' ? 'bg-blue-950/40 border border-blue-800/40' :
+                  item.color === 'yellow' ? 'bg-yellow-950/40 border border-yellow-800/40' :
+                  'bg-green-950/40 border border-green-800/40'
+                }`}>
+                  <p className={`text-xs font-bold mb-1 ${
+                    item.color === 'blue' ? 'text-blue-400' :
+                    item.color === 'yellow' ? 'text-yellow-400' : 'text-green-400'
+                  }`}>{item.label}</p>
+                  <p className="text-sm text-slate-300">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB: 商品知識 ─── */}
+      {activeTab === 'knowledge' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+              <h2 className="text-base font-bold text-white mb-4">🏨 製品ラインナップ</h2>
+              <div className="space-y-3">
+                {[
+                  { name: '自動チェックイン機（KIOSK型）', desc: 'すべての清算機能あり。申込から3ヶ月で手配可能。', badge: 'blue' },
+                  { name: '自動チェックイン機（タブレット型）', desc: '小規模施設・民泊向け。申込から1ヶ月で手配可能。', badge: 'green' },
+                  { name: 'クラウドスマートロック', desc: '暗証番号で開錠。チェックイン機と連動してレシートに暗証番号を印字。', badge: 'purple' },
+                  { name: 'ルームタブレット', desc: '内線電話機能。スタッフの名前表示・多言語対応。月額1室100円。', badge: 'yellow' },
+                ].map((p, i) => (
+                  <div key={i} className="bg-slate-700/50 rounded-xl p-4">
+                    <p className={`text-xs font-bold mb-1 ${
+                      p.badge === 'blue' ? 'text-blue-400' : p.badge === 'green' ? 'text-green-400' :
+                      p.badge === 'purple' ? 'text-purple-400' : 'text-yellow-400'
+                    }`}>{p.name}</p>
+                    <p className="text-sm text-slate-300">{p.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+              <h2 className="text-base font-bold text-white mb-4">💰 価格・費用感</h2>
+              <div className="space-y-3">
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-blue-400 font-bold mb-2">初期費用（IT補助金活用時）</p>
+                  <ul className="text-sm text-slate-300 space-y-1">
+                    <li>・KIOSK型：<span className="text-white font-bold">48万円〜</span></li>
+                    <li>・タブレット型：<span className="text-white font-bold">13万円〜</span></li>
+                    <li>・一軒家（シングルプラン）：<span className="text-white font-bold">49,800円〜</span></li>
+                    <li className="text-xs text-slate-500">※補助金申請は弊社が行う</li>
+                  </ul>
+                </div>
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-xs text-green-400 font-bold mb-2">月額費用</p>
+                  <ul className="text-sm text-slate-300 space-y-1">
+                    <li>・KIOSK型：19,600円＋部屋数×200円</li>
+                    <li>・タブレット型：500円×部屋数</li>
+                    <li>・使用しない月は<span className="text-green-300 font-medium">月額0円</span></li>
+                    <li>・土日祝のみ使用の日割り計算も可能</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+              <h2 className="text-base font-bold text-white mb-4">❓ よくある質問と回答</h2>
+              <div className="space-y-3">
+                {[
+                  { q: 'PMSと連携できるの？', a: '弊社はPMSとの連携開発に近年力を入れています。実績：ステイシー、スイートブック、ベッツ24。お客様の要望によりかなりの頻度で開発連携が進んでいますので、御社のPMSも今後連携開発を進めます。' },
+                  { q: 'カードキーに変えないといけない？', a: '弊社の売りはシリンダー錠（物理キー）に対応可能なこと。別売りのキーボックスで清算後にキーが自動開放される。キーボックスなしでもレシートをフロントで鍵と交換する対面接客も残せる。' },
+                  { q: '「無人」にできますか？', a: '⚠️「無人」というワードはNG。「省人化・業務効率化」と表現する。フロントスタッフの業務を削減し、接客サービスに集中できる環境を作ることをPRする。' },
+                  { q: 'インバウンド対応は？', a: '多言語対応（12〜13か国語）、パスポートスキャン・本人確認機能あり。インバウンド対策に非常に有効。' },
+                ].map((item, i) => (
+                  <div key={i} className="bg-slate-700/50 rounded-xl p-4">
+                    <p className="text-xs text-yellow-400 font-bold mb-2">Q: {item.q}</p>
+                    <p className="text-sm text-slate-300 leading-relaxed">A: {item.a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+              <h2 className="text-base font-bold text-white mb-4">📣 業務指導・重要ポイント</h2>
+              <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+                {[
+                  '資料送付後3週間以内の再架電を徹底。100円のインセンより5,000円のアポイントを狙う執着心を持つ。',
+                  '「将来的にご興味ありますか？」で提案する。「今導入してますか？」はNG。',
+                  '支配人につながったら「お時間よろしいでしょうか？」はNG（マナー問題）。「自動チェックイン機の件で」と言った時点で興味なければ切られる。',
+                  '流行り・世の中の流れを使うトーク：「最近よくお耳にするかとは思いますが」「全国からのお問い合わせが去年よりかなり多くなってきておりまして」を挿入。',
+                  '質問がある＝興味がある。質問があった先は優先度を「中」または「高」に変更する。',
+                  'info@宛の資料送付：件名に「〇〇様 自動チェックイン機の件」と入力する（スルーされる確率が減る）。',
+                  '資料送付メールに署名とカタログを必ず付ける。カタログの添付漏れに注意。',
+                  'シリンダー錠対応などの強みをPRしてから資料送付に持っていく。いきなり資料送付はNG。',
+                  '「。」で区切るなど、話し方をゆっくりわかりやすく。',
+                  '担当者不在が多い場合はフロントに資料送付をお願いする。',
+                  '組織決済案件は必ず報告。切り口がありそうなら逐一報告。',
+                  '資料送付メールの開封状況を確認。開封歴なし→迷惑メール確認・アドレス確認。',
+                  '部屋数が少ないところにはルームタブレット・スマートロックも合わせて提案。',
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-2 text-xs text-slate-300 bg-slate-700/30 rounded-lg p-3">
+                    <span className="text-blue-400 font-bold flex-shrink-0">{i + 1}.</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB: チェックリスト ─── */}
+      {activeTab === 'checklist' && (
+        <div className="space-y-6">
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-4">✅ 架電業務チェックリスト</h2>
+            <div className="space-y-2">
+              {[
+                '発信前に担当者を自分の名前に変更したか',
+                '架電後、ステージを正しく変更したか（不在／断り／本社へ／クレーム／他社製品使用）',
+                '不在時は「いる時間帯・日」を聞き、タスクを設定したか',
+                '資料送付時：メールアドレス・姓名（〇〇様）・携帯番号を入力したか',
+                '資料送付メールに署名とカタログを付けたか',
+                'info@宛は件名に「〇〇様 自動チェックイン機の件」と入れたか',
+                '会社の担当者（自分名）とリードステータスを変更したか',
+                '資料送付タスクの期限を3週間後に設定したか（つながりやすい時間帯も考慮）',
+                '受付・担当者の名前を両方聞いたか（インセン条件：メモ【担当受付共に〇●】等）',
+                '質問があった先は優先度を「中」または「高」に変更したか',
+                '資料送付後3週間以内に再架電したか',
+                '資料送付メールの開封状況を確認したか',
+                '「無人」というワードを使っていないか',
+                '切り口や質問があった案件を逐一報告したか',
+              ].map((item, i) => (
+                <label key={i} className="flex items-start gap-3 p-3 bg-slate-700/40 rounded-xl cursor-pointer hover:bg-slate-700 transition-colors">
+                  <input type="checkbox" className="w-4 h-4 accent-blue-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-slate-300">{item}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* 重要ポイント早見表 */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-4">📌 重要ポイント早見表</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    <th className="text-left text-slate-400 font-medium py-2 pr-4 whitespace-nowrap">項目</th>
+                    <th className="text-left text-white font-medium py-2">内容</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-700/50">
+                  {[
+                    { label: '対象取引ステージ', value: '楽天トラベル（不在）（スマートチェックイン）', highlight: true },
+                    { label: '追加する表示列', value: '「前回の連絡」「優先度」' },
+                    { label: 'ソート基準', value: '「前回の連絡」日時の昇順（過去から）' },
+                    { label: 'スキップ条件', value: '優先度が「高」または「中」のレコード', highlight: true },
+                    { label: '架電順序', value: 'リストの上から順番' },
+                    { label: '架電前の必須作業', value: '取引担当者を自分の名前に変更（★絶対忘れずに）', highlight: true },
+                    { label: '架電後の作業', value: '取引ステージを結果に応じて更新' },
+                    { label: 'セミナー開催日', value: '水曜11:00〜 ／ 金曜13:00〜（ZOOM）', highlight: true },
+                    { label: 'インセン条件', value: '受付・担当者の名前を両方聞けて100円' },
+                  ].map((row, i) => (
+                    <tr key={i}>
+                      <td className="text-slate-400 py-3 pr-4 whitespace-nowrap font-medium">{row.label}</td>
+                      <td className={`py-3 ${row.highlight ? 'text-yellow-300 font-medium' : 'text-slate-300'}`}>{row.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB: メールテンプレ ─── */}
+      {activeTab === 'mail' && (
+        <div className="space-y-6">
+          {[
+            {
+              key: 'zoom',
+              title: '📅 ZOOMミーティング案内メール',
+              content: `お世話になっております。
+(株)デバイスエージェンシーの〇〇でございます。
+お打ち合わせのお時間をいただけますこと、感謝申し上げます。
+標記の件につきまして、下記のとおりWebミーティング（ZOOM）をご案内申し上げます。
+
+記
+日時：2026年〇月〇日（〇）〇〇：00～
+形式：オンライン（ZOOM）
+ZOOM入室URL：https://us06web.zoom.us/j/84410321175?pwd=YklablhmOGIwQ0tCQmJXN0hnak9UZz09
+※当日はお時間になりましたら、上記URLよりご入室をお願いいたします。
+ご多忙の折、恐縮ではございますが、当日は何卒よろしくお願い申し上げます。`,
+            },
+            {
+              key: 'checkin',
+              title: '📧 資料送付メール（チェックイン機）',
+              content: `支配人 様
+
+お世話になります。
+本日は自動チェックイン機の件でお電話ありがとうございました。
+今後のインバウンド対策や、人手不足、利益率向上、業務効率化の面で大変良い評価をいただいております。
+また、価格面につきましても皆様に大変ご好評をいただいております。
+
+●人手不足・業務効率化対策
+フロントの人員削減、無人化が可能に。スタッフの業務負担の軽減⇔お客様のストレス緩和
+
+●カードキー以外にも対応
+ルームカードキー以外にも、スマートロックや物理キー（シリンダー錠）にも対応可能です。（オプションキーボックスの併用）
+
+●ホスピタリティーの向上
+事前チェックインシステムなどを利用することで、フロントでの事務的オペレーションを削減⇔お客様との対話時間が増え、館内施設や観光案内などの接客サービスをより一層手厚く行うことが可能に。
+
+●多種多様なカスタマイズ
+朝食券の発行や日帰り温泉客の受付・清算などのデイユース機能に加え、施設のニーズに応じて様々なカスタマイズに取り組んでいます。
+
+●インバウンド対応
+外国語対応（13ヵ国語）。パスポートスキャン、本人確認も可能です。
+
+【初期費用について】
+AdvaNceD IoT チェックイン筐体費用＋初期設定費用→IT補助金活用で1,330,000円～
+※シリンダー錠にも対応可能です。
+※小規模向けタブレット型は1台約16万円～で導入可能。
+
+【月額費用について】
+・使用しない月は0円になります。（季節限定特別料金帯）
+・ルーム利用料（×部屋数1～20室まで）一部屋×500円
+・3年目以降はルーム利用料200円×部屋数
+
+※商品の説明会セミナーもオンラインで毎週2回開催しております。（1時間程度）
+・水曜日：11：00～
+・金曜日：13：00～
+ご希望の日時がございましたら、ご返信ください。
+
+WEB版はこちらです「AdvaNceD IoT スマートチェックイン」
+https://and-iot.jp/dms-cardlock`,
+            },
+            {
+              key: 'tablet',
+              title: '📧 ルームタブレット資料送付メール',
+              content: `お世話になっております。デバイスエージェンシー橋本でございます。
+先ほどのお話でルームタブレット（内線電話）の資料をお送りします。
+
+ルームタブレットは、クラウドシステムのセットです。運営の効率化とコスト削減を実現できます。
+
+メリット：
+・スタッフの方がフロントから離れていても、移動しながら対応できます。
+・ゲスト様からの着信が一目でわかります。（例：「305の田中様」と表示）
+・多言語表示が可能で、インバウンド対策にも。
+・宿泊関連の情報を全てタブレットに集約でき、ペーパーレス化が可能。
+・タブレットやスマホの端末初期費用は0円（システム初期費用100,000円＋端末登録費用1台19,800円が別途）。
+・月額料金は1室100円。IT補助金活用で御社負担が月額費用も含め約1/3に。
+
+弊社では他にもホテル施設向けの自社開発製品を提供しております。
+https://and-iot.jp/`,
+            },
+            {
+              key: 'sign',
+              title: '✍️ 署名テンプレート',
+              content: `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+お世話になっております。
+株式会社デバイスエージェンシー 〇〇〇
+〒550-0015
+大阪市西区南堀江4-17-18 原田ビルディング1F
+TEL:06-6585-9865 FAX:06-6585-9875
+Email: （自分のアドレス）
+DA   www.device-agency.co.jp
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+            },
+          ].map(tpl => (
+            <div key={tpl.key} className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-bold text-white">{tpl.title}</h2>
+                <button
+                  onClick={() => copy(tpl.content, tpl.key)}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    copiedKey === tpl.key
+                      ? 'bg-green-600 text-white'
+                      : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                  }`}
+                >
+                  {copiedKey === tpl.key ? '✅ コピー済み' : '📋 コピー'}
+                </button>
+              </div>
+              <pre className="text-xs text-slate-300 bg-slate-900 rounded-xl p-4 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">{tpl.content}</pre>
             </div>
           ))}
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-
-        {/* STEP1: ビュー設定 */}
-        <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold text-white">1</span>
-            <h2 className="text-base font-bold text-white">ビューの設定とフィルター</h2>
-          </div>
-          <div className="space-y-3">
-            <div className="bg-slate-700/50 rounded-xl p-4">
-              <p className="text-xs text-blue-400 font-bold mb-2">① テーブルビューに切り替える</p>
-              <p className="text-sm text-slate-300">HubSpot CRM の <span className="text-white font-medium">「取引」画面</span> を開き、表示形式を <span className="text-blue-300 font-medium">「テーブルビュー」</span> に変更する。</p>
-            </div>
-            <div className="bg-slate-700/50 rounded-xl p-4">
-              <p className="text-xs text-blue-400 font-bold mb-2">② 詳細フィルターを設定する</p>
-              <p className="text-sm text-slate-300 mb-2">「詳細フィルター」を開き、取引ステージで以下を選択：</p>
-              <div className="bg-slate-900 rounded-lg px-3 py-2">
-                <p className="text-yellow-300 text-sm font-medium">楽天トラベル（不在）（スマートチェックイン）</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* STEP2: 列の編集 */}
-        <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold text-white">2</span>
-            <h2 className="text-base font-bold text-white">表示列の編集と並び替え</h2>
-          </div>
-          <div className="space-y-3">
-            <div className="bg-slate-700/50 rounded-xl p-4">
-              <p className="text-xs text-purple-400 font-bold mb-2">① 「前回の連絡」を追加</p>
-              <p className="text-sm text-slate-300">「列を編集」から <span className="text-purple-300 font-medium">「前回の連絡」</span> を検索して追加。いつ最後に接触したか確認できる。</p>
-            </div>
-            <div className="bg-slate-700/50 rounded-xl p-4">
-              <p className="text-xs text-purple-400 font-bold mb-2">② 「優先度」を追加</p>
-              <p className="text-sm text-slate-300">同様に <span className="text-purple-300 font-medium">「優先度」</span> を追加。架電をスキップする判断に使う。</p>
-            </div>
-            <div className="bg-slate-700/50 rounded-xl p-4">
-              <p className="text-xs text-purple-400 font-bold mb-2">③ 「前回の連絡」でソート</p>
-              <p className="text-sm text-slate-300">「前回の連絡」列の矢印をクリックし、<span className="text-white font-medium">過去のものから順（昇順）</span>に並び替える。</p>
-            </div>
-          </div>
-        </div>
-
-        {/* STEP3: 対象選定 */}
-        <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="w-7 h-7 bg-yellow-600 rounded-full flex items-center justify-center text-xs font-bold text-white">3</span>
-            <h2 className="text-base font-bold text-white">架電対象の選定ルール</h2>
-          </div>
-          <div className="space-y-3">
-            <div className="bg-red-950/50 border border-red-800/50 rounded-xl p-4">
-              <p className="text-xs text-red-400 font-bold mb-2">⚠️ スキップするレコード</p>
-              <p className="text-sm text-slate-300">優先度が <span className="text-red-300 font-bold">「高」または「中」</span> のレコードは架電不要。すでに進行中の可能性が高い。</p>
-            </div>
-            <div className="bg-green-950/50 border border-green-800/50 rounded-xl p-4">
-              <p className="text-xs text-green-400 font-bold mb-2">✅ 架電する順番</p>
-              <p className="text-sm text-slate-300">リストの <span className="text-green-300 font-bold">上から順番</span> に架電を進める。</p>
-            </div>
-            <div className="bg-slate-700/50 rounded-xl p-4">
-              <p className="text-xs text-slate-400 font-bold mb-2">💡 効率化テクニック</p>
-              <p className="text-sm text-slate-300">ブラウザのタブを複製しておくと、リスト画面と詳細画面を素早く行き来できる。</p>
-            </div>
-          </div>
-        </div>
-
-        {/* STEP4: 架電・更新 */}
-        <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center text-xs font-bold text-white">4</span>
-            <h2 className="text-base font-bold text-white">架電の実施フロー</h2>
-          </div>
-          <div className="space-y-3">
-            <div className="bg-red-950/50 border border-red-800/50 rounded-xl p-4">
-              <p className="text-xs text-red-400 font-bold mb-2">★ 必須：取引担当者の変更</p>
-              <p className="text-sm text-slate-300">架電前に必ず担当者を <span className="text-red-300 font-bold">「米山」</span> に変更する。これを忘れずに！</p>
-            </div>
-            <div className="bg-slate-700/50 rounded-xl p-4">
-              <p className="text-xs text-green-400 font-bold mb-2">① 電話をかける</p>
-              <p className="text-sm text-slate-300">画面左の <span className="text-white font-medium">通話（電話）ボタン</span> → 「電話をかける」をクリックして発信。</p>
-            </div>
-            <div className="bg-slate-700/50 rounded-xl p-4">
-              <p className="text-xs text-green-400 font-bold mb-2">② 取引ステージを更新する</p>
-              <p className="text-sm text-slate-300 mb-2">通話終了後、結果に合わせてステージを変更：</p>
-              <div className="flex gap-2 flex-wrap">
-                <span className="text-xs bg-red-900/60 text-red-300 border border-red-700 rounded-lg px-3 py-1">お断り</span>
-                <span className="text-xs bg-blue-900/60 text-blue-300 border border-blue-700 rounded-lg px-3 py-1">資料送付</span>
-                <span className="text-xs bg-slate-600/60 text-slate-300 border border-slate-500 rounded-lg px-3 py-1">その他</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* 重要ポイント早見表 */}
-      <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6 mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">📌</span>
-          <h2 className="text-lg font-bold text-white">重要ポイント早見表</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-700">
-                <th className="text-left text-slate-400 font-medium py-2 pr-4 whitespace-nowrap">項目</th>
-                <th className="text-left text-white font-medium py-2">内容</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-700/50">
+          {/* Zoom Phone連携 */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-4">📱 Zoom Phone × HubSpot 連携手順</h2>
+            <div className="space-y-2">
               {[
-                { label: '対象取引ステージ', value: '楽天トラベル（不在）（スマートチェックイン）', highlight: true },
-                { label: '追加する表示列', value: '「前回の連絡」「優先度」' },
-                { label: 'ソート基準', value: '「前回の連絡」日時の昇順（過去から）' },
-                { label: 'スキップ条件', value: '優先度が「高」または「中」のレコード', highlight: true },
-                { label: '架電順序', value: 'リストの上から順番' },
-                { label: '架電前の必須作業', value: '取引担当者を「米山」に変更（★絶対忘れずに）', highlight: true },
-                { label: '架電後の作業', value: '取引ステージを結果に応じて更新（お断り／資料送付 など）' },
-              ].map((row, i) => (
-                <tr key={i}>
-                  <td className="text-slate-400 py-3 pr-4 whitespace-nowrap font-medium">{row.label}</td>
-                  <td className={`py-3 ${row.highlight ? 'text-yellow-300 font-medium' : 'text-slate-300'}`}>{row.value}</td>
-                </tr>
+                'HubSpotにログイン→マーケットプレイス（家アイコン）を開く',
+                '「Zoom」で検索→「Zoom Phone for HubSpot」→「アプリをインストール」',
+                'Zoom Webポータルのログイン画面でZoomPhoneが有効なIDでログイン',
+                '「株式会社デバイスエージェンシー」をマーク→「アカウント選択」',
+                'チェックボックスにチェック→「アプリを接続」→「Confirm」→「確認する」',
+                '「サインインに成功しました」と表示されれば完了',
+                '★重要：Zoom Webポータル→電話→設定→発信者ID（無人チェックイン営業）を選択',
+              ].map((item, i) => (
+                <div key={i} className="flex gap-3 text-sm text-slate-300 bg-slate-700/40 rounded-lg p-3">
+                  <span className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0">{i + 1}</span>
+                  {item}
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+            <div className="mt-4 bg-yellow-950/50 border border-yellow-800/50 rounded-xl p-4">
+              <p className="text-xs text-yellow-400 font-bold mb-2">⚠️ 連携がうまくいかない場合</p>
+              <ul className="text-sm text-slate-300 space-y-1">
+                <li>・ZOOMワークプレイスをサインアウト→サインインし直す</li>
+                <li>・HubSpotのコールもサインアウト→サインインし直す</li>
+                <li>・HubSpot上部の電話マークアイコンからサインイン→別タブで「ZOOMフォン」選択→Googleでログイン</li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* 参考資料 */}
-      <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">📁</span>
-          <h2 className="text-lg font-bold text-white">参考資料</h2>
-        </div>
+      {/* 参考資料リンク */}
+      <div className="mt-6 bg-slate-800 rounded-2xl border border-slate-700 p-5">
+        <p className="text-xs text-slate-400 font-medium mb-3">📁 参考資料</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <a
-            href="https://docs.google.com/spreadsheets/d/1F2ycU3glbgrJCOkLRKHg86ROWggkbYOZXxhA2vco84o/edit?gid=767829959#gid=767829959"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 rounded-xl transition-colors group"
-          >
-            <span className="text-xl">📊</span>
+          <a href="https://docs.google.com/spreadsheets/d/1F2ycU3glbgrJCOkLRKHg86ROWggkbYOZXxhA2vco84o/edit?gid=767829959#gid=767829959" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 p-3 bg-slate-700/50 hover:bg-slate-700 rounded-xl transition-colors group">
+            <span className="text-lg">📊</span>
             <div>
-              <p className="text-white text-sm font-medium group-hover:text-blue-300 transition-colors">テレアポ業務マニュアル（スプレッドシート）</p>
-              <p className="text-slate-500 text-xs mt-0.5">テレアポ業務マニュアル改正シート</p>
+              <p className="text-white text-xs font-medium group-hover:text-blue-300 transition-colors">テレアポ業務マニュアル（スプレッドシート）</p>
+              <p className="text-slate-500 text-xs">テレアポ業務マニュアル改正シート</p>
             </div>
           </a>
-          <a
-            href="https://docs.google.com/spreadsheets/d/1WnwEhp2Db9lDHNw8qp_h2ZjhMY-mZG9TXcAAh6RX59w/edit?gid=1927965581#gid=1927965581"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 rounded-xl transition-colors group"
-          >
-            <span className="text-xl">📋</span>
+          <a href="https://docs.google.com/spreadsheets/d/1WnwEhp2Db9lDHNw8qp_h2ZjhMY-mZG9TXcAAh6RX59w/edit?gid=1927965581#gid=1927965581" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 p-3 bg-slate-700/50 hover:bg-slate-700 rounded-xl transition-colors group">
+            <span className="text-lg">📋</span>
             <div>
-              <p className="text-white text-sm font-medium group-hover:text-blue-300 transition-colors">アウトバウンド管理簿</p>
-              <p className="text-slate-500 text-xs mt-0.5">【スマートチェックイン】架電管理</p>
+              <p className="text-white text-xs font-medium group-hover:text-blue-300 transition-colors">アウトバウンド管理簿</p>
+              <p className="text-slate-500 text-xs">【スマートチェックイン】架電管理</p>
             </div>
           </a>
         </div>
