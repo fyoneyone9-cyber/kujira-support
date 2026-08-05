@@ -114,6 +114,64 @@ const CATEGORY_ITEMS = [
   { id: 'cat_claim',      children: ['claim_apology', 'claim_record'] },
 ]
 
+// ── キーワード→切り返しIDマッピング ──────────────────────────────
+// 相手の発言に含まれそうなキーワードから推奨する切り返しIDを返す
+const KEYWORD_MAP: Array<{ keywords: string[]; ids: string[] }> = [
+  { keywords: ['忙しい', 'いそが', '今は', 'また今度', '後で', 'あとで', '手が離せ', 'タイミング悪', '時間ない'],
+    ids: ['busy_later', 'busy_short', 'busy_task'] },
+  { keywords: ['興味ない', '興味がない', '必要ない', '結構です', 'いらない', '要らない', '不要', 'ニーズがない', '考えてない'],
+    ids: ['nointerest_reason', 'nointerest_future', 'nointerest_info', 'nointerest_seminar'] },
+  { keywords: ['他社', '他のメーカー', '既に', 'すでに', '導入済み', '使ってる', '使っている', '入れてる', '入れている', 'もう使'],
+    ids: ['other_maker', 'other_compare', 'other_renewal'] },
+  { keywords: ['高い', 'たかい', '高そう', 'お金', '費用', 'コスト', '予算', '値段', '料金', '安くなる'],
+    ids: ['price_subsidy', 'price_running', 'price_season', 'price_small'] },
+  { keywords: ['補助金', 'IT補助', '助成'],
+    ids: ['price_subsidy'] },
+  { keywords: ['カードキー', 'カード', '鍵', 'かぎ', 'シリンダー', '物理キー', 'ドア'],
+    ids: ['key_cylinder', 'key_smartlock', 'key_receipt'] },
+  { keywords: ['業態', '合わない', '合わない', 'うちには', '旅館', '民泊', '温泉', 'ゲストハウス', 'ホステル', '小規模', '規模が小さ'],
+    ids: ['custom_order', 'custom_example', 'custom_ryokan', 'size_tablet'] },
+  { keywords: ['pms', 'PMS', 'ホテルシステム', 'システム連携', '予約システム', 'ステイシー', 'スイートブック', 'ベッツ'],
+    ids: ['pms_list', 'pms_develop'] },
+  { keywords: ['無人', 'むじん', 'スタッフいない', '人がいない', '接客できない', '対面'],
+    ids: ['unmanned_pr', 'unmanned_night', 'unmanned_inbound'] },
+  { keywords: ['担当', 'たんとう', '不在', 'ふざい', '支配人', 'いない', '席を外', 'おりません', '出かけ'],
+    ids: ['person_time', 'person_front', 'person_callback', 'person_msg'] },
+  { keywords: ['メール', '届かない', '受け取れない', '迷惑', 'spam', '来ない', 'こない'],
+    ids: ['email_spam', 'email_recheck', 'email_resend'] },
+  { keywords: ['セミナー', '説明会', 'zoom', 'zoomで', 'オンライン', '参加', '日程'],
+    ids: ['seminar_when', 'seminar_content', 'seminar_nudge'] },
+  { keywords: ['外国', '英語', '中国語', '韓国語', 'インバウンド', '外国人', '訪日', 'パスポート', '多言語'],
+    ids: ['inbound_lang', 'inbound_passport'] },
+  { keywords: ['小さい', '小規模', '部屋数少', '客室少', '一軒家', 'シングル', '数室', '数部屋'],
+    ids: ['size_tablet', 'size_other'] },
+  { keywords: ['今は検討', '検討中ではない', '時期ではない', 'まだ先', 'そのうち', '来年', '再来年', '予算が'],
+    ids: ['timing_future', 'timing_task'] },
+  { keywords: ['かけるな', '電話しないで', 'もうかけ', '迷惑', 'クレーム', '怒', 'おこ', '二度と'],
+    ids: ['claim_apology', 'claim_record'] },
+]
+
+function suggestByKeyword(input: string): string[] {
+  if (!input.trim()) return []
+  const lower = input.toLowerCase()
+  const matched = new Map<string, number>() // id → スコア
+  for (const rule of KEYWORD_MAP) {
+    for (const kw of rule.keywords) {
+      if (lower.includes(kw.toLowerCase())) {
+        for (const id of rule.ids) {
+          matched.set(id, (matched.get(id) ?? 0) + 1)
+        }
+      }
+    }
+  }
+  // スコア順にソート、上位6件まで
+  return [...matched.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([id]) => id)
+}
+// ─────────────────────────────────────────────────────────────
+
 const TABS = [
   { id: 'hubspot', label: '📊 HubSpot手順', icon: '📊' },
   { id: 'script', label: '📞 トークスクリプト', icon: '📞' },
@@ -128,6 +186,8 @@ export default function TeleapoPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [selectedCat, setSelectedCat] = useState<string | null>(null)
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null)
+  const [searchInput, setSearchInput] = useState('')
+  const suggestions = suggestByKeyword(searchInput)
 
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text)
@@ -377,6 +437,76 @@ export default function TeleapoPage() {
                         }`}
                       >
                         {copiedKey === 'objection' ? '✅ コピー済み' : '📋 コピー'}
+                      </button>
+                    </div>
+                    <p className="text-lg text-white leading-relaxed font-medium">
+                      {OBJECTION_TREE[selectedResponse]?.response}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ── AI切り返しサジェスト ── */}
+          <div className="bg-slate-900 rounded-2xl border border-purple-800/50 p-6">
+            <h2 className="text-xl font-bold text-white mb-1">🔍 相手の発言から切り返しを探す</h2>
+            <p className="text-sm text-slate-400 mb-4">相手が言ったことをそのまま入力 → 推奨トークのボタンが出ます</p>
+            <div className="relative mb-4">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🎤</span>
+              <input
+                type="text"
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                placeholder="例：「もう他社のシステム入れてます」「今は忙しくて」「高そうだな」"
+                className="w-full bg-slate-800 border border-slate-600 rounded-xl pl-11 pr-4 py-4 text-base text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30"
+              />
+              {searchInput && (
+                <button
+                  onClick={() => setSearchInput('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xl"
+                >×</button>
+              )}
+            </div>
+
+            {searchInput && suggestions.length === 0 && (
+              <div className="text-center py-4 text-slate-400 text-base">
+                一致するトークが見つかりませんでした。カテゴリボタンから選んでください。
+              </div>
+            )}
+
+            {suggestions.length > 0 && (
+              <div>
+                <p className="text-sm text-purple-400 font-bold mb-3">💡 推奨トーク ({suggestions.length}件)</p>
+                <div className="flex flex-wrap gap-3 mb-4">
+                  {suggestions.map(id => (
+                    <button
+                      key={id}
+                      onClick={() => {
+                        setSelectedResponse(id === selectedResponse ? null : id)
+                      }}
+                      className={`px-5 py-3 rounded-xl text-base font-bold transition-all ${
+                        selectedResponse === id
+                          ? 'bg-purple-600 text-white shadow-lg scale-105'
+                          : 'bg-purple-900/50 text-purple-200 hover:bg-purple-700 hover:text-white border border-purple-700/60'
+                      }`}
+                    >
+                      {OBJECTION_TREE[id]?.label}
+                    </button>
+                  ))}
+                </div>
+
+                {selectedResponse && suggestions.includes(selectedResponse) && (
+                  <div className="bg-purple-950/60 border-2 border-purple-700/70 rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-base text-purple-400 font-bold">💬 推奨切り返しトーク</p>
+                      <button
+                        onClick={() => copy(OBJECTION_TREE[selectedResponse]?.response || '', 'suggest')}
+                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-colors ${
+                          copiedKey === 'suggest' ? 'bg-purple-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
+                        }`}
+                      >
+                        {copiedKey === 'suggest' ? '✅ コピー済み' : '📋 コピー'}
                       </button>
                     </div>
                     <p className="text-lg text-white leading-relaxed font-medium">
