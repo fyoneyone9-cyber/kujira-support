@@ -2,52 +2,116 @@
 import { useState } from 'react'
 
 // 切り返しデータ
-const OBJECTION_TREE: Record<string, { label: string; response: string; followups?: string[] }> = {
-  'root': { label: '', response: '' },
+const OBJECTION_TREE: Record<string, { label: string; response: string }> = {
   // ── カテゴリ ──
-  'cat_busy':      { label: '「今は忙しい」', response: '' },
-  'cat_nointerest':{ label: '「興味がない」', response: '' },
-  'cat_other':     { label: '「他社を使っている」', response: '' },
-  'cat_price':     { label: '「高そう」「お金がかかる」', response: '' },
-  'cat_key':       { label: '「カードキーでないとダメ」', response: '' },
-  'cat_custom':    { label: '「うちの業態に合わない」', response: '' },
-  'cat_pms':       { label: '「PMSと連携できる？」', response: '' },
-  'cat_unmanned':  { label: '「無人にはできない」', response: '' },
-  'cat_person':    { label: '「担当者不在」', response: '' },
-  'cat_email':     { label: '「メールが届かない」', response: '' },
-  // ── 切り返し本文 ──
-  'busy_later':    { label: 'いつならよいか確認する', response: '「承知いたしました。では、またお時間のよいときにご連絡させていただいてもよろしいでしょうか？いつ頃でしたらよろしいでしょうか？」' },
-  'busy_short':    { label: '30秒だけお願いする', response: '「お忙しいところ大変恐れ入ります。30秒だけお時間いただけますでしょうか。資料をメールでお送りするだけでも、させていただければと思っております。」' },
-  'nointerest_reason': { label: '理由を聞く', response: '「興味が無いのは、具体的に何か理由はございますか？もし導入コストや業態の面でご懸念がございましたら、解決できる事例もご用意しております。」' },
-  'nointerest_seminar': { label: 'セミナーに誘う', response: '「弊社は週2回、オンラインの説明会を開催しております（水曜11時・金曜13時）。1時間程度で、費用・導入事例なども詳しくご説明できます。一度いかがでしょうか？」' },
-  'nointerest_future':  { label: '将来的な興味を確認', response: '「将来的にも、ご興味はないでしょうか？近年、全国からのお問い合わせが去年よりかなり多くなってきておりまして、参考情報だけでもお送りさせていただければと思っております。」' },
-  'other_maker':   { label: 'どのメーカーか聞く', response: '「あ、そうでございましたか。もし差し支えないようでしたら、どちらのメーカー様をご利用されているか、参考までに教えて頂きたいのですが…」' },
-  'other_consider':{ label: '今後の検討を提案', response: '「現在の飲食業やホテル業界は、人手不足や人件費の高騰で厳しい状況と伺っております。無人チェックイン機で省人化・コスト削減に貢献できると考えていますが、こういったシステムにご興味はございませんでしょうか？」' },
-  'price_subsidy': { label: 'IT補助金を案内する', response: '「補助金を弊社で申請できます。IT補助金活用でKIOSK筐体が最安48万円〜、タブレット型は13万円〜でご導入可能です。また、使用しない月は月額0円になるプランもございます。」' },
-  'price_running': { label: '月額費用の説明', response: '「月額費用はKIOSK型で19,600円＋部屋数×200円、タブレット型は1室500円です。繁忙期のみ使用で使わない月は0円、日割り計算も可能です。実際の費用感をメールでお送りしてもよろしいでしょうか？」' },
-  'key_cylinder':  { label: 'シリンダー錠対応をPR', response: '「弊社の強みは、シリンダー錠（物理キー）にも対応可能なことです！別売りのキーボックスで、清算が終わると自動でキーボックスが開き、セルフで鍵のお渡しが可能になります。カードキーへの変更は不要です。」' },
-  'key_smartlock': { label: 'スマートロックを提案', response: '「もしご興味があれば、クラウドスマートロックもご提案できます。暗証番号で開錠でき、チェックイン機から排出されるレシートに暗証番号が自動で印字されます。」' },
-  'custom_order':  { label: 'オーダーメイドをPR', response: '「普段スタッフが口頭でご説明していることを、チェックイン機にカスタマイズして組み込むことが可能です。弊社は自社開発のため、御社専用のオーダーメイドをご提供できます。」' },
-  'custom_example':{ label: '導入事例を提示', response: '「弊社では接客の質を落とさずに手続きだけをスマート化して、顧客満足度を上げた事例がございます。同業態の導入事例を資料でお送りしてもよろしいでしょうか？」' },
-  'pms_list':      { label: 'PMS連携実績を案内', response: '「弊社はPMS（ホテルシステム）との連携開発に近年力を入れています。実績として、ステイシー・スイートブック・ベッツ24がございます。お客様のご要望によりかなりの頻度で開発連携が進んでいますので、御社のPMSも今後連携開発を進めます。」' },
-  'unmanned_pr':   { label: '省人化・効率化で言い換える', response: '「フロントでの事務的なオペレーションを削減することで、スタッフの方々がお客様との対話時間を増やし、館内施設や観光案内などの接客サービスをより一層手厚く行うことが可能になります。」' },
-  'person_time':   { label: 'いる時間帯を聞く', response: '「承知いたしました。失礼いたしました。何時（何日）ごろでしたら担当様とお話できますでしょうか？」' },
-  'person_front':  { label: 'フロントに資料送付を提案', response: '「では、フロントの方にお願いして、担当の支配人様にご一読いただけるよう資料をメールでお送りしてもよろしいでしょうか？メールアドレスをお教えいただけますか？」' },
-  'email_spam':    { label: '迷惑メールを確認してもらう', response: '「もしかしますと迷惑メールフォルダに入っている可能性がございます。「迷惑メールでないことを報告」をクリックしていただきますと、今後は受信ボックスに届くようになります。」' },
-  'email_recheck': { label: 'アドレスを再確認する', response: '「念のためメールアドレスをもう一度ご確認させていただけますでしょうか？正しいアドレスでも届かない場合は、一度フロントの方のアドレスから弊社へ送信していただくと、今後スムーズに送受信できるようになります。」' },
+  'cat_busy':        { label: '⏰ 今は忙しい', response: '' },
+  'cat_nointerest':  { label: '😐 興味がない', response: '' },
+  'cat_other':       { label: '🏢 他社を使っている', response: '' },
+  'cat_price':       { label: '💴 高そう・お金がかかる', response: '' },
+  'cat_key':         { label: '🔑 カードキーでないとダメ', response: '' },
+  'cat_custom':      { label: '🏨 うちの業態に合わない', response: '' },
+  'cat_pms':         { label: '💻 PMSと連携できる？', response: '' },
+  'cat_unmanned':    { label: '🚫 無人にはできない', response: '' },
+  'cat_person':      { label: '📵 担当者不在', response: '' },
+  'cat_email':       { label: '📧 メールが届かない', response: '' },
+  'cat_seminar':     { label: '📅 セミナーの案内', response: '' },
+  'cat_inbound':     { label: '🌏 インバウンド対応は？', response: '' },
+  'cat_size':        { label: '🏡 小規模だから不要では？', response: '' },
+  'cat_timing':      { label: '📆 今は検討時期ではない', response: '' },
+  'cat_claim':       { label: '😡 かけてくるな（クレーム）', response: '' },
+
+  // ── 今は忙しい ──
+  'busy_later':   { label: 'いつ頃なら大丈夫か確認する', response: '「承知いたしました。では、またお時間のよいときにご連絡させていただいてもよろしいでしょうか？いつ頃でしたらよろしいでしょうか？」' },
+  'busy_short':   { label: '30秒だけお願いする', response: '「お忙しいところ大変恐れ入ります。30秒だけお時間いただけますでしょうか。資料をメールでお送りするだけでも、させていただければと思っております。」' },
+  'busy_task':    { label: 'タスクに控えて後日かける', response: '「かしこまりました。では、後日あらためてご連絡させていただきます。〇〇様のお名前とご連絡先、確認させていただいてよろしいでしょうか？」' },
+
+  // ── 興味がない ──
+  'nointerest_reason':   { label: '具体的な理由を聞く', response: '「そうでございますか。差し支えなければ、どのような点でご興味をお持ちになれないか、教えていただけますでしょうか？もしコスト面や業態の問題でしたら、解決できた事例もご用意しております。」' },
+  'nointerest_future':   { label: '将来的な可能性を確認', response: '「将来的にも、ご興味はないでしょうか？近年、全国からのお問い合わせが去年よりかなり多くなってきておりまして、業界全体でのスタンダードになりつつあります。参考情報だけでもお送りさせていただければと思います。」' },
+  'nointerest_seminar':  { label: 'セミナーに誘う', response: '「弊社は週2回、オンラインの説明会を開催しております（水曜11時・金曜13時）。1時間程度で費用・導入事例なども詳しくご説明できます。ご参加は無料ですので、一度いかがでしょうか？」' },
+  'nointerest_flow':     { label: '流行の波を伝える', response: '「最近よくお耳にするかとは思いますが、自動チェックイン機の件になります。全国各地のホテル様で急速に導入が進んでおりまして、業界のスタンダードになりつつある状況でございます。他社様に遅れをとらないためにも、一度ご検討いただけませんか？」' },
+  'nointerest_info':     { label: '情報だけでも送る提案', response: '「ご興味がないのは承知いたしました。ただ、資料だけでもご覧いただけますと、具体的なコストや仕組みがよくわかります。メールアドレスをお教えいただければ今日中にお送りいたします。」' },
+
+  // ── 他社使用中 ──
+  'other_maker':    { label: 'どのメーカーか聞く', response: '「あ、そうでございましたか。差し支えなければ、どちらのメーカー様をご利用されているか、参考までに教えて頂けますでしょうか？」' },
+  'other_compare':  { label: '比較提案に持ち込む', response: '「すでに導入されていらっしゃるのですね。弊社は自社開発のため、他社様にはない機能（シリンダー錠対応・完全オーダーメイドカスタマイズ等）がございます。現状の課題があれば、比較資料としてご覧いただけますでしょうか？」' },
+  'other_renewal':  { label: '更新・リプレイス提案', response: '「現在ご利用のシステムの契約更新時期はいつ頃でしょうか？弊社は価格面でもご好評をいただいており、乗り換えを検討されている施設様も増えております。ちょうどそのタイミングで比較検討いただけると幸いです。」' },
+
+  // ── 価格 ──
+  'price_subsidy':  { label: 'IT補助金を案内する', response: '「弊社が補助金申請を代行できます。IT補助金活用でKIOSK筐体が最安48万円〜、タブレット型は13万円〜でご導入可能です。補助金があれば実質費用がかなり抑えられます。詳しい資料をお送りしてもよろしいでしょうか？」' },
+  'price_running':  { label: '月額費用・コスト削減効果を説明', response: '「月額費用はKIOSK型で19,600円＋部屋数×200円、タブレット型は1室500円です。繁忙期のみ使用で使わない月は0円、日割り計算も可能です。一方で、フロントスタッフの人件費削減効果と比べると、多くの施設様で半年〜1年以内に回収されています。」' },
+  'price_season':   { label: '季節限定プランを案内', response: '「ご使用にならない月は月額0円になります。繁忙期のみのご利用や、土日祝のみご使用の日割り計算プランもございます。実際の費用感をメールでご案内してもよろしいでしょうか？」' },
+  'price_small':    { label: '小規模向け低コストプランを提示', response: '「小規模施設様向けには、タブレット型でご導入いただけます。初期費用はIT補助金活用で13万円〜、月額は1室500円です。一軒家や小規模旅館様にも導入実績がございます。」' },
+
+  // ── カードキー・鍵 ──
+  'key_cylinder':   { label: 'シリンダー錠対応をPR', response: '「弊社の強みは、シリンダー錠（物理キー）にも対応可能なことです！別売りのキーボックスを使うことで、清算が完了すると自動でキーボックスが開き、お客様がセルフで鍵をお受け取りいただけます。カードキーへの変更は一切不要です。」' },
+  'key_smartlock':  { label: 'クラウドスマートロックを提案', response: '「クラウドスマートロックという選択肢もございます。暗証番号で開錠でき、チェックイン機から排出されるレシートに暗証番号が自動で印字されます。鍵の受け渡しが完全にセルフになります。」' },
+  'key_receipt':    { label: 'レシート×対面方式を提案', response: '「もし接客を残したい場合は、チェックイン機で清算まで済ませてレシートを発行し、そのレシートをフロントで鍵と交換するという運用も可能です。対面の接客要素を残しながら、手続きだけ効率化できます。」' },
+
+  // ── 業態・カスタマイズ ──
+  'custom_order':   { label: 'オーダーメイドをPR', response: '「普段スタッフが口頭でご説明していることを、チェックイン機にカスタマイズして組み込むことが可能です。弊社は自社開発のため、御社専用のオーダーメイドをご提供できます。他社様には真似のできない強みです。」' },
+  'custom_example': { label: '同業態の導入事例を提示', response: '「弊社では接客の質を落とさずに手続きだけをスマート化して、顧客満足度を上げた事例がございます。同じような業態の施設様の導入事例を資料でお送りしてもよろしいでしょうか？」' },
+  'custom_ryokan':  { label: '旅館・温泉施設への対応', response: '「旅館様でも多数ご導入いただいております。日帰り温泉客の受付・清算、朝食券・夕食券の発行など、旅館特有の運用にもカスタマイズ対応できます。お話しだけでもいかがでしょうか？」' },
+  'custom_hospi':   { label: 'ホスピタリティを落とさない訴求', response: '「チェックイン機を導入することで、フロントスタッフがチェックイン手続きから解放され、観光案内やお出迎えなどの本来の接客に集中できるようになります。結果としてホスピタリティが向上した施設様も多くいらっしゃいます。」' },
+
+  // ── PMS連携 ──
+  'pms_list':       { label: 'PMS連携実績を案内', response: '「弊社はPMS（ホテルシステム）との連携開発に近年力を入れています。連携実績：ステイシー・スイートブック・ベッツ24。現在も複数のPMSと連携開発が進行中です。御社のPMSについても、ぜひ一度ご相談いただけますでしょうか？」' },
+  'pms_develop':    { label: '連携開発の意欲を伝える', response: '「お客様のご要望によりかなりの頻度で連携開発が進んでいますので、御社のPMSも今後連携開発を進めることが可能です。まずはシステム名をお教えいただけますでしょうか？」' },
+
+  // ── 無人化 ──
+  'unmanned_pr':    { label: '省人化・効率化に言い換える', response: '「「無人化」というより、「省人化」・「業務効率化」のツールとしてご活用いただいております。フロントスタッフがチェックイン手続きから解放されることで、お客様との会話や観光案内など、本来の接客サービスにより集中できるようになります。」' },
+  'unmanned_night': { label: '夜間・深夜帯の対応として訴求', response: '「特に夜間や深夜帯のチェックインで効果を発揮します。スタッフが不在の時間でも、お客様が自分でチェックインできるため、深夜のフロント対応を大幅に削減できます。」' },
+  'unmanned_inbound': { label: 'インバウンドへの対応力', response: '「外国語対応（13か国語）とパスポートスキャン機能により、インバウンドのお客様もスムーズにチェックインできます。言語の壁がなくなることで、スタッフの対応負担が大幅に減ります。」' },
+
+  // ── 担当者不在 ──
+  'person_time':    { label: 'いつ頃いるか確認する', response: '「承知いたしました。失礼いたしました。何時（何日）ごろでしたら担当の支配人様とお話できますでしょうか？」' },
+  'person_front':   { label: 'フロントに資料送付をお願いする', response: '「では、フロントの方にお願いして、担当の支配人様にご一読いただけるよう資料をメールでお送りしてもよろしいでしょうか？よろしければメールアドレスをお教えいただけますか？（フロントの方のお名前も頂戴できますと幸いです。）」' },
+  'person_callback':{ label: 'かけ直しをお願いする', response: '「ありがとうございます。では〇〇（時間帯）にあらためてお電話させていただきます。よろしくお願いいたします。」' },
+  'person_msg':     { label: 'フロントに伝言をお願いする', response: '「よろしければ、「デバイスエージェンシーの〇〇より、自動チェックイン機のご案内でお電話がありました」とお伝えいただけますでしょうか？後ほどあらためてご連絡させていただきます。」' },
+
+  // ── メール未着 ──
+  'email_spam':     { label: '迷惑メールを確認してもらう', response: '「もしかしますと迷惑メールフォルダに入っている可能性がございます。「迷惑メールでないことを報告」をクリックしていただきますと、今後は受信ボックスに届くようになります。」' },
+  'email_recheck':  { label: 'アドレスを再確認する', response: '「念のためメールアドレスをもう一度ご確認させていただけますでしょうか？正しいアドレスでも届かない場合は、一度フロントの方のアドレスから弊社へ送信していただくと、今後スムーズに送受信できるようになります。」' },
+  'email_resend':   { label: 'こちらから再送する', response: '「承知いたしました。再度お送りいたします。件名は「〇〇様　自動チェックイン機のご案内」でお送りしますので、ご確認いただけますでしょうか。もし届かなければお電話でご連絡ください。」' },
+
+  // ── セミナー ──
+  'seminar_when':   { label: 'セミナー日程を案内する', response: '「オンラインセミナーは毎週水曜日11時〜・金曜日13時〜開催しております（1時間程度・参加無料）。ご都合に合わせて別日のご案内も可能ですので、ご希望の日時をお教えください。」' },
+  'seminar_content':{ label: 'セミナー内容を説明する', response: '「セミナーでは、実際の操作デモ・価格・補助金・導入事例・PMSとの連携などを1時間でご説明いたします。個別のご質問もその場でお答えできます。ZoomのURLをお送りいたしますので、メールアドレスをいただけますでしょうか？」' },
+  'seminar_nudge':  { label: 'まず資料→後でセミナー提案', response: '「まず資料だけでもご覧いただき、ご興味があればセミナーにもお気軽にご参加いただける形でいかがでしょうか？資料をお送りするだけなら1分で済みます。メールアドレスをいただけますか？」' },
+
+  // ── インバウンド ──
+  'inbound_lang':   { label: '多言語対応（13か国語）を説明', response: '「弊社の自動チェックイン機は13か国語に対応しております。外国語が苦手なスタッフ様でも、インバウンドのお客様に対応できます。パスポートスキャン・本人確認もチェックイン機で完結します。」' },
+  'inbound_passport':{ label: 'パスポートスキャン機能を説明', response: '「インバウンド対応として、パスポートスキャンと顔写真撮影による本人確認機能がございます。外国籍のお客様の情報を自動で取得・記録できるため、フロントの手間が大幅に減ります。」' },
+
+  // ── 小規模 ──
+  'size_tablet':    { label: 'タブレット型を提案', response: '「小規模施設様にはタブレット型がございます。初期費用はIT補助金活用で13万円〜、月額は1室500円から。一軒家（シングルプラン）でも49,800円〜でご導入いただけます。」' },
+  'size_other':     { label: 'ルームタブレット・スマートロックを提案', response: '「部屋数が少ない施設様でも、ルームタブレット（内線電話・月額1室100円〜）やクラウドスマートロックなど、チェックイン機以外の製品もご活用いただけます。組み合わせることで業務効率が上がります。」' },
+
+  // ── 検討時期ではない ──
+  'timing_future':  { label: '将来のために情報だけ送る', response: '「承知いたしました。ご検討の時期にぜひご参考いただければと思いますので、資料だけでもお送りさせていただけますでしょうか？今すぐでなくても、情報として持っておいていただくだけで大丈夫です。」' },
+  'timing_task':    { label: '再架電タスクを設定する', response: '「わかりました。では、ご検討の時期に合わせてあらためてご連絡させていただきます。〇〇月頃にご連絡してもよろしいでしょうか？」' },
+
+  // ── クレーム ──
+  'claim_apology':  { label: 'まず謝罪する', response: '「大変失礼いたしました。ご迷惑をおかけして申し訳ございません。今後はご連絡を控えさせていただきます。ありがとうございました。」（→ 架電クレームにステージ変更してHubSpotに記録する）' },
+  'claim_record':   { label: 'HubSpotに記録して終了', response: '（電話を丁重に終了し、HubSpotの取引ステージを「架電クレーム」に変更する。タスクは削除。今後の架電対象から除外する。）' },
 }
 
 const CATEGORY_ITEMS = [
-  { id: 'cat_busy',       children: ['busy_later', 'busy_short'] },
-  { id: 'cat_nointerest', children: ['nointerest_reason', 'nointerest_seminar', 'nointerest_future'] },
-  { id: 'cat_other',      children: ['other_maker', 'other_consider'] },
-  { id: 'cat_price',      children: ['price_subsidy', 'price_running'] },
-  { id: 'cat_key',        children: ['key_cylinder', 'key_smartlock'] },
-  { id: 'cat_custom',     children: ['custom_order', 'custom_example'] },
-  { id: 'cat_pms',        children: ['pms_list'] },
-  { id: 'cat_unmanned',   children: ['unmanned_pr'] },
-  { id: 'cat_person',     children: ['person_time', 'person_front'] },
-  { id: 'cat_email',      children: ['email_spam', 'email_recheck'] },
+  { id: 'cat_busy',       children: ['busy_later', 'busy_short', 'busy_task'] },
+  { id: 'cat_nointerest', children: ['nointerest_reason', 'nointerest_future', 'nointerest_seminar', 'nointerest_flow', 'nointerest_info'] },
+  { id: 'cat_other',      children: ['other_maker', 'other_compare', 'other_renewal'] },
+  { id: 'cat_price',      children: ['price_subsidy', 'price_running', 'price_season', 'price_small'] },
+  { id: 'cat_key',        children: ['key_cylinder', 'key_smartlock', 'key_receipt'] },
+  { id: 'cat_custom',     children: ['custom_order', 'custom_example', 'custom_ryokan', 'custom_hospi'] },
+  { id: 'cat_pms',        children: ['pms_list', 'pms_develop'] },
+  { id: 'cat_unmanned',   children: ['unmanned_pr', 'unmanned_night', 'unmanned_inbound'] },
+  { id: 'cat_person',     children: ['person_time', 'person_front', 'person_callback', 'person_msg'] },
+  { id: 'cat_email',      children: ['email_spam', 'email_recheck', 'email_resend'] },
+  { id: 'cat_seminar',    children: ['seminar_when', 'seminar_content', 'seminar_nudge'] },
+  { id: 'cat_inbound',    children: ['inbound_lang', 'inbound_passport'] },
+  { id: 'cat_size',       children: ['size_tablet', 'size_other'] },
+  { id: 'cat_timing',     children: ['timing_future', 'timing_task'] },
+  { id: 'cat_claim',      children: ['claim_apology', 'claim_record'] },
 ]
 
 const TABS = [
@@ -138,11 +202,11 @@ export default function TeleapoPage() {
               </div>
               <div className="space-y-3">
                 <div className="bg-slate-700/50 rounded-xl p-4">
-                  <p className="text-xs text-blue-400 font-bold mb-2">① テーブルビューに切り替え</p>
+                  <p className="text-sm font-bold text-blue-400 mb-2">① テーブルビューに切り替え</p>
                   <p className="text-sm text-slate-300">HubSpot CRM の「取引」画面を開き、表示形式を<span className="text-blue-300 font-medium">「テーブルビュー」</span>に変更する。</p>
                 </div>
                 <div className="bg-slate-700/50 rounded-xl p-4">
-                  <p className="text-xs text-blue-400 font-bold mb-2">② 詳細フィルターを設定</p>
+                  <p className="text-sm font-bold text-blue-400 mb-2">② 詳細フィルターを設定</p>
                   <p className="text-sm text-slate-300 mb-2">「楽天トラベル（未架電）」＋「担当者：未割り当て」または「不在」でフィルター</p>
                   <div className="bg-slate-900 rounded-lg px-3 py-2">
                     <p className="text-yellow-300 text-sm font-medium">楽天トラベル（不在）（スマートチェックイン）</p>
@@ -331,25 +395,25 @@ export default function TeleapoPage() {
             </div>
             <div className="space-y-3">
               <div className="bg-slate-700/50 rounded-xl p-4">
-                <p className="text-xs text-blue-400 font-bold mb-2">オープニング</p>
-                <p className="text-sm text-slate-300 leading-relaxed">
+                <p className="text-sm font-bold text-blue-400 mb-2">オープニング</p>
+                <p className="text-base text-slate-200 leading-relaxed">
                   お忙しい所恐れ入ります。わたくし、株式会社デバイスエージェンシーの瀬戸です。お世話になっております。<br/>
                   弊社でございますが、お客様のチェックインからお帰りまでのフロント業務を省力化するセルフチェックイン機を、開発から、販売、メンテナンスに至るまで、ワンストップで行っている会社でございます。
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="bg-blue-950/50 border border-blue-800/50 rounded-xl p-4">
-                  <p className="text-xs text-blue-400 font-bold mb-2">分岐①　担当者へ繋いでもらう場合</p>
+                  <p className="text-sm font-bold text-blue-400 mb-2">分岐①　担当者へ繋いでもらう場合</p>
                   <p className="text-sm text-slate-300">「この件につきまして、お話しをさせて頂ける支配人様か担当の方がおられましたら、おつなぎをお願い出来ませんでしょうか？」</p>
                 </div>
                 <div className="bg-purple-950/50 border border-purple-800/50 rounded-xl p-4">
-                  <p className="text-xs text-purple-400 font-bold mb-2">分岐②　ヒアリング先行の場合</p>
+                  <p className="text-sm font-bold text-purple-400 mb-2">分岐②　ヒアリング先行の場合</p>
                   <p className="text-sm text-slate-300">「今現在ですが、このようなチェックインシステムをご利用されていたり、近いうちに端末機などの導入をご検討されたりしていらっしゃいますでしょうか？」</p>
                 </div>
               </div>
               <div className="bg-slate-700/50 rounded-xl p-4">
-                <p className="text-xs text-green-400 font-bold mb-2">資料送付・セミナー案内</p>
-                <p className="text-sm text-slate-300 leading-relaxed">
+                <p className="text-sm font-bold text-green-400 mb-2">資料送付・セミナー案内</p>
+                <p className="text-base text-slate-200 leading-relaxed">
                   「弊社ではWebページで商品の詳細をご覧いただけるカタログと価格表をご用意しております。また端末を設置した場合の操作手順もご覧いただける動画も配信しております。資料だけでもご覧になって頂きたいので、メールで送らせて頂けないでしょうか？また毎週月・水・金曜日にZoomでセミナーを開催しておりますので、こちらへもお気軽にご参加ください。」
                 </p>
               </div>
@@ -358,7 +422,7 @@ export default function TeleapoPage() {
 
           {/* パターンB */}
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-base font-bold text-white mb-4">💬 会話形式ヒアリング（橋本パターン）</h2>
+            <h2 className="text-xl font-bold text-white mb-4">💬 会話形式ヒアリング（橋本パターン）</h2>
             <div className="space-y-3">
               {[
                 { label: '①', text: '「株式会社デバイスエージェンシー橋本でございます。」', color: 'blue' },
@@ -383,7 +447,7 @@ export default function TeleapoPage() {
                 </div>
               ))}
               <div className="bg-slate-700/50 rounded-xl p-4">
-                <p className="text-xs text-yellow-400 font-bold mb-2">ヒアリングで拾う課題例</p>
+                <p className="text-sm font-bold text-yellow-400 mb-2">ヒアリングで拾う課題例</p>
                 <div className="flex flex-wrap gap-2">
                   {['鍵渡しの手間', 'スタッフの高齢化', '精算の間違い', '人件費の削減', '人員不足', 'ワンオペ業務過多', '繁忙期の人員不足'].map(c => (
                     <span key={c} className="text-xs bg-yellow-900/40 text-yellow-300 border border-yellow-700/50 rounded-lg px-2 py-1">{c}</span>
@@ -395,16 +459,16 @@ export default function TeleapoPage() {
 
           {/* パターンC: インサイト営業 */}
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-base font-bold text-white mb-2">🎯 ヒアリング主導型（インサイト営業）</h2>
+            <h2 className="text-xl font-bold text-white mb-2">🎯 ヒアリング主導型（インサイト営業）</h2>
             <p className="text-xs text-slate-400 mb-4">「売り込まない」スタンスで警戒心を下げ、ネガティブな本音を引き出してから提案につなげる方式</p>
             <div className="space-y-3">
               <div className="bg-slate-700/50 rounded-xl p-4">
-                <p className="text-xs text-blue-400 font-bold mb-2">導入（受付突破）</p>
-                <p className="text-sm text-slate-300 leading-relaxed">「お忙しいところ恐れ入ります、デバイスエージェンシーの〇〇と申します。本日はホテルの自動チェックインシステムについて、<span className="text-yellow-300 font-medium">売り込みではなく</span>、実際に支配人様が率直にどう感じられているか、現場の本音をお伺いしたくお電話いたしました。支配人様（またはフロント責任者様）にお繋ぎいただけますでしょうか？」</p>
+                <p className="text-sm font-bold text-blue-400 mb-2">導入（受付突破）</p>
+                <p className="text-base text-slate-200 leading-relaxed">「お忙しいところ恐れ入ります、デバイスエージェンシーの〇〇と申します。本日はホテルの自動チェックインシステムについて、<span className="text-yellow-300 font-medium">売り込みではなく</span>、実際に支配人様が率直にどう感じられているか、現場の本音をお伺いしたくお電話いたしました。支配人様（またはフロント責任者様）にお繋ぎいただけますでしょうか？」</p>
               </div>
               <div className="bg-slate-700/50 rounded-xl p-4">
-                <p className="text-xs text-purple-400 font-bold mb-2">本題（支配人につながったら）</p>
-                <p className="text-sm text-slate-300 leading-relaxed">「多くの支配人様から『正直、うちの規模や業態には合わないんじゃないか』『かえって手間が増えるのでは』といったネガティブな本音をいただくことがあります。〇〇様からご覧になって、自動チェックイン機に対して<span className="text-yellow-300 font-medium">『ここがネックになりそうだな』といったネガティブな印象や疑問</span>って、何かお持ちだったりしますか？」</p>
+                <p className="text-sm font-bold text-purple-400 mb-2">本題（支配人につながったら）</p>
+                <p className="text-base text-slate-200 leading-relaxed">「多くの支配人様から『正直、うちの規模や業態には合わないんじゃないか』『かえって手間が増えるのでは』といったネガティブな本音をいただくことがあります。〇〇様からご覧になって、自動チェックイン機に対して<span className="text-yellow-300 font-medium">『ここがネックになりそうだな』といったネガティブな印象や疑問</span>って、何かお持ちだったりしますか？」</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {[
@@ -421,16 +485,16 @@ export default function TeleapoPage() {
                       p.color === 'blue' ? 'text-blue-400' :
                       p.color === 'green' ? 'text-green-400' : 'text-yellow-400'
                     }`}>{p.label}</p>
-                    <p className="text-xs text-slate-300 leading-relaxed">{p.text}</p>
+                    <p className="text-sm text-slate-200 leading-relaxed">{p.text}</p>
                   </div>
                 ))}
               </div>
               <div className="bg-green-950/50 border border-green-800/50 rounded-xl p-4">
-                <p className="text-xs text-green-400 font-bold mb-2">アドレス回収トーク</p>
-                <p className="text-sm text-slate-300 leading-relaxed">「では、〇〇様のメールアドレスを教えていただけますでしょうか？……ありがとうございます。本日お聞きした『〇〇（懸念点）』の解決に特に関連する部分に印をつけて、本日中に私からダイレクトにお送りさせていただきます。」</p>
+                <p className="text-sm font-bold text-green-400 mb-2">アドレス回収トーク</p>
+                <p className="text-base text-slate-200 leading-relaxed">「では、〇〇様のメールアドレスを教えていただけますでしょうか？……ありがとうございます。本日お聞きした『〇〇（懸念点）』の解決に特に関連する部分に印をつけて、本日中に私からダイレクトにお送りさせていただきます。」</p>
               </div>
               <div className="bg-yellow-950/50 border border-yellow-800/50 rounded-xl p-4">
-                <p className="text-xs text-yellow-400 font-bold mb-2">💡 成功のポイント</p>
+                <p className="text-sm font-bold text-yellow-400 mb-2">💡 成功のポイント</p>
                 <p className="text-sm text-slate-300">ネガティブな意見が出たとき、すぐに「弊社の製品ならそれは解決できます！」と反論しない。「まさにそこが課題ですよね」と一度100%同意し、「その課題をクリアした事例が手元にある」というスタンスを崩さない。</p>
               </div>
             </div>
@@ -438,7 +502,7 @@ export default function TeleapoPage() {
 
           {/* よくある断り文句と切り返し */}
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-base font-bold text-white mb-4">🔄 よくある断り文句と切り返し</h2>
+            <h2 className="text-xl font-bold text-white mb-4">🔄 よくある断り文句と切り返し</h2>
             <div className="space-y-3">
               {[
                 { objection: '他社導入済みの場合', response: '「もしこれからご検討されるようでしたら、是非わたくしどもの製品をと思っていたのですが、残念です。もし差し支えないようでしたら、どちらのメーカー様をご利用されているか、参考までに教えて頂きたいのですが…」' },
@@ -448,8 +512,8 @@ export default function TeleapoPage() {
                 { objection: '「カスタマイズできない」', response: '「普段スタッフが口頭説明していることをチェックイン機にカスタマイズできます。御社専用のオーダーメイドをご提供できます。」' },
               ].map((item, i) => (
                 <div key={i} className="bg-slate-700/50 rounded-xl p-4">
-                  <p className="text-xs text-red-400 font-bold mb-2">❌ {item.objection}</p>
-                  <p className="text-sm text-slate-300 leading-relaxed">✅ {item.response}</p>
+                  <p className="text-sm font-bold text-red-400 mb-2">❌ {item.objection}</p>
+                  <p className="text-base text-slate-200 leading-relaxed">✅ {item.response}</p>
                 </div>
               ))}
             </div>
@@ -557,7 +621,7 @@ export default function TeleapoPage() {
               <h2 className="text-base font-bold text-white mb-4">💰 価格・費用感</h2>
               <div className="space-y-3">
                 <div className="bg-slate-700/50 rounded-xl p-4">
-                  <p className="text-xs text-blue-400 font-bold mb-2">初期費用（IT補助金活用時）</p>
+                  <p className="text-sm font-bold text-blue-400 mb-2">初期費用（IT補助金活用時）</p>
                   <ul className="text-sm text-slate-300 space-y-1">
                     <li>・KIOSK型：<span className="text-white font-bold">48万円〜</span></li>
                     <li>・タブレット型：<span className="text-white font-bold">13万円〜</span></li>
@@ -566,7 +630,7 @@ export default function TeleapoPage() {
                   </ul>
                 </div>
                 <div className="bg-slate-700/50 rounded-xl p-4">
-                  <p className="text-xs text-green-400 font-bold mb-2">月額費用</p>
+                  <p className="text-sm font-bold text-green-400 mb-2">月額費用</p>
                   <ul className="text-sm text-slate-300 space-y-1">
                     <li>・KIOSK型：19,600円＋部屋数×200円</li>
                     <li>・タブレット型：500円×部屋数</li>
@@ -587,8 +651,8 @@ export default function TeleapoPage() {
                   { q: 'インバウンド対応は？', a: '多言語対応（12〜13か国語）、パスポートスキャン・本人確認機能あり。インバウンド対策に非常に有効。' },
                 ].map((item, i) => (
                   <div key={i} className="bg-slate-700/50 rounded-xl p-4">
-                    <p className="text-xs text-yellow-400 font-bold mb-2">Q: {item.q}</p>
-                    <p className="text-sm text-slate-300 leading-relaxed">A: {item.a}</p>
+                    <p className="text-sm font-bold text-yellow-400 mb-2">Q: {item.q}</p>
+                    <p className="text-base text-slate-200 leading-relaxed">A: {item.a}</p>
                   </div>
                 ))}
               </div>
@@ -821,7 +885,7 @@ DA   www.device-agency.co.jp
               ))}
             </div>
             <div className="mt-4 bg-yellow-950/50 border border-yellow-800/50 rounded-xl p-4">
-              <p className="text-xs text-yellow-400 font-bold mb-2">⚠️ 連携がうまくいかない場合</p>
+              <p className="text-sm font-bold text-yellow-400 mb-2">⚠️ 連携がうまくいかない場合</p>
               <ul className="text-sm text-slate-300 space-y-1">
                 <li>・ZOOMワークプレイスをサインアウト→サインインし直す</li>
                 <li>・HubSpotのコールもサインアウト→サインインし直す</li>
