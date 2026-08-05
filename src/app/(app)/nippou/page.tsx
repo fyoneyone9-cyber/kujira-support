@@ -5,14 +5,27 @@ import { useState } from 'react'
 const DEFAULT_START = '09:00'
 const DEFAULT_END = '18:00'
 const DEFAULT_BREAK = '1.0'
-const DEFAULT_WORK = '8.0'
+
+
+// HH:MM × 2 → 差を時間（小数）で返す
+function calcWork(start: string, end: string, br: string): string {
+  const [sh, sm] = start.split(':').map(Number)
+  const [eh, em] = end.split(':').map(Number)
+  const totalMin = (eh * 60 + em) - (sh * 60 + sm)
+  if (isNaN(totalMin) || totalMin <= 0) return ''
+  const workMin = totalMin - parseFloat(br || '0') * 60
+  if (workMin <= 0) return '0.0'
+  return (workMin / 60).toFixed(1)
+}
 
 export default function NippouPage() {
   const [slackContent, setSlackContent] = useState('')
   const [startTime, setStartTime] = useState(DEFAULT_START)
   const [endTime, setEndTime] = useState(DEFAULT_END)
   const [breakTime, setBreakTime] = useState(DEFAULT_BREAK)
-  const [workTime, setWorkTime] = useState(DEFAULT_WORK)
+
+  // 実労働時間は自動計算（手入力なし）
+  const workTime = calcWork(startTime, endTime, breakTime)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [nippouBody, setNippouBody] = useState('')
@@ -98,15 +111,12 @@ ${nippouBody}`
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">実労働時間（h）</label>
-              <input
-                type="number"
-                step="0.5"
-                min="0"
-                value={workTime}
-                onChange={(e) => setWorkTime(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <label className="block text-xs text-slate-400 mb-1">実労働時間（h）<span className="ml-1 text-blue-400">自動計算</span></label>
+              <div className={`w-full px-3 py-2 rounded-xl text-sm font-bold border ${
+                workTime ? 'bg-blue-900/40 border-blue-700 text-blue-300' : 'bg-slate-700 border-slate-600 text-slate-500'
+              }`}>
+                {workTime ? `${workTime} h` : '— h'}
+              </div>
             </div>
           </div>
         </div>
