@@ -261,19 +261,19 @@ export default function TeleapoPage() {
 
           {/* ── 切り返しナビ ── */}
           <div className="bg-slate-800 rounded-2xl border border-blue-800/40 p-6">
-            <h2 className="text-base font-bold text-white mb-1">⚡ 切り返しナビ</h2>
-            <p className="text-xs text-slate-400 mb-4">相手の反応をクリック → 対応方法を選ぶ → トークが表示されます</p>
+            <h2 className="text-xl font-bold text-white mb-1">⚡ 切り返しナビ</h2>
+            <p className="text-sm text-slate-400 mb-5">相手の反応をクリック → 対応方法を選ぶ → トークが表示されます</p>
 
             {/* カテゴリボタン */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-3 mb-5">
               {CATEGORY_ITEMS.map(cat => (
                 <button
                   key={cat.id}
                   onClick={() => selectCat(cat.id)}
-                  className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                  className={`px-5 py-3 rounded-xl text-base font-bold transition-all ${
                     selectedCat === cat.id
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600'
+                      ? 'bg-blue-600 text-white shadow-lg scale-105'
+                      : 'bg-slate-700 text-slate-200 hover:bg-slate-600 hover:text-white border border-slate-500'
                   }`}
                 >
                   {OBJECTION_TREE[cat.id]?.label}
@@ -283,17 +283,17 @@ export default function TeleapoPage() {
 
             {/* サブ選択 */}
             {selectedCat && (
-              <div className="border-t border-slate-700 pt-4">
-                <p className="text-xs text-blue-400 font-bold mb-3">どう対応しますか？</p>
-                <div className="flex flex-wrap gap-2 mb-4">
+              <div className="border-t border-slate-700 pt-5">
+                <p className="text-base text-blue-400 font-bold mb-4">どう対応しますか？</p>
+                <div className="flex flex-wrap gap-3 mb-5">
                   {CATEGORY_ITEMS.find(c => c.id === selectedCat)?.children.map(childId => (
                     <button
                       key={childId}
                       onClick={() => selectResponse(childId)}
-                      className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                      className={`px-5 py-3 rounded-xl text-base font-bold transition-all ${
                         selectedResponse === childId
-                          ? 'bg-green-600 text-white shadow-lg'
-                          : 'bg-slate-700/70 text-slate-300 hover:bg-slate-600 hover:text-white border border-slate-600'
+                          ? 'bg-green-600 text-white shadow-lg scale-105'
+                          : 'bg-slate-700/70 text-slate-200 hover:bg-slate-600 hover:text-white border border-slate-500'
                       }`}
                     >
                       {OBJECTION_TREE[childId]?.label}
@@ -303,19 +303,19 @@ export default function TeleapoPage() {
 
                 {/* トーク表示 */}
                 {selectedResponse && (
-                  <div className="bg-green-950/50 border border-green-700/60 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs text-green-400 font-bold">💬 切り返しトーク</p>
+                  <div className="bg-green-950/60 border-2 border-green-700/70 rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-base text-green-400 font-bold">💬 切り返しトーク</p>
                       <button
                         onClick={() => copy(OBJECTION_TREE[selectedResponse]?.response || '', 'objection')}
-                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                          copiedKey === 'objection' ? 'bg-green-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-colors ${
+                          copiedKey === 'objection' ? 'bg-green-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
                         }`}
                       >
                         {copiedKey === 'objection' ? '✅ コピー済み' : '📋 コピー'}
                       </button>
                     </div>
-                    <p className="text-sm text-slate-100 leading-relaxed">
+                    <p className="text-lg text-white leading-relaxed font-medium">
                       {OBJECTION_TREE[selectedResponse]?.response}
                     </p>
                   </div>
