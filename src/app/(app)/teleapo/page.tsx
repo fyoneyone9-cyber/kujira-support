@@ -189,6 +189,38 @@ export default function TeleapoPage() {
   const [searchInput, setSearchInput] = useState('')
   const suggestions = suggestByKeyword(searchInput)
 
+  // ── メモ欄 ──
+  const MEMO_KEY = 'teleapo_memo'
+  const MEMO_SAVES_KEY = 'teleapo_memo_saves'
+  const [memoText, setMemoText] = useState<string>(() => {
+    if (typeof window === 'undefined') return ''
+    return localStorage.getItem(MEMO_KEY) ?? ''
+  })
+  const [savedMemos, setSavedMemos] = useState<Array<{ ts: string; text: string }>>(() => {
+    if (typeof window === 'undefined') return []
+    try { return JSON.parse(localStorage.getItem(MEMO_SAVES_KEY) ?? '[]') } catch { return [] }
+  })
+  const [memoSaved, setMemoSaved] = useState(false)
+  const [memoOpen, setMemoOpen] = useState(false)
+
+  const saveMemo = () => {
+    if (!memoText.trim()) return
+    localStorage.setItem(MEMO_KEY, memoText)
+    const now = new Date()
+    const ts = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    const next = [{ ts, text: memoText }, ...savedMemos].slice(0, 10) // 最大10件
+    setSavedMemos(next)
+    localStorage.setItem(MEMO_SAVES_KEY, JSON.stringify(next))
+    setMemoSaved(true)
+    setTimeout(() => setMemoSaved(false), 2000)
+  }
+
+  const deleteSavedMemo = (i: number) => {
+    const next = savedMemos.filter((_, idx) => idx !== i)
+    setSavedMemos(next)
+    localStorage.setItem(MEMO_SAVES_KEY, JSON.stringify(next))
+  }
+
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text)
     setCopiedKey(key)
@@ -512,6 +544,114 @@ export default function TeleapoPage() {
                     <p className="text-lg text-white leading-relaxed font-medium">
                       {OBJECTION_TREE[selectedResponse]?.response}
                     </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ── メモ欄 ── */}
+          <div className="bg-slate-900 rounded-2xl border border-amber-800/50 p-6">
+            {/* ヘッダー */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold text-white">📝 架電メモ</h2>
+                <p className="text-sm text-slate-400 mt-0.5">通話中のメモ・気になった点を記録。一時保存すると履歴に残ります。</p>
+              </div>
+              <button
+                onClick={() => setMemoOpen(o => !o)}
+                className="text-slate-400 hover:text-white text-sm px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-slate-500 transition-colors"
+              >
+                {memoOpen ? '▲ 閉じる' : '▼ 開く'}
+              </button>
+            </div>
+
+            {memoOpen && (
+              <div className="space-y-4">
+                {/* テキストエリア */}
+                <textarea
+                  value={memoText}
+                  onChange={e => {
+                    setMemoText(e.target.value)
+                    localStorage.setItem(MEMO_KEY, e.target.value)
+                  }}
+                  rows={6}
+                  placeholder={`通話メモをここに入力...\n例）\n・担当：山田支配人\n・懸念：コスト、シリンダー錠\n・次回：9/5 14:00 再架電`}
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-base text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 resize-none leading-relaxed font-mono"
+                />
+
+                {/* ボタン行 */}
+                <div className="flex flex-wrap gap-3 items-center">
+                  <button
+                    onClick={saveMemo}
+                    disabled={!memoText.trim()}
+                    className={`px-6 py-3 rounded-xl text-base font-bold transition-all ${
+                      memoSaved
+                        ? 'bg-green-600 text-white'
+                        : memoText.trim()
+                          ? 'bg-amber-600 hover:bg-amber-500 text-white'
+                          : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {memoSaved ? '✅ 保存済み' : '💾 一時保存'}
+                  </button>
+                  <button
+                    onClick={() => copy(memoText, 'memo')}
+                    disabled={!memoText.trim()}
+                    className={`px-6 py-3 rounded-xl text-base font-bold transition-all ${
+                      copiedKey === 'memo'
+                        ? 'bg-blue-600 text-white'
+                        : memoText.trim()
+                          ? 'bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600'
+                          : 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700'
+                    }`}
+                  >
+                    {copiedKey === 'memo' ? '✅ コピー済み' : '📋 コピー'}
+                  </button>
+                  {memoText && (
+                    <button
+                      onClick={() => { setMemoText(''); localStorage.removeItem(MEMO_KEY) }}
+                      className="px-4 py-3 rounded-xl text-sm text-slate-400 hover:text-red-400 hover:bg-red-950/30 border border-slate-700 transition-colors"
+                    >
+                      🗑 クリア
+                    </button>
+                  )}
+                </div>
+
+                {/* 保存履歴 */}
+                {savedMemos.length > 0 && (
+                  <div className="border-t border-slate-700 pt-4">
+                    <p className="text-sm font-bold text-slate-300 mb-3">🕐 保存履歴（最大10件）</p>
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {savedMemos.map((m, i) => (
+                        <div key={i} className="bg-slate-800 rounded-xl border border-slate-700 px-4 py-3">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs text-amber-400 font-bold">{m.ts}</span>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => { setMemoText(m.text); localStorage.setItem(MEMO_KEY, m.text) }}
+                                className="text-xs text-blue-400 hover:text-blue-300 px-2 py-0.5 rounded bg-blue-950/40 border border-blue-800/40"
+                              >
+                                復元
+                              </button>
+                              <button
+                                onClick={() => copy(m.text, `saved_${i}`)}
+                                className="text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-700/60 border border-slate-600"
+                              >
+                                {copiedKey === `saved_${i}` ? '✅' : '📋'}
+                              </button>
+                              <button
+                                onClick={() => deleteSavedMemo(i)}
+                                className="text-xs text-red-400 hover:text-red-300 px-2 py-0.5 rounded bg-red-950/40 border border-red-800/40"
+                              >
+                                削除
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-sm text-slate-300 whitespace-pre-line leading-relaxed line-clamp-3">{m.text}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
