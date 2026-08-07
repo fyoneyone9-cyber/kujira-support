@@ -172,6 +172,8 @@ function suggestByKeyword(input: string): string[] {
 }
 // ─────────────────────────────────────────────────────────────
 
+type AiSuggestion = { label: string; talk: string; point: string }
+
 const TABS = [
   { id: 'hubspot', label: '📊 HubSpot手順', icon: '📊' },
   { id: 'script', label: '📞 トークスクリプト', icon: '📞' },
@@ -191,7 +193,6 @@ export default function TeleapoPage() {
   const suggestions = suggestByKeyword(searchInput)
 
   // ── AI サジェスト (Gemini) ──
-  type AiSuggestion = { label: string; talk: string; point: string }
   const [aiInput, setAiInput] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[]>([])

@@ -1,0 +1,2 @@
+'\" "C:\Users\fyone\AppData\Roaming\npm\vercel.cmd\' は、内部コマンドまたは外部コマンド、
+操作可能なプログラムまたはバッチ ファイルとして認識されていません。
