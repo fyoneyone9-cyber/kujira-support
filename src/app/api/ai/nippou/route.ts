@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     if (!content) return NextResponse.json({ error: 'content required' }, { status: 400 })
 
     const prompt = `あなたは日報作成アシスタントです。
-以下はSlackのやり取りです。このやり取りから、社内提出用の日報【業務内容】セクションを作成してください。
+以下のSlackのやりとりや業務メモから、日報用の【業務内容】セクションを作成してください。
 
 ---
 ${content.slice(0, 8000)}
@@ -18,18 +18,15 @@ ${content.slice(0, 8000)}
 以下のルールに従って出力してください：
 
 1. 業務内容を箇条書きで列挙する
-2. 各業務に所要時間（例: 2.0h）を付ける
-3. 合計時間が実労働時間（8.0h）になるように調整する
-4. 業務内容は簡潔かつ具体的に（1行）
-5. 余計な説明・前置き・マークダウン装飾は一切不要
-6. 出力形式は以下のとおり厳守：
+2. 工数（時間）は一切記載しない
+3. 各業務内容は簡潔かつ具体的に（1行）
+4. 余計な説明・外枠・マークダウン装飾は一切不要
+5. 出力形式は以下のとおり厳守：
 
 【業務内容】
-- 業務A 2.0h
-- 業務B 3.0h
-- 業務C 3.0h
-
-合計：8.0h`
+- 業務A
+- 業務B
+- 業務C`
 
     const result = await gemini(prompt)
     return NextResponse.json({ nippou: result })
