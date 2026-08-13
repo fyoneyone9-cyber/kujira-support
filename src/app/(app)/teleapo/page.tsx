@@ -369,7 +369,7 @@ export default function TeleapoPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-xs font-bold text-green-400 mb-2">✅ あなたが電話する4つの箱（優先順）</p>
+                <p className="text-sm font-bold text-green-400 mb-2">✅ あなたが電話する4つの箱（優先順）</p>
                 <div className="space-y-2">
                   {[
                     { num: '①', label: 'AIテレアポ結果', count: '1,237件', desc: '録音・メモ確認→前回の話を踏まえて電話。最も成果につながりやすい', color: 'green' },
@@ -389,15 +389,15 @@ export default function TeleapoPage() {
                         item.color === 'yellow' ? 'text-yellow-400' : 'text-purple-400'
                       }`}>{item.num}</span>
                       <div>
-                        <p className="text-white text-xs font-bold">{item.label} <span className="text-slate-400 font-normal">({item.count})</span></p>
-                        <p className="text-slate-300 text-xs mt-0.5">{item.desc}</p>
+                        <p className="text-white text-sm font-bold">{item.label} <span className="text-slate-400 font-normal">({item.count})</span></p>
+                        <p className="text-slate-300 text-sm mt-0.5">{item.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 mb-2">🤖 AIが担当（触らなくてOK）</p>
+                <p className="text-sm font-bold text-slate-400 mb-2">🤖 AIが担当（触らなくてOK）</p>
                 <div className="space-y-1.5">
                   {[
                     { label: 'これから架電（未架電）', count: '16,367件', desc: 'AIが順番にかける' },
@@ -406,27 +406,27 @@ export default function TeleapoPage() {
                     { label: '電話不出', count: '656件', desc: '何度かけても出ない先' },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2 p-2 bg-slate-700/40 rounded-lg">
-                      <span className="text-slate-500 text-xs">🚫</span>
-                      <p className="text-slate-400 text-xs">{item.label} <span className="text-slate-500">({item.count})</span> — {item.desc}</p>
+                      <span className="text-slate-500 text-sm">🚫</span>
+                      <p className="text-slate-400 text-sm">{item.label} <span className="text-slate-500">({item.count})</span> — {item.desc}</p>
                     </div>
                   ))}
                 </div>
-                <p className="text-xs font-bold text-slate-400 mb-2 mt-3">⏳ あとで（4箱消化後）</p>
+                <p className="text-sm font-bold text-slate-400 mb-2 mt-3">⏳ あとで（4箱消化後）</p>
                 <div className="space-y-1.5">
                   {[
                     { label: 'メルマガ配信（見込顧客）', count: '208件' },
                     { label: '将来的見込顧客', count: '142件' },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2 p-2 bg-slate-600/30 rounded-lg">
-                      <span className="text-slate-500 text-xs">📋</span>
-                      <p className="text-slate-400 text-xs">{item.label} <span className="text-slate-500">({item.count})</span></p>
+                      <span className="text-slate-500 text-sm">📋</span>
+                      <p className="text-slate-400 text-sm">{item.label} <span className="text-slate-500">({item.count})</span></p>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
             <div className="bg-red-950/40 border border-red-800/40 rounded-xl p-3">
-              <p className="text-xs text-red-400 font-bold">⚠️ 鉄則：電話後は必ずメモを残す。AIも含め次の担当者が重複しないように。</p>
+              <p className="text-sm text-red-400 font-bold">⚠️ 鉄則：電話後は必ずメモを残す。AIも含め次の担当者が重複しないように。</p>
             </div>
           </div>
 
