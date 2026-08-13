@@ -106,9 +106,9 @@ export default async function DashboardPage() {
       {/* 玄関集合機 */}
       <div className="bg-slate-800 rounded-2xl border border-slate-700 mb-8">
         <div className="p-5 border-b border-slate-700">
-          <h2 className="text-base font-semibold text-white">🚪 玄関集合機</h2>
+          <h2 className="text-lg font-semibold text-white">🚪 玄関集合機</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5">
           {[
             { label: 'Notion', url: 'https://app.notion.com/native/p/07554695c69f4f8c98f1b9a3db86c19a?deepLinkOpenNewTab=true', icon: '📝' },
             { label: 'スプレッドシート①', url: 'https://docs.google.com/spreadsheets/d/1MITcOZmpGeYc3MDTTby0bXVgFh8tlbQM1ev_mC1oVCo/edit?gid=0#gid=0', icon: '📊' },
@@ -122,11 +122,11 @@ export default async function DashboardPage() {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 rounded-xl transition-colors group"
+              className="flex items-center gap-4 px-5 py-4 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 rounded-xl transition-colors group"
             >
-              <span className="text-xl">{link.icon}</span>
-              <span className="text-sm text-slate-200 group-hover:text-white transition-colors font-medium">{link.label}</span>
-              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-xs">↗</span>
+              <span className="text-3xl">{link.icon}</span>
+              <span className="text-base text-slate-200 group-hover:text-white transition-colors font-semibold">{link.label}</span>
+              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-sm">↗</span>
             </a>
           ))}
         </div>
