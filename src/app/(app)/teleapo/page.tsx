@@ -970,6 +970,37 @@ export default function TeleapoPage() {
                             <span>⚡ 切り返しナビ</span>
                             <span>{stepNavOpen[i] ? '▲ 閉じる' : '▼ 開く'}</span>
                           </button>
+
+                          {/* キーワード検索（常時表示） */}
+                          <div className="mt-2">
+                            <input
+                              type="text"
+                              value={stepSearch[i]}
+                              onChange={e => updateStepSearch(i, e.target.value)}
+                              placeholder="🔍 キーワードで切り返しを検索（例：予算・他社・深夜）"
+                              className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            />
+                            {stepSearch[i] && (() => {
+                              const hits = suggestByKeyword(stepSearch[i])
+                              return hits.length > 0 ? (
+                                <div className="mt-2 space-y-2">
+                                  {hits.slice(0, 3).map(id => (
+                                    <div key={id} className="bg-slate-800/80 rounded-lg p-3">
+                                      <p className="text-xs font-bold text-slate-300 mb-1">{OBJECTION_TREE[id]?.label}</p>
+                                      <div className="flex items-start gap-2">
+                                        <p className="text-sm text-slate-200 flex-1 leading-relaxed">{OBJECTION_TREE[id]?.response}</p>
+                                        <button onClick={() => copy(OBJECTION_TREE[id]?.response || '', `sw_${i}_${id}`)}
+                                          className={`text-xs px-2 py-1 rounded flex-shrink-0 transition-colors ${copiedKey === `sw_${i}_${id}` ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300 hover:bg-slate-500'}`}>
+                                          {copiedKey === `sw_${i}_${id}` ? '✅' : '📋'}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : <p className="text-xs text-slate-500 mt-1">該当なし</p>
+                            })()}
+                          </div>
+
                           {stepNavOpen[i] && (
                             <div className="mt-3 bg-slate-900/60 rounded-xl p-4 space-y-4">
                               {/* 切り返しナビ */}
