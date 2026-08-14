@@ -960,8 +960,8 @@ export default function TeleapoPage() {
                             {copiedKey === `ym_${ymPattern}_${i}` ? '✅' : '📋'}
                           </button>
                         </div>
-                        <p className="text-base text-slate-100 leading-relaxed whitespace-pre-line mb-3">{item.text}</p>
-                        <p className="text-sm text-slate-400 leading-relaxed border-t border-slate-600/50 pt-3 mb-3">💡 {item.point}</p>
+                        <p className="text-lg text-slate-100 leading-relaxed whitespace-pre-line mb-3">{item.text}</p>
+                        <p className="text-base text-slate-400 leading-relaxed border-t border-slate-600/50 pt-3 mb-3">💡 {item.point}</p>
 
                         {/* 切り返しナビ折りたたみ */}
                         <div className="border-t border-slate-600/40 pt-3 mb-3">
