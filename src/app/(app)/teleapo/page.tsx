@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 
 // ── 切り返しデータ（全15カテゴリ）──
 const OBJECTION_TREE: Record<string, { label: string; response: string }> = {
@@ -225,6 +225,68 @@ export default function TeleapoPage() {
   const [aiSelectedIdx, setAiSelectedIdx] = useState<number | null>(null)
   const [aiPattern, setAiPattern] = useState<string>('yoneyama')
 
+  // 音声認識
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
+
+  const startListening = useCallback(() => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SR) { alert('このブラウザは音声認識に対応していません（Chrome推奨）'); return }
+    const recog = new SR()
+    recog.lang = 'ja-JP'
+    recog.continuous = false
+    recog.interimResults = true
+    recog.onstart = () => setIsListening(true)
+    recog.onresult = (e: any) => {
+      const transcript = Array.from(e.results).map((r: any) => r[0].transcript).join('')
+      setAiInput(transcript)
+      if (e.results[e.results.length - 1].isFinal) {
+        setIsListening(false)
+        fetchAiSuggestions(transcript, aiPattern)
+      }
+    }
+    recog.onerror = () => setIsListening(false)
+    recog.onend = () => setIsListening(false)
+    recognitionRef.current = recog
+    recog.start()
+  }, [aiPattern, fetchAiSuggestions])
+
+  const stopListening = useCallback(() => {
+    recognitionRef.current?.stop()
+    setIsListening(false)
+  }, [])
+
+  // 音声認識
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
+
+  const startListening = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) { alert('このブラウザは音声認識に対応していません（Chrome推奨）'); return }
+    const recog = new SpeechRecognition()
+    recog.lang = 'ja-JP'
+    recog.continuous = false
+    recog.interimResults = true
+    recog.onstart = () => setIsListening(true)
+    recog.onresult = (e: any) => {
+      const transcript = Array.from(e.results).map((r: any) => r[0].transcript).join('')
+      setAiInput(transcript)
+      if (e.results[e.results.length - 1].isFinal) {
+        setIsListening(false)
+        fetchAiSuggestions(transcript, aiPattern)
+      }
+    }
+    recog.onerror = () => setIsListening(false)
+    recog.onend = () => setIsListening(false)
+    recognitionRef.current = recog
+    recog.start()
+  }, [aiPattern, fetchAiSuggestions])
+
+  const stopListening = useCallback(() => {
+    recognitionRef.current?.stop()
+    setIsListening(false)
+  }, [])
+
   const fetchAiSuggestions = useCallback(async (text: string, pattern: string) => {
     if (!text.trim()) return
     setAiLoading(true)
@@ -437,6 +499,84 @@ export default function TeleapoPage() {
             )}
           </div>
 
+
+          {/* AI切り返し */}
+          <div className="bg-slate-900 rounded-2xl border border-purple-800/50 p-6">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-xl font-bold text-white">🤖 AI切り返しサジェスト</h2>
+              <span className="text-xs bg-purple-900/60 border border-purple-700/50 text-purple-300 px-2 py-1 rounded-lg">Gemini API</span>
+            </div>
+            <p className="text-base text-slate-400 mb-4">相手が言ったことをそのまま入力 → AIがデバイスエージェンシーの製品切り返しを表示</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {[
+                { id: 'yoneyama', label: '💰 IT補助金訴求', active: 'bg-yellow-600' },
+                { id: 'price',    label: '💴 価格・コスト訴求', active: 'bg-green-600' },
+                { id: 'inbound',  label: '🌏 インバウンド訴求', active: 'bg-blue-600' },
+                { id: 'case',     label: '🏨 導入事例訴求', active: 'bg-purple-600' },
+                { id: 'urgency',  label: '⏰ 緊急性訴求', active: 'bg-red-600' },
+              ].map(p => (
+                <button key={p.id} onClick={() => setAiPattern(p.id)}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${aiPattern === p.id ? `${p.active} text-white` : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'}`}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2 mb-4">
+              <div className="relative flex-1">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🎤</span>
+                <input type="text" value={aiInput} onChange={e => setAiInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && fetchAiSuggestions(aiInput, aiPattern)}
+                  placeholder="例：「もう他社のシステム入れてます」「今は忙しくて」「高そうだな」"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl pl-11 pr-4 py-4 text-base text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30" />
+                {aiInput && <button onClick={() => { setAiInput(''); setAiSuggestions([]); setAiSelectedIdx(null) }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xl">×</button>}
+              </div>
+              <button
+                onClick={isListening ? stopListening : startListening}
+                className={`px-4 py-4 rounded-xl text-xl transition-all flex-shrink-0 ${isListening ? 'bg-red-600 text-white animate-pulse' : 'bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600'}`}
+                title={isListening ? '停止' : 'マイク入力'}>
+                {isListening ? '⏹️' : '🎙️'}
+              </button>
+              <button onClick={() => fetchAiSuggestions(aiInput, aiPattern)} disabled={!aiInput.trim() || aiLoading}
+                className={`px-6 py-4 rounded-xl text-base font-bold transition-all whitespace-nowrap ${aiLoading ? 'bg-purple-900 text-purple-400 cursor-wait' : aiInput.trim() ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
+                {aiLoading ? '⏳ 生成中...' : '✨ AI提案'}
+              </button>
+            </div>
+            {isListening && <div className="flex items-center gap-2 bg-red-950/40 border border-red-700/40 rounded-xl p-4 mb-4 text-base text-red-300 animate-pulse">🎙️ 音声認識中… 相手の声を聞かせてください</div>}
+            {aiError && <div className="bg-red-950/50 border border-red-700/50 rounded-xl p-4 mb-4 text-base text-red-300">⚠️ {aiError}</div>}
+            {aiLoading && <div className="text-center py-8 text-purple-400"><div className="text-2xl mb-2 animate-pulse">🤖</div><p className="text-base">Gemini AIが切り返しを生成中...</p></div>}
+            {aiSuggestions.length > 0 && (
+              <div>
+                <p className="text-sm text-purple-400 font-bold mb-3">💡 AI推奨切り返し ({aiSuggestions.length}件)</p>
+                <div className="flex flex-wrap gap-3 mb-4">
+                  {aiSuggestions.map((s, i) => (
+                    <button key={i} onClick={() => setAiSelectedIdx(aiSelectedIdx === i ? null : i)}
+                      className={`px-5 py-3 rounded-xl text-base font-bold transition-all ${aiSelectedIdx === i ? 'bg-purple-600 text-white shadow-lg scale-105' : 'bg-purple-900/50 text-purple-200 hover:bg-purple-700 hover:text-white border border-purple-700/60'}`}>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+                {aiSelectedIdx !== null && aiSuggestions[aiSelectedIdx] && (
+                  <div className="bg-purple-950/60 border-2 border-purple-700/70 rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-base text-purple-400 font-bold">💬 {aiSuggestions[aiSelectedIdx].label}</p>
+                        <p className="text-sm text-purple-300/70 mt-0.5">📌 {aiSuggestions[aiSelectedIdx].point}</p>
+                      </div>
+                      <button onClick={() => copy(aiSuggestions[aiSelectedIdx!].talk, 'ai_talk')}
+                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-colors ${copiedKey === 'ai_talk' ? 'bg-purple-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}`}>
+                        {copiedKey === 'ai_talk' ? '✅ コピー済み' : '📋 コピー'}
+                      </button>
+                    </div>
+                    <p className="text-lg text-white leading-relaxed font-medium">{aiSuggestions[aiSelectedIdx].talk}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* キーワード検索 */}
+
           {/* 米山パターン — トークスクリプト */}
           <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
             <div className="flex items-center gap-3 mb-5">
@@ -529,75 +669,6 @@ export default function TeleapoPage() {
             </div>
           </div>
 
-          {/* AI切り返し */}
-          <div className="bg-slate-900 rounded-2xl border border-purple-800/50 p-6">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-xl font-bold text-white">🤖 AI切り返しサジェスト</h2>
-              <span className="text-xs bg-purple-900/60 border border-purple-700/50 text-purple-300 px-2 py-1 rounded-lg">Gemini API</span>
-            </div>
-            <p className="text-base text-slate-400 mb-4">相手が言ったことをそのまま入力 → AIがデバイスエージェンシーの製品切り返しを表示</p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {[
-                { id: 'yoneyama', label: '💰 IT補助金訴求', active: 'bg-yellow-600' },
-                { id: 'price',    label: '💴 価格・コスト訴求', active: 'bg-green-600' },
-                { id: 'inbound',  label: '🌏 インバウンド訴求', active: 'bg-blue-600' },
-                { id: 'case',     label: '🏨 導入事例訴求', active: 'bg-purple-600' },
-                { id: 'urgency',  label: '⏰ 緊急性訴求', active: 'bg-red-600' },
-              ].map(p => (
-                <button key={p.id} onClick={() => setAiPattern(p.id)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${aiPattern === p.id ? `${p.active} text-white` : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'}`}>
-                  {p.label}
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2 mb-4">
-              <div className="relative flex-1">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🎤</span>
-                <input type="text" value={aiInput} onChange={e => setAiInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && fetchAiSuggestions(aiInput, aiPattern)}
-                  placeholder="例：「もう他社のシステム入れてます」「今は忙しくて」「高そうだな」"
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl pl-11 pr-4 py-4 text-base text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30" />
-                {aiInput && <button onClick={() => { setAiInput(''); setAiSuggestions([]); setAiSelectedIdx(null) }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xl">×</button>}
-              </div>
-              <button onClick={() => fetchAiSuggestions(aiInput, aiPattern)} disabled={!aiInput.trim() || aiLoading}
-                className={`px-6 py-4 rounded-xl text-base font-bold transition-all whitespace-nowrap ${aiLoading ? 'bg-purple-900 text-purple-400 cursor-wait' : aiInput.trim() ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
-                {aiLoading ? '⏳ 生成中...' : '✨ AI提案'}
-              </button>
-            </div>
-            {aiError && <div className="bg-red-950/50 border border-red-700/50 rounded-xl p-4 mb-4 text-base text-red-300">⚠️ {aiError}</div>}
-            {aiLoading && <div className="text-center py-8 text-purple-400"><div className="text-2xl mb-2 animate-pulse">🤖</div><p className="text-base">Gemini AIが切り返しを生成中...</p></div>}
-            {aiSuggestions.length > 0 && (
-              <div>
-                <p className="text-sm text-purple-400 font-bold mb-3">💡 AI推奨切り返し ({aiSuggestions.length}件)</p>
-                <div className="flex flex-wrap gap-3 mb-4">
-                  {aiSuggestions.map((s, i) => (
-                    <button key={i} onClick={() => setAiSelectedIdx(aiSelectedIdx === i ? null : i)}
-                      className={`px-5 py-3 rounded-xl text-base font-bold transition-all ${aiSelectedIdx === i ? 'bg-purple-600 text-white shadow-lg scale-105' : 'bg-purple-900/50 text-purple-200 hover:bg-purple-700 hover:text-white border border-purple-700/60'}`}>
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-                {aiSelectedIdx !== null && aiSuggestions[aiSelectedIdx] && (
-                  <div className="bg-purple-950/60 border-2 border-purple-700/70 rounded-2xl p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className="text-base text-purple-400 font-bold">💬 {aiSuggestions[aiSelectedIdx].label}</p>
-                        <p className="text-sm text-purple-300/70 mt-0.5">📌 {aiSuggestions[aiSelectedIdx].point}</p>
-                      </div>
-                      <button onClick={() => copy(aiSuggestions[aiSelectedIdx!].talk, 'ai_talk')}
-                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-colors ${copiedKey === 'ai_talk' ? 'bg-purple-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}`}>
-                        {copiedKey === 'ai_talk' ? '✅ コピー済み' : '📋 コピー'}
-                      </button>
-                    </div>
-                    <p className="text-lg text-white leading-relaxed font-medium">{aiSuggestions[aiSelectedIdx].talk}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* キーワード検索 */}
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
             <h2 className="text-base font-bold text-white mb-3">🔍 キーワードで切り返しを検索</h2>
             <input type="text" value={searchInput} onChange={e => setSearchInput(e.target.value)}
