@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+type AudienceType = 'internal' | 'customer'
+
 export default function NewManualPage() {
   const router = useRouter()
   const [title, setTitle] = useState('')
@@ -11,6 +13,29 @@ export default function NewManualPage() {
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiAudience, setAiAudience] = useState<AudienceType>('internal')
+
+  const generateWithAI = async (audience: AudienceType) => {
+    if (!title.trim()) { setError('タイトルを入力してからAI生成してください'); return }
+    setAiLoading(true)
+    setAiAudience(audience)
+    setError('')
+    try {
+      const res = await fetch('/api/ai/manual-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, category, audience }),
+      })
+      const data = await res.json()
+      if (data.error) setError(data.error)
+      else setContent(data.content)
+    } catch {
+      setError('AI生成に失敗しました')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,6 +95,24 @@ export default function NewManualPage() {
               placeholder="例: 機器設定 / トラブルシューティング"
               className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             />
+          </div>
+
+          {/* AI生成ボタン */}
+          <div className="border border-slate-600 rounded-xl p-4 bg-slate-700/30">
+            <p className="text-sm font-medium text-slate-300 mb-3">🤖 Gemini AIで内容を自動生成</p>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => generateWithAI('internal')}
+                disabled={aiLoading || !title.trim()}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${aiLoading && aiAudience === 'internal' ? 'bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}>
+                {aiLoading && aiAudience === 'internal' ? <><span className="animate-spin">⏳</span> 生成中...</> : <>🏢 社内向けで生成</>}
+              </button>
+              <button type="button" onClick={() => generateWithAI('customer')}
+                disabled={aiLoading || !title.trim()}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${aiLoading && aiAudience === 'customer' ? 'bg-green-700 text-white' : 'bg-green-600 hover:bg-green-500 text-white'}`}>
+                {aiLoading && aiAudience === 'customer' ? <><span className="animate-spin">⏳</span> 生成中...</> : <>👤 顧客向けで生成</>}
+              </button>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">タイトルを入力してからボタンを押してください。生成後に内容を編集できます。</p>
           </div>
 
           <div>
