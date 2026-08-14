@@ -224,6 +224,8 @@ export default function TeleapoPage() {
   const [aiError, setAiError] = useState<string | null>(null)
   const [aiSelectedIdx, setAiSelectedIdx] = useState<number | null>(null)
   const [aiPattern, setAiPattern] = useState<string>('yoneyama')
+  const [stepMemos, setStepMemos] = useState<string[]>(['', '', '', '', ''])
+  const updateMemo = (i: number, val: string) => setStepMemos(prev => prev.map((m, idx) => idx === i ? val : m))
 
   // 音声認識
   const [isListening, setIsListening] = useState(false)
@@ -608,7 +610,17 @@ export default function TeleapoPage() {
                     </button>
                   </div>
                   <p className="text-base text-slate-100 leading-relaxed whitespace-pre-line mb-3">{item.text}</p>
-                  <p className="text-sm text-slate-400 leading-relaxed border-t border-slate-600/50 pt-3">💡 {item.point}</p>
+                  <p className="text-sm text-slate-400 leading-relaxed border-t border-slate-600/50 pt-3 mb-3">💡 {item.point}</p>
+                  <div className="border-t border-slate-600/40 pt-3">
+                    <p className="text-xs text-slate-500 mb-1">📝 メモ（このステップの反応・気づき）</p>
+                    <textarea
+                      value={stepMemos[i]}
+                      onChange={e => updateMemo(i, e.target.value)}
+                      placeholder="例：「予算がない」と言われた。補助金で突破できた。"
+                      rows={2}
+                      className="w-full bg-slate-900/60 border border-slate-600/60 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
