@@ -23,8 +23,8 @@ export default function TasksPage() {
 
   useEffect(() => {
     fetchTasks()
-    // 通知権限確認
-    if ('Notification' in window) {
+    // 通知権限確認（SSR安全）
+    if (typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'granted') setNotifGranted(true)
     }
     // アラームチェック（1分ごと）
@@ -43,12 +43,13 @@ export default function TasksPage() {
   }
 
   const requestNotif = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return
     const perm = await Notification.requestPermission()
     setNotifGranted(perm === 'granted')
   }
 
   const checkAlarms = async () => {
-    if (Notification.permission !== 'granted') return
+    if (typeof window === 'undefined' || Notification.permission !== 'granted') return
     const { data } = await supabase.from('tasks').select('*').eq('done', false)
     const now = new Date()
     for (const task of data || []) {
@@ -104,7 +105,7 @@ export default function TasksPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">✅ タスク管理</h1>
-        {!notifGranted && 'Notification' in window && (
+        {!notifGranted && typeof window !== 'undefined' && 'Notification' in window && (
           <button
             onClick={requestNotif}
             className="text-xs px-4 py-2 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-600/40 text-yellow-300 rounded-xl transition-colors"
