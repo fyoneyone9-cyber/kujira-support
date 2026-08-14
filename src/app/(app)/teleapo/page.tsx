@@ -125,6 +125,38 @@ const OBJECTION_TREE: Record<string, { label: string; response: string }> = {
   'claim_apology':   { label: 'まず謝罪して鎮める', response: '「大変失礼いたしました。ご迷惑をおかけして申し訳ございません。以後、ご連絡を控えさせていただきます。もしご不明な点等ございましたらいつでもご連絡ください。」' },
   'claim_record':    { label: '架電停止をHubSpotに記録する', response: '（架電クレームとしてHubSpotに記録し、今後の架電対象から除外する。ステータスを「架電クレーム」に変更する）' },
   'claim_freq':      { label: '架電頻度が高い場合の対応', response: '「ご不快をおかけして誠に申し訳ございません。以後は一切ご連絡いたしません。ご迷惑をおかけしました。」（その後すぐに電話を切る）' },
+
+  // ── PMSメーカー名 ──
+  'cat_pmsname':     { label: '🖥️ PMSメーカー名が出てきた', response: '' },
+  'pmsname_nehops':  { label: 'NEHOPS（NEC）', response: '「NECのNEHOPS（ネホップス）ですね。承知しました。連携実績も増えており、弊社からメーカーへ連携依頼することも可能です。ぜひ一度ご相談させてください。」' },
+  'pmsname_glovia':  { label: 'GLOVIA smart（富士通）', response: '「富士通のGLOVIA smartですね。承知しました。弊社はリストにないPMSでも諦めず、メーカーへ直接連携依頼して進めております。詳しくはご相談ください。」' },
+  'pmsname_wincal':  { label: 'Wincal（アルメックス）', response: '「アルメックスのWincalですね。USENグループのアルメックスですね。連携について弊社から対応できますので、ぜひご相談ください。」' },
+  'pmsname_staysee': { label: 'Staysee / AirHost / Beds24', response: '「はい、連携実績がございます。弊社との連携をスムーズに進めることができます。詳しい資料をお送りしてもよろしいでしょうか。」' },
+  'pmsname_airhost': { label: 'エアホスト', response: '「エアホストですね。対応しております。PMS・サイトコントローラー問わず対応できますので、ぜひ詳しくお話しさせてください。」' },
+  'pmsname_neppan':  { label: 'ねっぱん！', response: '「ねっぱん！はサイトコントローラー版とPMS版がありますが、どちらをお使いでしょうか。2026年1月に楽天トラベルサービスへ合併・改称されましたね。いずれも連携について弊社からご対応できます。」' },
+  'pmsname_unknown': { label: '対応リストにないPMS', response: '「リストに載っていないPMSでも諦めません。サイトコントローラー経由でつながるケースも多く、弊社からメーカーへ連携依頼して進めることも可能です。システム名を教えていただけますか？」' },
+
+  // ── 鍵・スマートロック ──
+  'cat_locktype':    { label: '🔐 鍵・スマートロックの話題', response: '' },
+  'locktype_miwa':   { label: 'MIWAが入っている', response: '「MIWA（美和ロック）ですね。カードロックとスマートロック両方のラインナップがあります。MIWAのスマートロックであれば連携対応可能です。今お使いの機種を確認させていただけますか？」' },
+  'locktype_epic':   { label: 'EPICが入っている', response: '「EPICは株式会社エナスピレーションの製品で、カードロックになります。スマートロックとして暗証番号開錠はできませんが、チェックイン機との連携によりカードキー発行の自動化が可能です。」' },
+  'locktype_remote': { label: 'RemoteLockが入っている', response: '「RemoteLockは構造計画研究所の製品です。日本の窓口はリモートロックジャパンへ移管されていますね。スマートロック対応ですので、チェックイン機との連携が可能です。」' },
+  'locktype_nochange':{ label: '鍵を変えたくない', response: '「今の鍵はそのままで大丈夫です。シリンダー錠の場合はキーボックスをご活用いただき、精算完了後に自動でキーボックスが開く運用が可能です。工事も不要です。」' },
+  'locktype_keybox': { label: 'キーボックスの工事が心配', response: '「キーボックスは既存のシリンダー錠をそのままキーボックスに入れるだけです。錠前の交換工事は不要で、壁への取り付けのみです。工事の負担は最小限です。」' },
+
+  // ── 運用・機能 ──
+  'cat_operation':   { label: '⚙️ 運用・機能の質問', response: '' },
+  'ope_unmanned_mode':{ label: '夜だけ無人にしたい', response: '「無人モードのON/OFFを切り替えることができます。昼間はフロント対応、夜間は端末をメインにする運用も可能です。柔軟にご活用いただけます。」' },
+  'ope_checkin_search':{ label: '予約番号を覚えていない客', response: '「予約番号以外にも、お名前・電話番号・メールアドレス・チェックイン日の4通りで検索できます。予約番号がわからないお客様にも対応可能です。」' },
+  'ope_id_check':    { label: '本人確認が心配', response: '「本人確認画面が表示され、DMSからスタッフがビデオ通話で承認する仕組みがあります。完全な無人でも本人確認が可能です。」' },
+  'ope_cardkey_num': { label: 'カードキーを複数枚出したい', response: '「発行枚数は施設様が自由に設定できます。グループ客など複数名への配布にも対応しています。」' },
+  'ope_group':       { label: '団体客・グループの対応', response: '「事前チェックインで代表者様が同行者の分を代理入力できます。また簡易チェックイン機能で代表者以外の入力を省略することも可能です。」' },
+  'ope_passport_jp': { label: '日本在住外国人のパスポート', response: '「日本にお住まいの外国籍の方はパスポート撮影をスキップできる設定が可能です。毎回嫌な顔をされるというお悩みも解消できます。」' },
+  'ope_kessai':      { label: '決済・精算の方法', response: '「現金・クレジットカード・交通系ICに対応しています。また前日精算や客室精算など精算タイミングも柔軟に設定できます。」' },
+  'ope_invoice':     { label: '領収書の再発行', response: '「DMSの管理画面から該当予約を開き、いつでも再発行できます。宛名の省略設定も可能です。」' },
+  'ope_stat':        { label: '宿泊旅行統計調査', response: '「宿泊実績定期報告の機能があり、統計調査用のデータをDMSから出力できます。手集計は不要になります。」' },
+  'ope_network':     { label: 'LANがない・回線がない', response: '「有線・無線どちらでも構いません。また回線工事が難しい場所には弊社のLTE SIMをご活用いただくことで、回線工事なしで接続できます。固定IPも不要です。」' },
+  'ope_season':      { label: '季節営業・閑散期', response: '「シーズン営業のご利用が可能です。動かさない月は月額保守費用を停止できます。ただし端末メーカーへの保守費用は別途かかります。完全にゼロにはなりません。」' },
 }
 
 // ── カテゴリ→子ID マッピング ──
@@ -144,6 +176,9 @@ const CATEGORY_ITEMS = [
   { id: 'cat_size',        children: ['size_tablet', 'size_other', 'size_case', 'size_future'] },
   { id: 'cat_timing',      children: ['timing_future', 'timing_task', 'timing_subsidy', 'timing_competitor', 'timing_renovation'] },
   { id: 'cat_claim',       children: ['claim_apology', 'claim_record', 'claim_freq'] },
+  { id: 'cat_pmsname',     children: ['pmsname_nehops', 'pmsname_glovia', 'pmsname_wincal', 'pmsname_staysee', 'pmsname_airhost', 'pmsname_neppan', 'pmsname_unknown'] },
+  { id: 'cat_locktype',    children: ['locktype_miwa', 'locktype_epic', 'locktype_remote', 'locktype_nochange', 'locktype_keybox'] },
+  { id: 'cat_operation',   children: ['ope_unmanned_mode', 'ope_checkin_search', 'ope_id_check', 'ope_cardkey_num', 'ope_group', 'ope_passport_jp', 'ope_kessai', 'ope_invoice', 'ope_stat', 'ope_network', 'ope_season'] },
 ]
 
 // ── キーワード→切り返しIDマッピング ──
@@ -831,6 +866,86 @@ export default function TeleapoPage() {
               ))}
             </div>
           </div>
+          {/* 業界知識：PMS・SC・スマートロック・カードロック */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-xl font-bold text-white mb-4">🏨 業界システム知識（必須）</h2>
+            <div className="space-y-4">
+              <div className="bg-blue-950/40 border border-blue-800/40 rounded-xl p-5">
+                <p className="text-base font-bold text-blue-300 mb-3">📋 PMS（ホテル基幹システム）</p>
+                <div className="space-y-2">
+                  {[
+                    { maker: 'NEHOPS', detail: 'NEC製。「ネホップス」と読む。' },
+                    { maker: 'GLOVIA smart', detail: '富士通製。' },
+                    { maker: 'Wincal', detail: 'アルメックス製。USENグループ。' },
+                    { maker: 'Staysee / AirHost / Beds24', detail: '連携実績あり。対応済み。' },
+                    { maker: 'ねっぱん！', detail: '旧シーナッツ→バリューコマース吸収→2026年1月 楽天トラベルサービスへ合併・改称。SC版とPMS版あり。' },
+                    { maker: 'ダイナテック', detail: '→バリューコマースに吸収合併。' },
+                  ].map((r, i) => (
+                    <div key={i} className="flex gap-3 items-start text-base">
+                      <span className="text-blue-400 font-bold w-44 flex-shrink-0">{r.maker}</span>
+                      <span className="text-slate-300">{r.detail}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-purple-950/40 border border-purple-800/40 rounded-xl p-5">
+                <p className="text-base font-bold text-purple-300 mb-3">📋 サイトコントローラー（SC）</p>
+                <p className="text-base text-slate-300">手間いらず / ねっぱん！（サイトコントローラー版）/ らく通with / TLリンカーン</p>
+              </div>
+              <div className="bg-green-950/40 border border-green-800/40 rounded-xl p-5">
+                <p className="text-base font-bold text-green-300 mb-3">🔐 スマートロック（暗証番号で開錠）</p>
+                <p className="text-base text-slate-300 mb-2">SwitchBot / RemoteLock（構造計画研究所→リモートロックジャパン） / EPIC（エナスピレーション）/ TTLock</p>
+                <p className="text-xs text-slate-400">※EPICはカードロックではなく「スマートロック」に分類される点に注意</p>
+              </div>
+              <div className="bg-yellow-950/40 border border-yellow-800/40 rounded-xl p-5">
+                <p className="text-base font-bold text-yellow-300 mb-3">🗝️ カードロック（カードキー発行）</p>
+                <p className="text-base text-slate-300">MIWA（美和ロック）/ GOAL / LEGEND / ASSA ABLOY</p>
+              </div>
+              <div className="bg-red-950/40 border border-red-800/40 rounded-xl p-5">
+                <p className="text-base font-bold text-red-300 mb-3">⚠️ 競合メーカー</p>
+                <div className="space-y-2">
+                  {[
+                    { name: 'アルメックス（Wincal）', detail: '自動精算機も出しているので、その領域では競合。PMSとしても使われる。' },
+                    { name: 'その他チェックイン機メーカー', detail: '他社製品は実質「精算機」でフロント業務が残るケースが多い。弊社は無人化に特化。' },
+                  ].map((r, i) => (
+                    <div key={i} className="flex gap-3 items-start text-base">
+                      <span className="text-red-400 font-bold w-52 flex-shrink-0">{r.name}</span>
+                      <span className="text-slate-300">{r.detail}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 機能・運用クイックリファレンス */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-xl font-bold text-white mb-4">⚙️ 機能・運用クイックリファレンス</h2>
+            <div className="space-y-3">
+              {[
+                { q: '固定IPは必要？', a: '不要。有線・無線どちらでも可。回線がない場所はLTE SIM対応。' },
+                { q: '予約番号を忘れた客の検索方法は？', a: '4通り：予約番号・お名前・電話番号・メールアドレス（+チェックイン日）。' },
+                { q: '本人確認はどうする？', a: '本人確認画面が表示され、DMSからビデオ通話で承認。完全無人でも対応可。' },
+                { q: 'カードキーは何枚出せる？', a: '施設が自由に枚数を設定できる。グループ客も対応。' },
+                { q: '無人化は完全にしなければいけない？', a: 'いいえ。無人モードはON/OFF切り替え可。昼有人・夜無人などハイブリッド運用OK。' },
+                { q: '鍵を変えたくない場合は？', a: '今の鍵はそのままでOK。シリンダー錠→キーボックスを使えば工事不要。' },
+                { q: '閑散期・シーズン営業の費用は？', a: '月額保守費用は停止可。端末メーカーへの保守費用は別途必要。完全ゼロにはならない。' },
+                { q: '宿泊旅行統計調査（手集計をやめたい）', a: '宿泊実績定期報告機能でDMSからデータ出力可。手集計不要。' },
+                { q: '日本在住の外国人にパスポートを出させると嫌がる', a: '日本にお住まいの外国籍の方はパスポートスキャンをスキップできる設定が可能。' },
+                { q: '団体客の代表者が全員分入力したい', a: '事前チェックインで代表者が同行者分を代理入力可。簡易チェックインで省略も可。' },
+                { q: '鍵の一時預かり・返却の自動化', a: '「鍵の一時預かり／返却」機能あり。返却時の確認ごと自動化できる。' },
+                { q: '連携していないPMSがある', a: 'リストにないPMSでも諦めない。弊社からメーカーへ連携依頼して進める。' },
+                { q: '宿泊者名簿（クラウドで大丈夫？）', a: '名簿は営業者の事務所に備えることも法律上認められており、クラウド保存でOK。' },
+                { q: '将来のロードマップは？', a: '動画マニュアルをAIアバター化し、バーチャルフロントへ進化させる予定。' },
+              ].map((item, i) => (
+                <div key={i} className="bg-slate-700/40 rounded-xl p-4">
+                  <p className="text-sm font-bold text-yellow-400 mb-1">Q. {item.q}</p>
+                  <p className="text-base text-slate-200">A. {item.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
             <h2 className="text-base font-bold text-white mb-4">🔑 訴求ポイント（必ず覚える）</h2>
             <div className="space-y-3">
