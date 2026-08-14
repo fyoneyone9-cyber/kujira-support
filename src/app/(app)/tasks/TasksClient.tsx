@@ -91,6 +91,15 @@ export default function TasksClient() {
     e.preventDefault()
     if (!title.trim()) return
     await supabase.from('tasks').insert({ title: title.trim(), description: description.trim() || null, due_at: dueAt || null })
+    // Googleカレンダーにも登録（日時があり連携済みの場合）
+    if (dueAt && googleConnected) {
+      await fetch('/api/google/calendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim(), description: description.trim() || null, due_at: dueAt }),
+      })
+      fetchCalendar()
+    }
     setTitle(''); setDescription(''); setDueAt('')
     fetchTasks()
   }
