@@ -573,20 +573,6 @@ export default function TeleapoPage() {
               <span className="text-xs bg-purple-900/60 border border-purple-700/50 text-purple-300 px-2 py-1 rounded-lg">Gemini API</span>
             </div>
             <p className="text-base text-slate-400 mb-4">相手が言ったことをそのまま入力 → AIがデバイスエージェンシーの製品切り返しを表示</p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {[
-                { id: 'yoneyama', label: '💰 IT補助金訴求', active: 'bg-yellow-600' },
-                { id: 'price',    label: '💴 価格・コスト訴求', active: 'bg-green-600' },
-                { id: 'inbound',  label: '🌏 インバウンド訴求', active: 'bg-blue-600' },
-                { id: 'case',     label: '🏨 導入事例訴求', active: 'bg-purple-600' },
-                { id: 'urgency',  label: '⏰ 緊急性訴求', active: 'bg-red-600' },
-              ].map(p => (
-                <button key={p.id} onClick={() => setAiPattern(p.id)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${aiPattern === p.id ? `${p.active} text-white` : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'}`}>
-                  {p.label}
-                </button>
-              ))}
-            </div>
             <div className="flex gap-2 mb-4">
               <div className="relative flex-1">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🎤</span>
