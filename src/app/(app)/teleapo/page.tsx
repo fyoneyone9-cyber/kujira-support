@@ -722,9 +722,29 @@ export default function TeleapoPage() {
                 <div className="bg-cyan-950/40 border border-cyan-700/40 rounded-xl p-4">
                   <p className="text-sm font-bold text-cyan-400 mb-2">🎯 推奨アプローチ</p>
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {hotelResult.recommended.map((r, i) => (
-                      <span key={i} className="px-3 py-1.5 bg-cyan-700 text-white rounded-lg text-sm font-bold">{r}</span>
-                    ))}
+                    {hotelResult.recommended.map((r, ri) => {
+                      const patternMap: Record<string, number> = {
+                        'IT補助金': 0, '補助金全面': 0,
+                        'インバウンド': 1,
+                        '競合': 2, '乗り換え': 2,
+                        '導入事例': 3, '数字': 3,
+                        '宿泊名簿': 4, '本人確認': 4,
+                        '夜間': 5, '無人': 5,
+                      }
+                      const patIdx = Object.entries(patternMap).find(([k]) => r.includes(k))?.[1] ?? -1
+                      return (
+                        <div key={ri} className="flex items-center gap-2">
+                          <span className="px-3 py-1.5 bg-cyan-700 text-white rounded-lg text-sm font-bold">{r}</span>
+                          {patIdx >= 0 && (
+                            <button
+                              onClick={() => { setYmPattern(patIdx); const el = document.getElementById('ym-pattern-section'); el?.scrollIntoView({ behavior: 'smooth' }) }}
+                              className="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg text-sm font-bold transition-colors">
+                              このパターンで架電 ↓
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                   <p className="text-base text-slate-200 leading-relaxed">{hotelResult.reason}</p>
                 </div>
@@ -904,7 +924,7 @@ export default function TeleapoPage() {
             }[c] ?? { bg: 'bg-slate-700/50 border border-slate-600/40', text: 'text-slate-400' })
 
             return (
-              <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
+              <div id="ym-pattern-section" className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="text-3xl">💰</span>
                   <div>
