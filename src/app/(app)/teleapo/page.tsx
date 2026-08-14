@@ -296,6 +296,26 @@ export default function TeleapoPage() {
   const [stepNavOpen, setStepNavOpen] = useState<boolean[]>([false, false, false, false, false])
   const toggleStepNav = (i: number) => setStepNavOpen(prev => prev.map((v, idx) => idx === i ? !v : v))
   const [ymPattern, setYmPattern] = useState<number>(0)
+  const [stepSearch, setStepSearch] = useState<string[]>(['', '', '', '', ''])
+  const updateStepSearch = (i: number, val: string) => setStepSearch(prev => prev.map((v, idx) => idx === i ? val : v))
+  const [stepMemoInput, setStepMemoInput] = useState<string[]>(['', '', '', '', ''])
+  const updateStepMemoInput = (i: number, val: string) => setStepMemoInput(prev => prev.map((v, idx) => idx === i ? val : v))
+  const [stepMemoSaving, setStepMemoSaving] = useState<boolean[]>([false, false, false, false, false])
+  const saveStepMemo = async (i: number, stepLabel: string) => {
+    const content = stepMemoInput[i].trim()
+    if (!content) return
+    setStepMemoSaving(prev => prev.map((v, idx) => idx === i ? true : v))
+    try {
+      await fetch('/api/teleapo-memo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: `[${stepLabel}] ${content}`, category: 'script' }),
+      })
+      updateStepMemoInput(i, '')
+    } finally {
+      setStepMemoSaving(prev => prev.map((v, idx) => idx === i ? false : v))
+    }
+  }
 
   // ── ノウハウメモ ──
   const [memos, setMemos] = useState<TeleapoMemo[]>([])
@@ -930,39 +950,94 @@ export default function TeleapoPage() {
                             <span>{stepNavOpen[i] ? '▲ 閉じる' : '▼ 開く'}</span>
                           </button>
                           {stepNavOpen[i] && (
-                            <div className="mt-3 bg-slate-900/60 rounded-xl p-4">
-                              <div className="flex flex-wrap gap-2 mb-3">
-                                {CATEGORY_ITEMS.map(cat => (
-                                  <button key={cat.id} onClick={() => selectCat(cat.id)}
-                                    className={`px-3 py-2 rounded-lg text-sm font-bold transition-all ${selectedCat === cat.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
-                                    {OBJECTION_TREE[cat.id]?.label}
-                                  </button>
-                                ))}
-                              </div>
-                              {selectedCat && (
-                                <div className="border-t border-slate-700 pt-3">
-                                  <div className="flex flex-wrap gap-2 mb-3">
-                                    {CATEGORY_ITEMS.find(c => c.id === selectedCat)?.children.map(childId => (
-                                      <button key={childId} onClick={() => selectResponse(childId)}
-                                        className={`px-3 py-2 rounded-lg text-sm font-bold transition-all ${selectedResponse === childId ? 'bg-green-600 text-white shadow-lg' : 'bg-slate-700/70 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
-                                        {OBJECTION_TREE[childId]?.label}
-                                      </button>
-                                    ))}
-                                  </div>
-                                  {selectedResponse && (
-                                    <div className="bg-green-950/60 border border-green-700/70 rounded-xl p-4">
-                                      <div className="flex items-center justify-between mb-2">
-                                        <p className="text-sm text-green-400 font-bold">💬 切り返しトーク</p>
-                                        <button onClick={() => copy(OBJECTION_TREE[selectedResponse]?.response || '', `step_nav_${i}`)}
-                                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${copiedKey === `step_nav_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}`}>
-                                          {copiedKey === `step_nav_${i}` ? '✅' : '📋'}
-                                        </button>
-                                      </div>
-                                      <p className="text-base text-white leading-relaxed">{OBJECTION_TREE[selectedResponse]?.response}</p>
-                                    </div>
-                                  )}
+                            <div className="mt-3 bg-slate-900/60 rounded-xl p-4 space-y-4">
+                              {/* 切り返しナビ */}
+                              <div>
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {CATEGORY_ITEMS.map(cat => (
+                                    <button key={cat.id} onClick={() => selectCat(cat.id)}
+                                      className={`px-3 py-2 rounded-lg text-sm font-bold transition-all ${selectedCat === cat.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
+                                      {OBJECTION_TREE[cat.id]?.label}
+                                    </button>
+                                  ))}
                                 </div>
-                              )}
+                                {selectedCat && (
+                                  <div className="border-t border-slate-700 pt-3">
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                      {CATEGORY_ITEMS.find(c => c.id === selectedCat)?.children.map(childId => (
+                                        <button key={childId} onClick={() => selectResponse(childId)}
+                                          className={`px-3 py-2 rounded-lg text-sm font-bold transition-all ${selectedResponse === childId ? 'bg-green-600 text-white shadow-lg' : 'bg-slate-700/70 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
+                                          {OBJECTION_TREE[childId]?.label}
+                                        </button>
+                                      ))}
+                                    </div>
+                                    {selectedResponse && (
+                                      <div className="bg-green-950/60 border border-green-700/70 rounded-xl p-4">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <p className="text-sm text-green-400 font-bold">💬 切り返しトーク</p>
+                                          <button onClick={() => copy(OBJECTION_TREE[selectedResponse]?.response || '', `step_nav_${i}`)}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${copiedKey === `step_nav_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}`}>
+                                            {copiedKey === `step_nav_${i}` ? '✅' : '📋'}
+                                          </button>
+                                        </div>
+                                        <p className="text-base text-white leading-relaxed">{OBJECTION_TREE[selectedResponse]?.response}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* キーワード検索 */}
+                              <div className="border-t border-slate-700 pt-3">
+                                <p className="text-xs text-slate-400 font-bold mb-2">🔍 キーワードで検索</p>
+                                <input
+                                  type="text"
+                                  value={stepSearch[i]}
+                                  onChange={e => updateStepSearch(i, e.target.value)}
+                                  placeholder="例：予算・他社・深夜・インバウンド"
+                                  className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                                />
+                                {stepSearch[i] && (() => {
+                                  const hits = suggestByKeyword(stepSearch[i])
+                                  return hits.length > 0 ? (
+                                    <div className="mt-2 space-y-2">
+                                      {hits.slice(0, 3).map(id => (
+                                        <div key={id} className="bg-slate-800 rounded-lg p-3">
+                                          <p className="text-xs font-bold text-slate-300 mb-1">{OBJECTION_TREE[id]?.label}</p>
+                                          <div className="flex items-start gap-2">
+                                            <p className="text-sm text-slate-200 flex-1 leading-relaxed">{OBJECTION_TREE[id]?.response}</p>
+                                            <button onClick={() => copy(OBJECTION_TREE[id]?.response || '', `sw_${i}_${id}`)}
+                                              className={`text-xs px-2 py-1 rounded flex-shrink-0 transition-colors ${copiedKey === `sw_${i}_${id}` ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300 hover:bg-slate-500'}`}>
+                                              {copiedKey === `sw_${i}_${id}` ? '✅' : '📋'}
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : <p className="text-xs text-slate-500 mt-2">該当なし</p>
+                                })()}
+                              </div>
+
+                              {/* メモ保存 */}
+                              <div className="border-t border-slate-700 pt-3">
+                                <p className="text-xs text-slate-400 font-bold mb-2">💾 気づきをメモ保存（ノウハウメモに追加）</p>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={stepMemoInput[i]}
+                                    onChange={e => updateStepMemoInput(i, e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && saveStepMemo(i, item.label)}
+                                    placeholder="例：「深夜対応は困ってる」→無人モード訴求が刺さった"
+                                    className="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                                  />
+                                  <button
+                                    onClick={() => saveStepMemo(i, item.label)}
+                                    disabled={stepMemoSaving[i] || !stepMemoInput[i].trim()}
+                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg text-xs font-bold transition-colors whitespace-nowrap">
+                                    {stepMemoSaving[i] ? '保存中' : '💾 保存'}
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
