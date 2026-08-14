@@ -47,6 +47,30 @@ export default async function DashboardPage() {
           <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Slack（個人）</span>
           <span className="text-slate-500 text-xs">↗</span>
         </a>
+        <a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-blue-400 rounded-xl transition-colors group">
+          <span className="text-lg">✨</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Gemini</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
+        <a href="https://claude.ai/new" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-400 rounded-xl transition-colors group">
+          <span className="text-lg">🤖</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Claude</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
+        <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-green-400 rounded-xl transition-colors group">
+          <span className="text-lg">💡</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">ChatGPT</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
+        <a href="https://www.genspark.ai/agents?type=ai_chat" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-pink-400 rounded-xl transition-colors group">
+          <span className="text-lg">⚡</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Genspark</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
       </div>
 
       {/* Quick Links */}
