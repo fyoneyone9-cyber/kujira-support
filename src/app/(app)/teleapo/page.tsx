@@ -359,45 +359,137 @@ export default function TeleapoPage() {
       {/* ─── TAB: HubSpot手順 ─── */}
       {activeTab === 'hubspot' && (
         <div className="space-y-6">
+
+          {/* 電話してください4箱 */}
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-xl font-bold text-white mb-4">📊 HubSpot 架電手順</h2>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">📞</span>
+              <h2 className="text-xl font-bold text-white">電話してください — 4つの箱（上から順に）</h2>
+            </div>
+            <p className="text-sm text-slate-400 mb-5">左から2〜5番目のステージが対象。まずこれを消化する。</p>
             <div className="space-y-4">
               {[
-                { step: '① 架電リストを開く', detail: 'HubSpot → 取引 → 「楽天トラベル（未架電）」フィルターで一覧表示', color: 'blue' },
-                { step: '② 取引を選択', detail: '施設名・電話番号・過去の接触履歴を確認する', color: 'blue' },
-                { step: '③ 架電', detail: 'トークスクリプトに沿って架電。担当者名を取得する', color: 'green' },
-                { step: '④ 結果をステータス更新', detail: '架電後すぐにステータスを変更する（「楽天トラベル（不在）」「資料送付」等）', color: 'yellow' },
-                { step: '⑤ メモを記録', detail: '担当者名・反応・次のアクションを取引メモに記録', color: 'yellow' },
-                { step: '⑥ 資料送付', detail: '資料送付に至った場合は「資料送付」ステータスに変更し、メールを送る', color: 'purple' },
+                {
+                  num: '①', stage: 'AIテレアポ結果', count: '1,237件', color: 'green',
+                  icon: '🤖',
+                  what: 'AIが電話して何らかの結果が出た先。担当者につながった・資料送付になった・また連絡する、など。',
+                  how: '録音を再生するかメモを読んで、前回の話を確認してから電話する。前回の文脈を踏まえて話せるため、いちばん成果につながりやすい。',
+                },
+                {
+                  num: '②', stage: 'IVR（突破待ち）', count: '283件', color: 'yellow',
+                  icon: '📟',
+                  what: '「1を押してください〜」という自動音声でAIが止まってしまった先。相手のホテルには問題なし。',
+                  how: '人の手で番号を押して担当者までつなぐ。つながれば通常どおり話せる。',
+                },
+                {
+                  num: '③', stage: 'AIへの着信折り返し', count: '49件', color: 'blue',
+                  icon: '📲',
+                  what: 'こちらからかけた際に出られず、相手から折り返してきた先。向こうから連絡してくれている。',
+                  how: 'すぐ電話する。つながりやすく、話を聞いてもらえる可能性が高い。',
+                },
+                {
+                  num: '④', stage: '本社及びチェーン本部（人が架電）', count: '110件', color: 'purple',
+                  icon: '🏢',
+                  what: '複数ホテルをまとめている本部。1件決まれば傘下ホテルにまとめて広がる可能性がある。',
+                  how: 'アポインターが担当。代表電話への取り次ぎが必要で、AIでは突破できないと判断された案件。',
+                },
               ].map((item, i) => (
-                <div key={i} className={`rounded-xl p-4 ${
-                  item.color === 'blue' ? 'bg-blue-950/40 border border-blue-800/40' :
-                  item.color === 'green' ? 'bg-green-950/40 border border-green-800/40' :
-                  item.color === 'yellow' ? 'bg-yellow-950/40 border border-yellow-800/40' :
-                  'bg-purple-950/40 border border-purple-800/40'
+                <div key={i} className={`rounded-xl p-5 border ${
+                  item.color === 'green' ? 'bg-green-950/40 border-green-800/40' :
+                  item.color === 'yellow' ? 'bg-yellow-950/40 border-yellow-800/40' :
+                  item.color === 'blue' ? 'bg-blue-950/40 border-blue-800/40' :
+                  'bg-purple-950/40 border-purple-800/40'
                 }`}>
-                  <p className={`text-sm font-bold mb-1 ${
-                    item.color === 'blue' ? 'text-blue-400' :
-                    item.color === 'green' ? 'text-green-400' :
-                    item.color === 'yellow' ? 'text-yellow-400' : 'text-purple-400'
-                  }`}>{item.step}</p>
-                  <p className="text-base text-slate-200">{item.detail}</p>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-2xl">{item.icon}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-base font-bold ${
+                          item.color === 'green' ? 'text-green-400' :
+                          item.color === 'yellow' ? 'text-yellow-400' :
+                          item.color === 'blue' ? 'text-blue-400' : 'text-purple-400'
+                        }`}>{item.num}</span>
+                        <span className="text-base font-bold text-white">{item.stage}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                          item.color === 'green' ? 'bg-green-800/60 text-green-300' :
+                          item.color === 'yellow' ? 'bg-yellow-800/60 text-yellow-300' :
+                          item.color === 'blue' ? 'bg-blue-800/60 text-blue-300' : 'bg-purple-800/60 text-purple-300'
+                        }`}>{item.count}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-400 mb-2">📋 {item.what}</p>
+                  <p className="text-base text-slate-100">✅ {item.how}</p>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* あとで */}
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-base font-bold text-white mb-4">📝 HubSpotメモテンプレート</h2>
+            <h2 className="text-base font-bold text-white mb-1">⏳ あとで — 上の4箱を消化したら</h2>
+            <p className="text-sm text-slate-400 mb-4">かける先が少なくなってきたら進む</p>
             <div className="space-y-3">
               {[
-                { label: '不在時', text: '担当者不在。後日再架電予定。' },
-                { label: '断り時', text: '「必要ない」との断り。再架電不要。ステータス：断り。' },
-                { label: '資料送付時', text: '担当者：〇〇様。資料送付済み（補助金概要・製品仕様・事例）。3週間後フォロー予定。' },
-                { label: 'アポ獲得時', text: 'セミナー予約済み。日時：〇月〇日〇時。Zoom URL送付済み。' },
+                { stage: 'メルマガ配信（見込顧客）', count: '208件', desc: 'メールは送っているが、まだ電話で話せていない先' },
+                { stage: '将来的見込顧客', count: '142件', desc: '今すぐではないが、いずれ可能性がある先' },
               ].map((item, i) => (
-                <div key={i} className="bg-slate-700/50 rounded-xl p-4">
+                <div key={i} className="flex items-center gap-4 bg-slate-700/50 rounded-xl p-4">
+                  <div className="flex-1">
+                    <p className="text-base font-bold text-white">{item.stage}</p>
+                    <p className="text-sm text-slate-400 mt-0.5">{item.desc}</p>
+                  </div>
+                  <span className="text-sm font-bold text-slate-300 bg-slate-600 px-3 py-1 rounded-lg">{item.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 触らなくてOK */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-1">🚫 触らなくてOK — AIが担当する箱</h2>
+            <p className="text-sm text-slate-400 mb-4">電話する必要なし</p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    <th className="text-left text-slate-400 font-medium py-2 pr-4">箱の名前</th>
+                    <th className="text-left text-slate-400 font-medium py-2 pr-4">件数</th>
+                    <th className="text-left text-slate-400 font-medium py-2">理由</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-700/50">
+                  {[
+                    { stage: 'これから架電（未架電）', count: '16,367件', reason: 'すべてAIが順番にかける' },
+                    { stage: 'AIテレアポ架電中', count: '2,453件', reason: '今AIがかけている途中' },
+                    { stage: '留守番電話', count: '25件', reason: '後日AIがかけ直す' },
+                    { stage: '電話不出', count: '656件', reason: '何度かけても出ない。AIが再挑戦' },
+                  ].map((row, i) => (
+                    <tr key={i}>
+                      <td className="py-2.5 pr-4 text-slate-300 font-medium">{row.stage}</td>
+                      <td className="py-2.5 pr-4 text-slate-400">{row.count}</td>
+                      <td className="py-2.5 text-slate-400">{row.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* メモ必須ルール */}
+          <div className="bg-yellow-950/40 rounded-2xl border border-yellow-700/50 p-6">
+            <h2 className="text-base font-bold text-yellow-300 mb-3">⚠️ 電話後のメモ — 必須</h2>
+            <p className="text-base text-slate-200 leading-relaxed mb-4">電話が終わったら、どんな話だったかを<span className="text-yellow-300 font-bold">必ずメモに残す</span>。次にかける人（AIも含む）が同じ話を繰り返さずに済み、お客様に「何度もかかってくる」と思われずに済む。</p>
+            <div className="space-y-3">
+              {[
+                { label: 'AI結果フォロー後', text: '前回AIが話した内容を確認済み。担当者：〇〇様。今回の反応：〇〇。次のアクション：〇〇。' },
+                { label: 'IVR突破後', text: 'IVR突破して担当者に接続。担当者：〇〇様。反応：〇〇。次回：〇〇。' },
+                { label: '折り返し対応後', text: 'お客様から折り返しあり。担当者：〇〇様。内容：〇〇。次のアクション：〇〇。' },
+                { label: '本部対応後', text: '本部（〇〇様）と話せた。傘下ホテル数：〇〇。反応：〇〇。次回：〇〇。' },
+              ].map((item, i) => (
+                <div key={i} className="bg-slate-800/60 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-bold text-slate-300">{item.label}</p>
+                    <p className="text-sm font-bold text-yellow-400">{item.label}</p>
                     <button onClick={() => copy(item.text, `hs_${i}`)}
                       className={`text-xs px-3 py-1 rounded-lg font-medium transition-colors ${copiedKey === `hs_${i}` ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300 hover:bg-slate-500'}`}>
                       {copiedKey === `hs_${i}` ? '✅' : '📋'}
@@ -408,6 +500,7 @@ export default function TeleapoPage() {
               ))}
             </div>
           </div>
+
         </div>
       )}
 
