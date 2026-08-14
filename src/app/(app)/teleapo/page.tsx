@@ -229,7 +229,7 @@ export default function TeleapoPage() {
   const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[]>([])
   const [aiError, setAiError] = useState<string | null>(null)
   const [aiSelectedIdx, setAiSelectedIdx] = useState<number | null>(null)
-  const [aiPattern, setAiPattern] = useState<'yoneyama' | 'hashimoto'>('yoneyama')
+  const [aiPattern, setAiPattern] = useState<string>('yoneyama')
 
   const fetchAiSuggestions = useCallback(async (text: string, pattern: string) => {
     if (!text.trim()) return
@@ -907,12 +907,23 @@ export default function TeleapoPage() {
             <div className="flex gap-2 mb-4">
               <button onClick={() => setAiPattern('yoneyama')}
                 className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${aiPattern === 'yoneyama' ? 'bg-yellow-600 text-white' : 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
-                💰 米山パターン（IT補助金訴求）
+                💰 IT補助金訴求
               </button>
-              <button onClick={() => setAiPattern('hashimoto')}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${aiPattern === 'hashimoto' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
-                💬 橋本パターン（ヒアリング型）
+              <button onClick={() => setAiPattern('price')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${aiPattern === 'price' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
+                💴 価格・コスト訴求
               </button>
+              <button onClick={() => setAiPattern('inbound')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${aiPattern === 'inbound' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
+                🌏 インバウンド訴求
+              </button>
+              <button onClick={() => setAiPattern('case')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${aiPattern === 'case' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
+                🏨 導入事例訴求
+              </button>
+              <button onClick={() => setAiPattern('urgency')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${aiPattern === 'urgency' ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
+                ⏰ 緊急性訴求
             </div>
             <div className="flex gap-2 mb-4">
               <div className="relative flex-1">
