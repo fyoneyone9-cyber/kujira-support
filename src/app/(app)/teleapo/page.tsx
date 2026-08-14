@@ -547,6 +547,28 @@ export default function TeleapoPage() {
           </div>
 
           {/* キーワード検索 */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-base font-bold text-white mb-3">🔍 キーワードで切り返しを検索</h2>
+            <input type="text" value={searchInput} onChange={e => setSearchInput(e.target.value)}
+              placeholder="例：予算・他社・忙しい・インバウンド・補助金"
+              className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-base text-white placeholder-slate-500 focus:outline-none focus:border-blue-500" />
+            {suggestions.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {suggestions.map(id => (
+                  <div key={id} className="bg-slate-700/60 rounded-xl p-4">
+                    <p className="text-sm font-bold text-slate-300 mb-1">{OBJECTION_TREE[id].label}</p>
+                    <div className="flex items-start gap-3">
+                      <p className="text-base text-slate-200 flex-1">{OBJECTION_TREE[id].response}</p>
+                      <button onClick={() => copy(OBJECTION_TREE[id].response, `search_${id}`)}
+                        className={`text-xs px-3 py-1 rounded-lg flex-shrink-0 transition-colors ${copiedKey === `search_${id}` ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300 hover:bg-slate-500'}`}>
+                        {copiedKey === `search_${id}` ? '✅' : '📋'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* 米山パターン — トークスクリプト */}
           <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
@@ -648,29 +670,6 @@ export default function TeleapoPage() {
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-base font-bold text-white mb-3">🔍 キーワードで切り返しを検索</h2>
-            <input type="text" value={searchInput} onChange={e => setSearchInput(e.target.value)}
-              placeholder="例：予算・他社・忙しい・インバウンド・補助金"
-              className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-base text-white placeholder-slate-500 focus:outline-none focus:border-blue-500" />
-            {suggestions.length > 0 && (
-              <div className="mt-3 space-y-2">
-                {suggestions.map(id => (
-                  <div key={id} className="bg-slate-700/60 rounded-xl p-4">
-                    <p className="text-sm font-bold text-slate-300 mb-1">{OBJECTION_TREE[id].label}</p>
-                    <div className="flex items-start gap-3">
-                      <p className="text-base text-slate-200 flex-1">{OBJECTION_TREE[id].response}</p>
-                      <button onClick={() => copy(OBJECTION_TREE[id].response, `search_${id}`)}
-                        className={`text-xs px-3 py-1 rounded-lg flex-shrink-0 transition-colors ${copiedKey === `search_${id}` ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300 hover:bg-slate-500'}`}>
-                        {copiedKey === `search_${id}` ? '✅' : '📋'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
         </div>
