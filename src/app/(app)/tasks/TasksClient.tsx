@@ -139,12 +139,20 @@ export default function TasksClient() {
             <span className="text-lg">📅</span>
             <h2 className="text-sm font-semibold text-white">Googleカレンダー（今後7日）</h2>
           </div>
-          {!googleConnected && (
-            <a href="/api/auth/google" className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors">
-              Googleと連携
-            </a>
-          )}
-          {googleConnected && <span className="text-xs text-green-400">✓ 連携済み</span>}
+          <div className="flex items-center gap-2">
+            {googleConnected && (
+              <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer" className="text-xs px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors">
+                カレンダーを開く ↗
+              </a>
+            )}
+            {!googleConnected ? (
+              <a href="/api/auth/google" className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors">
+                Googleと連携
+              </a>
+            ) : (
+              <span className="text-xs text-green-400">✓ 連携済み</span>
+            )}
+          </div>
         </div>
         <div className="divide-y divide-slate-700/50">
           {calLoading && <p className="text-slate-400 text-xs p-4">読み込み中...</p>}
