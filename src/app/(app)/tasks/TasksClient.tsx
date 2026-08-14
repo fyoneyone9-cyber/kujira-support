@@ -1,7 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+
+type CalEvent = {
+  id: string
+  summary: string
+  start: { dateTime?: string; date?: string }
+  end: { dateTime?: string; date?: string }
+}
 
 type Task = {
   id: string
@@ -14,21 +22,38 @@ type Task = {
 
 export default function TasksClient() {
   const supabase = createClient()
+  const searchParams = useSearchParams()
   const [tasks, setTasks] = useState<Task[]>([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [dueAt, setDueAt] = useState('')
   const [loading, setLoading] = useState(true)
   const [notifGranted, setNotifGranted] = useState(false)
+  const [calEvents, setCalEvents] = useState<CalEvent[]>([])
+  const [calLoading, setCalLoading] = useState(false)
+  const [googleConnected, setGoogleConnected] = useState(false)
 
   useEffect(() => {
     fetchTasks()
+    fetchCalendar()
+    if (searchParams.get('google') === 'connected') setGoogleConnected(true)
     if ('Notification' in window) {
       if (Notification.permission === 'granted') setNotifGranted(true)
     }
     const interval = setInterval(checkAlarms, 60000)
     return () => clearInterval(interval)
   }, [])
+
+  const fetchCalendar = async () => {
+    setCalLoading(true)
+    const res = await fetch('/api/google/calendar')
+    const data = await res.json()
+    if (data.events) {
+      setCalEvents(data.events)
+      setGoogleConnected(true)
+    }
+    setCalLoading(false)
+  }
 
   const fetchTasks = async () => {
     const { data } = await supabase
@@ -96,6 +121,44 @@ export default function TasksClient() {
           </button>
         )}
         {notifGranted && <span className="text-xs text-green-400">🔔 通知ON</span>}
+      </div>
+
+      {/* Google Calendar */}
+      <div className="bg-slate-800 rounded-2xl border border-slate-700 mb-6">
+        <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📅</span>
+            <h2 className="text-sm font-semibold text-white">Googleカレンダー（今後7日）</h2>
+          </div>
+          {!googleConnected && (
+            <a href="/api/auth/google" className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors">
+              Googleと連携
+            </a>
+          )}
+          {googleConnected && <span className="text-xs text-green-400">✓ 連携済み</span>}
+        </div>
+        <div className="divide-y divide-slate-700/50">
+          {calLoading && <p className="text-slate-400 text-xs p-4">読み込み中...</p>}
+          {!calLoading && !googleConnected && (
+            <p className="text-slate-500 text-xs p-4">「Googleと連携」ボタンで予定を表示</p>
+          )}
+          {!calLoading && googleConnected && calEvents.length === 0 && (
+            <p className="text-slate-500 text-xs p-4">今後7日の予定はありません</p>
+          )}
+          {calEvents.map(ev => {
+            const start = ev.start.dateTime || ev.start.date || ''
+            const d = new Date(start)
+            return (
+              <div key={ev.id} className="px-4 py-2.5 flex items-center gap-3">
+                <div className="text-center w-10 flex-shrink-0">
+                  <p className="text-xs text-slate-400">{d.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}</p>
+                  {ev.start.dateTime && <p className="text-xs font-bold text-white">{d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</p>}
+                </div>
+                <p className="text-slate-200 text-sm line-clamp-1">{ev.summary}</p>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       <form onSubmit={addTask} className="bg-slate-800 rounded-2xl border border-slate-700 p-5 mb-6">
