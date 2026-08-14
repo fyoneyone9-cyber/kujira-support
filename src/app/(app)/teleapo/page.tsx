@@ -263,7 +263,6 @@ const TABS = [
   { id: 'script',   label: '📞 トークスクリプト' },
   { id: 'status',   label: '🏷️ ステータス一覧' },
   { id: 'knowledge',label: '💡 商品知識' },
-  { id: 'checklist',label: '✅ チェックリスト' },
   { id: 'mail',     label: '✉️ メールテンプレ' },
   { id: 'memo',     label: '📝 ノウハウメモ' },
 ]
@@ -1044,47 +1043,6 @@ export default function TeleapoPage() {
                     <p className="text-base text-slate-300 mt-1">{item.desc}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── TAB: チェックリスト ─── */}
-      {activeTab === 'checklist' && (
-        <div className="space-y-6">
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-xl font-bold text-white mb-4">✅ 架電前チェックリスト</h2>
-            <div className="space-y-2">
-              {[
-                '施設名・電話番号・過去の接触履歴をHubSpotで確認した',
-                'トークスクリプトを一度声に出して確認した',
-                'Zoomなど架電ツールが起動している',
-                'メモ帳（HubSpot）を開いている',
-                '資料送付用のメールテンプレートを準備している',
-                'セミナー日程（今週分）を把握している',
-              ].map((item, i) => (
-                <label key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-700/40 cursor-pointer">
-                  <input type="checkbox" className="w-5 h-5 rounded accent-blue-500" />
-                  <span className="text-base text-slate-200">{item}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-base font-bold text-white mb-4">✅ 架電後チェックリスト</h2>
-            <div className="space-y-2">
-              {[
-                'HubSpotのステータスを更新した',
-                '担当者名・反応・次のアクションをメモした',
-                '資料送付の場合：メールを今日中に送った',
-                'アポ獲得の場合：セミナーURLをメールで送った',
-                '断りの場合：「楽天トラベル（断り）」に変更した',
-              ].map((item, i) => (
-                <label key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-700/40 cursor-pointer">
-                  <input type="checkbox" className="w-5 h-5 rounded accent-blue-500" />
-                  <span className="text-base text-slate-200">{item}</span>
-                </label>
               ))}
             </div>
           </div>
