@@ -1,49 +1,200 @@
 'use client'
 import { useState, useCallback } from 'react'
 
-// ── 切り返しデータ ──
+// ── 切り返しデータ（全15カテゴリ）──
 const OBJECTION_TREE: Record<string, { label: string; response: string }> = {
-  // カテゴリ
+  // ── カテゴリ（ラベルのみ）──
   'cat_busy':        { label: '⏰ 今は忙しい', response: '' },
   'cat_nointerest':  { label: '🚫 興味がない', response: '' },
-  'cat_other':       { label: '🔀 他社を使っている', response: '' },
-  'cat_price':       { label: '💰 高そう・費用がかかる', response: '' },
-  'cat_timing':      { label: '📅 今は時期が悪い', response: '' },
-  'cat_info':        { label: '📋 資料だけ欲しい', response: '' },
-  // 忙しい系
-  'busy_later':      { label: '後でかけ直して', response: '「承知しました。改めてご連絡します。よろしければメールでも資料をお送りできますが、アドレスをいただけますか？」' },
-  'busy_now':        { label: '今は対応できない', response: '「お忙しいところ失礼しました。IT補助金の申請期限が近づいておりまして、2分だけいただけますか？」' },
-  // 興味なし系
-  'nointerest_already': { label: 'もう検討してない', response: '「そうですか。実は同業のホテル様でも最初はそうおっしゃっていた方が、補助金で実質48万円と聞いて話だけ聞いてみると言っていただけました。資料だけでもいかがですか？」' },
-  'nointerest_nouse':   { label: '必要ない', response: '「承知しました。今後インバウンドが増えた時や繁忙期前に検討される際のために、資料だけお手元に置いていただけますか？」' },
-  // 他社系
-  'other_using':     { label: '他社製品使用中', response: '「ありがとうございます。弊社は自社開発でオーダーメイドカスタマイズができます。IT補助金の申請代行も行っていますので、比較資料としてお送りしてもよいですか？」' },
-  'other_consider':  { label: '他社で検討中', response: '「そうですか。弊社はシリンダー錠対応・13か国語・使わない月は月額0円という点で差別化しています。比較の参考に資料だけ送らせてください。」' },
-  // 価格系
-  'price_expensive': { label: '高そう', response: '「IT補助金を活用いただくと、KIOSK型が実質48万円〜、タブレット型が13万円〜でご導入できます。補助金申請は弊社が全部代行しますので御社のご負担はほぼゼロです。」' },
-  'price_budget':    { label: '予算がない', response: '「IT補助金で最大2/3が国から補助されます。弊社が申請を全部代行しますので、タブレット型なら実質13万円〜です。資料だけでもご覧になりませんか？」' },
-  // タイミング系
-  'timing_later':    { label: '来年以降で', response: '「IT補助金の申請枠は毎年更新されます。今から情報を持っておくと来年すぐ動けます。今日中に資料をお送りしますのでメールアドレスをいただけますか？」' },
-  'timing_busy':     { label: '繁忙期中', response: '「繁忙期前に入れた方が効果が大きいのですが、今は難しいですよね。繁忙期が落ち着いた頃に改めてご連絡してもよいですか？」' },
-  // 資料系
-  'info_send':       { label: '資料を送って', response: '「ありがとうございます。補助金の概要・製品仕様・導入事例をセットでお送りします。メールアドレスをいただけますか？」' },
+  'cat_other':       { label: '🏢 他社を使っている', response: '' },
+  'cat_price':       { label: '💴 高そう・お金がかかる', response: '' },
+  'cat_key':         { label: '🔑 カードキーでないとダメ', response: '' },
+  'cat_custom':      { label: '🏨 うちの業態に合わない', response: '' },
+  'cat_pms':         { label: '💻 PMSと連携できるの？', response: '' },
+  'cat_unmanned':    { label: '🚫 無人にはできない', response: '' },
+  'cat_person':      { label: '📵 担当者不在', response: '' },
+  'cat_email':       { label: '📧 メールが届かない', response: '' },
+  'cat_seminar':     { label: '📅 セミナーの案内', response: '' },
+  'cat_inbound':     { label: '🌏 インバウンド対応の話', response: '' },
+  'cat_size':        { label: '🏡 小規模だから不要では？', response: '' },
+  'cat_timing':      { label: '📆 今は検討時期ではない', response: '' },
+  'cat_claim':       { label: '😡 かけてくるな（クレーム）', response: '' },
+
+  // ── 今は忙しい ──
+  'busy_later':      { label: 'また頃合いを見て連絡する', response: '「承知しました。では、またお時間のよいときにご連絡させていただいてもよろしいでしょうか。いつ頃でしたらよろしいでしょうか。」' },
+  'busy_short':      { label: '30秒だけお願いする', response: '「お忙しいところ大変恐れ入ります。30秒だけお時間いただけますでしょうか。資料をメールでお送りするだけでも、させていただければと思っております。」' },
+  'busy_task':       { label: 'タスクに控えて後日かける', response: '「かしこまりました。では、後日あらためてご連絡させていただきます。お名前とご連絡先、確認させていただいてよろしいでしょうか。」' },
+  'busy_mail':       { label: '今は資料だけメールで送る', response: '「お忙しいところ失礼しました。では資料だけでもメールでお送りさせていただいてもよろしいでしょうか。メールアドレスをいただけるだけで大丈夫です。」' },
+  'busy_time_ask':   { label: '今日の後半に再架電を提案', response: '「承知しました。では本日の午後、あらためてお電話してもよろしいでしょうか。一言いただければ十分です。」' },
+  'busy_empathy':    { label: '繁忙期であることに共感して次につなぐ', response: '「繁忙期でお忙しい時期にお電話してしまい申し訳ありません。実は繁忙期こそ弊社製品が力を発揮するのですが、落ち着いたタイミングで一度お話しさせていただけますでしょうか。」' },
+
+  // ── 興味がない ──
+  'nointerest_reason':    { label: '具体的な理由を聞く', response: '「そうでございますか。差し支えなければ、どのような点でご興味をお持ちになれないか、教えていただけますでしょうか。もしコスト面や業態の問題でしたら、解決できた事例もご用意しております。」' },
+  'nointerest_future':    { label: '将来的な可能性を確認', response: '「将来的にも、ご興味はないでしょうか。近年、全国からのお問い合わせが去年よりかなり多くなってきておりまして、業界全体でのスタンダードになりつつあります。参考情報だけでもお送りさせていただければと思います。」' },
+  'nointerest_seminar':   { label: 'セミナーに誘う', response: '「弊社は週2回、オンラインの説明会を開催しております（水曜11時・金曜13時）。1時間程度で費用・導入事例なども詳しくご説明できます。ご参加は無料ですので、一度いかがでしょうか。」' },
+  'nointerest_flow':      { label: '流行の波を伝える', response: '「最近よくお耳にするかとは思いますが、自動チェックイン機の件になります。全国各地のホテル様で急速に導入が進んでおりまして、業界のスタンダードになりつつある状況でございます。他社様に遅れをとらないためにも、一度ご検討いただけませんか？」' },
+  'nointerest_info':      { label: '情報だけでも送る提案', response: '「ご興味がないのは承知しました。ただ、資料だけでもご覧いただけますと、具体的なコストや仕組みがよくわかります。メールアドレスをお教えいただければ今日中にお送りします。」' },
+  'nointerest_subsidy':   { label: 'IT補助金の話に切り替える', response: '「製品のご興味より先に、今年のIT補助金の締め切りが近づいているのでご案内しているという側面もございます。補助金申請だけでも弊社が代行できますので、情報だけでも受け取っていただけますでしょうか。」' },
+  'nointerest_competitor':{ label: '競合に差をつけられる前に、と訴求', response: '「同じ地域の競合ホテル様がすでに導入されている事例もございます。チェックインのスムーズさは口コミにも影響しますので、情報だけでも持っておいていただけると幸いです。」' },
+
+  // ── 他社使用中 ──
+  'other_maker':     { label: 'どのメーカーか聞く', response: '「あ、そうでございましたか。差し支えなければ、どちらのメーカー様をご利用されているか、参考までに教えて頂けますでしょうか。」' },
+  'other_compare':   { label: '比較提案に持ち込む', response: '「すでに導入されていらっしゃるのですね。弊社は自社開発のため、他社様にはない機能（シリンダー錠対応・完全オーダーメイドカスタマイズ等）がございます。現状の課題があれば、比較資料としてご覧いただけますでしょうか。」' },
+  'other_renewal':   { label: '更新・リプレイス提案', response: '「現在ご利用のシステムの契約更新時期はいつ頃でしょうか。弊社は価格面でもご好評をいただいており、乗り換えを検討されている施設様も増えております。ちょうどそのタイミングで比較検討いただけると幸いです。」' },
+  'other_weakness':  { label: '現在の課題・不満を聞く', response: '「現在お使いのシステムで、何か不満な点や「ここがもう少し…」という部分はございますでしょうか。弊社はカスタマイズ性と価格面で選ばれることが多く、改善できる可能性があるかもしれません。」' },
+  'other_coexist':   { label: '併用・補完提案をする', response: '「チェックイン機は既存のPMSや管理システムとの連携も可能です。今お使いのシステムはそのままで、チェックイン・精算だけ弊社製品を使っていただく形も選択肢としてございます。」' },
+
+  // ── 価格 ──
+  'price_subsidy':        { label: 'IT補助金を案内する', response: '「弊社が補助金申請を代行できます。IT補助金活用でKIOSK型が実質48万円〜、タブレット型は13万円〜でご導入可能です。補助金があれば実質費用がかなり抑えられます。詳しい資料をお送りしてもよろしいでしょうか。」' },
+  'price_running':        { label: '月額費用・コスト削減効果を説明', response: '「月額費用はKIOSK型で19,600円（部屋数×100円）、タブレット型は1室500円です。繁忙期のみ使用で使わない月は0円・日割り計算も可能です。一方で、フロントスタッフの人件費削減効果と比べると、多くの施設様で半年〜1年以内に回収されています。」' },
+  'price_season':         { label: '季節限定プランを案内', response: '「ご使用にならない月は月額0円になります。繁忙期のみのご利用や、土日祝のみご使用の日割り計算プランもございます。実際の費用感をメールでご案内してもよろしいでしょうか。」' },
+  'price_small':          { label: '小規模向け低コストプランを提示', response: '「小規模施設様向けには、タブレット型でご導入いただけます。初期費用はIT補助金活用で13万円〜、月額は1室500円です。一軒家規模の旅館様にも導入実績がございます。」' },
+  'price_roi':            { label: '人件費削減ROIを説明する', response: '「仮にフロントスタッフ1名の夜間対応を削減できたとすると、月20〜30万円の人件費削減になります。月額費用と比較すると、多くの施設様で3〜6ヶ月で回収できています。」' },
+  'price_subsidy_detail': { label: 'IT補助金の詳細を説明する', response: '「IT導入補助金は中小企業がITシステムを導入する際に国が最大2/3を補助する制度です。弊社は補助金申請の代行から書類作成まで全て対応しており、御社にご負担いただくのは必要書類のご提出のみです。」' },
+
+  // ── カードキー・鍵 ──
+  'key_cylinder':    { label: 'シリンダー錠対応をPR', response: '「弊社の強みは、シリンダー錠（物理キー）にも対応可能なことです！別売りのキーボックスを使うことで、精算が完了すると自動でキーボックスが開き、お客様がセルフで鍵をお受け取りいただけます。カードキーへの変更は一切不要です。」' },
+  'key_smartlock':   { label: 'クラウドスマートロックを提案', response: '「クラウドスマートロックという選択肢もございます。暗証番号で開錠でき、チェックイン機から排出されるレシートに暗証番号が自動で印字されます。鍵の受け渡しが完全にセルフになります。」' },
+  'key_receipt':     { label: 'レシート×対面方式を提案', response: '「もし接客を残したい場合は、チェックイン機で精算まで済ませてレシートを発行し、そのレシートをフロントで鍵と交換するという運用も可能です。対面の接客要素を残しながら、手続きだけ効率化できます。」' },
+  'key_keybox':      { label: 'キーボックスの仕組みを説明する', response: '「キーボックスは壁に設置する鍵の収納ボックスで、チェックイン機での精算完了と同時に自動解錠されます。番号錠ではなく自動解錠型なので、お客様が暗証番号を覚える必要がありません。」' },
+  'key_cost':        { label: 'カードキー化のコストを比較する', response: '「カードキーへの変更は設備投資が必要ですが、弊社のシリンダー錠対応なら既存の鍵をそのまま使えます。余計な改修費用をかけずにチェックイン機を導入できるのが弊社の強みです。」' },
+
+  // ── 業態・カスタマイズ ──
+  'custom_order':    { label: 'オーダーメイドをPR', response: '「普段スタッフが口頭でご説明していることを、チェックイン機にカスタマイズして組み込むことが可能です。弊社は自社開発のため、御社専用のオーダーメイドをご提供できます。他社様には真似のできない強みです。」' },
+  'custom_example':  { label: '同業態の導入事例を提示', response: '「弊社では接客の質を落とさずに手続きだけをスマート化して、顧客満足度を上げた事例がございます。同じような業態の施設様の導入事例を資料でお送りしてもよろしいでしょうか。」' },
+  'custom_ryokan':   { label: '旅館・温泉施設への対応', response: '「旅館様でも多数ご導入いただいております。日帰り温泉客の受付・精算、朝食券・夕食券の発行など、旅館特有の運用にもカスタマイズ対応できます。お話しだけでもいかがでしょうか。」' },
+  'custom_hospi':    { label: 'ホスピタリティを落とさない訴求', response: '「チェックイン機を導入することで、フロントスタッフがチェックイン手続きから解放され、観光案内やお出迎えなどの本来の接客に集中できるようになります。結果としてホスピタリティが向上した施設様も多くいらっしゃいます。」' },
+  'custom_demo':     { label: 'デモの実機確認を提案', response: '「実際の操作感が気になるようでしたら、オンラインデモをご用意することも可能です。実際の画面をご覧いただきながら、御社の業態に合う設定をご提案できます。30分程度で済みますが、いかがでしょうか。」' },
+  'custom_ui':       { label: 'UI・画面のカスタマイズを説明', response: '「チェックイン画面のUIは御社のブランドに合わせてカスタマイズできます。ロゴや配色、表示する質問項目、宿泊規約の文面なども変更可能です。「うちらしくない」とはなりません。」' },
+
+  // ── PMS連携 ──
+  'pms_list':        { label: 'PMS連携実績を案内', response: '「弊社はPMS（ホテルシステム）との連携開発に近年力を入れています。連携実績：ステイシー・スイートブック・ベッド4。現在も複数のPMSと連携開発が進行中です。御社のPMSについても、ぜひ一度ご相談いただけますでしょうか。」' },
+  'pms_develop':     { label: '連携開発の意欲を伝える', response: '「お客様のご要望によりかなりの頻度で連携開発が進んでいますので、御社のPMSも今後連携開発を進めることが可能です。まずシステム名をお教えいただけますでしょうか。」' },
+  'pms_standalone':  { label: 'PMS連携なしでも使えると伝える', response: '「PMSとの連携がなくても、弊社製品単体でチェックイン・精算・精算書発行まで完結できます。連携がない場合でも、予約番号での照合や手動入力での運用が可能です。まず基本機能を試していただいてから連携を検討する施設様も多いです。」' },
+  'pms_api':         { label: 'API連携の仕組みを説明する', response: '「APIが公開されているPMSであれば、弊社との連携開発ができます。御社のPMSのAPI仕様書を確認できれば、連携可能かどうかを弊社エンジニアが確認いたします。PMSのシステム名を教えていただけますでしょうか。」' },
+
+  // ── 無人化 ──
+  'unmanned_pr':      { label: '省人化の効果に言い換える', response: '「「無人化」というより、「省人化」「業務効率化」のツールとしてご活用いただいております。フロントスタッフがチェックイン手続きから解放されることで、お客様との会話や観光案内など、本来の接客サービスにより集中できるようになります。」' },
+  'unmanned_night':   { label: '夜間・深夜帯の対応として訴求', response: '「特に夜間・深夜帯のチェックインで効果を発揮します。スタッフが不在の時間でも、お客様が自力でチェックインできるため、深夜のフロント対応を大幅に削減できます。」' },
+  'unmanned_inbound': { label: 'インバウンドへの対応力', response: '「外国語対応（13か国語）とパスポートスキャン機能により、インバウンドのお客様もスムーズにチェックインできます。言語の壁がなくなることで、スタッフの対応負荷が大幅に減ります。」' },
+  'unmanned_hybrid':  { label: 'ハイブリッド運用を提案', response: '「完全無人化ではなく、ハイブリッド運用も可能です。例えば平日昼はフロント対応、深夜や繁忙期はチェックイン機を併用、という形です。状況に合わせて柔軟に使い分けられます。」' },
+  'unmanned_elderly': { label: 'お年寄りゲストへの対応を説明', response: '「ご年配のお客様にはスタッフがサポートする運用にしている施設様も多いです。機械が苦手なお客様にはフロントで対応し、それ以外のお客様にはチェックイン機を使っていただく、という使い分けで問題ありません。」' },
+  'unmanned_staff':   { label: 'スタッフの仕事がなくならないと説明', response: '「「チェックイン手続きがなくなると、スタッフの仕事がなくなるのでは」とご心配されることがありますが、逆にスタッフが接客・コンシェルジュ・宿泊チェックなど付加価値の高い業務に集中できるようになります。」' },
+
+  // ── 担当者不在 ──
+  'person_time':     { label: '折り返し時間を聞く', response: '「そうですか、失礼しました。何時頃にお戻りになりますでしょうか。その時間に改めてご連絡させていただきます。」' },
+  'person_front':    { label: 'フロント担当に話す', response: '「では、フロントのご担当の方にお取り次ぎいただけますでしょうか。IT補助金を活用した自動チェックイン機のご案内で、2〜3分だけお時間いただければ幸いです。」' },
+  'person_callback':  { label: '折り返し電話をお願いする', response: '「ありがとうございます。お手数ですが、お戻りになりましたらデバイスエージェンシーの米山からご連絡があった旨、お伝えいただけますでしょうか。電話番号は080-3207-8422です。」' },
+  'person_msg':      { label: 'メッセージを残す', response: '「承知しました。では、IT補助金を活用した自動チェックイン機の案内でお電話した旨、ご担当者様にお伝えいただけますでしょうか。後ほど改めてご連絡いたします。」' },
+  'person_name':     { label: '担当者名を取得する', response: '「ありがとうございます。差し支えなければ、ご担当の方のお名前を教えていただけますでしょうか。次回ご連絡する際にお名前でお呼びできれば幸いです。」' },
+  'person_email':    { label: 'メールだけ送る', response: '「では、IT補助金や自動チェックイン機の資料だけでもメールでお送りしてもよろしいでしょうか。メールアドレスをいただければ今日中にお送りします。」' },
+
+  // ── メールが届かない ──
+  'email_spam':      { label: '迷惑メールフォルダを確認してもらう', response: '「大変失礼しました。迷惑メールフォルダに振り分けられている可能性がございます。「deviceagency」で検索していただけますでしょうか。」' },
+  'email_recheck':   { label: 'メールアドレスを再確認する', response: '「念のため、ご登録のメールアドレスを確認させていただけますでしょうか。入力ミスが発生している可能性がございます。」' },
+  'email_resend':    { label: '再送する', response: '「承知しました。今すぐ再度お送りします。もし届かない場合は、別のメールアドレスをご用意いただけますでしょうか。」' },
+  'email_domain':    { label: '送信ドメインの確認を依頼', response: '「企業のメールフィルターで弾かれている可能性がございます。IT部門に「deviceagency.co.jp」ドメインからのメールを受信許可していただくようご確認いただけますでしょうか。」' },
+  'email_change':    { label: '別の連絡手段を提案', response: '「もし届き続けない場合は、Gmailなど別のアドレスでお受け取りいただくか、LINEやFAXなど別の方法でお送りすることも可能です。いかがでしょうか。」' },
+
+  // ── セミナー ──
+  'seminar_when':    { label: 'セミナーの日程を案内', response: '「弊社のオンラインセミナーは毎週水曜11時・金曜13時に開催しております。1時間程度で費用感・補助金活用・実際のデモも見ていただけます。次回の水曜・金曜どちらがご都合よいですか？」' },
+  'seminar_content': { label: 'セミナーの内容を説明', response: '「セミナーでは、IT補助金の活用方法・製品デモ・導入事例・費用感・Q&Aをご案内しています。1時間程度で無料です。実際の画面操作もご覧いただけます。」' },
+  'seminar_nudge':   { label: 'セミナー参加を後押し', response: '「まずセミナーに参加いただくだけでも構いません。参加=導入決定ではなく、情報収集として多くの施設様にご活用いただいています。次の水曜か金曜、いかがでしょうか。」' },
+  'seminar_record':  { label: '録画・アーカイブを案内', response: '「もしリアルタイムが難しければ、録画をお送りすることも可能です。ご都合のよい時間にご覧いただけます。メールアドレスをいただけますか？」' },
+
+  // ── インバウンド ──
+  'inbound_lang':    { label: '多言語対応の説明', response: '「弊社のチェックイン機は13か国語に対応しています。お客様が自分の言語でチェックイン操作できるため、スタッフが外国語を話せなくても問題ありません。」' },
+  'inbound_passport':{ label: 'パスポートスキャン機能のPR', response: '「パスポートスキャン機能で、外国人旅行者の情報を自動で読み取り・記録できます。手書き宿帳への転記が不要になり、入国管理法対応もスムーズです。」' },
+  'inbound_cc':      { label: 'クレジット・国際決済の対応', response: '「海外発行のクレジットカード・交通系ICにも対応しています。インバウンドのお客様が現金なしでもスムーズに精算できます。」' },
+  'inbound_demand':  { label: 'インバウンド増加トレンドを訴求', response: '「訪日外国人は2024年から過去最高水準が続いており、今後もさらに増加が見込まれます。今のうちにインバウンド対応を強化しておくことで、口コミ評価の向上にもつながります。」' },
+
+  // ── 小規模 ──
+  'size_tablet':     { label: 'タブレット型を提案', response: '「小規模施設様向けにはタブレット型がございます。IT補助金適用後で実質13万円〜でご導入可能です。月額も1室500円からと、小規模でも無理のないプランです。」' },
+  'size_other':      { label: '小規模導入事例を紹介', response: '「客室数5室以下の小規模旅館様や民泊施設様にも多数ご導入いただいています。部屋数が少ないほど月額コストも低くなります。」' },
+  'size_case':       { label: '費用対効果を説明', response: '「小規模でも夜間のチェックイン対応をセルフ化するだけで、スタッフの深夜対応が大幅に減ります。月額コスト以上のメリットを実感いただいている施設様が多いです。」' },
+  'size_future':     { label: '将来的な拡張を見据えた提案', response: '「今は小規模でも、将来的に部屋数を増やしたり複数拠点を持った場合にも、同じシステムをそのまま活用できます。早めに慣れておくのがおすすめです。」' },
+
+  // ── 今は時期ではない ──
+  'timing_future':      { label: '将来の検討に向けて情報を残す', response: '「承知しました。では今すぐでなくとも、IT補助金の概要と製品資料だけでも手元に置いておいていただけると、タイミングが来た時にすぐ動けます。メールアドレスをいただけますか？」' },
+  'timing_task':        { label: '検討タスクとして残してもらう', response: '「では、来季の検討課題として弊社のご案内を残していただけますでしょうか。改めてご連絡するタイミングはいつ頃がよろしいですか？」' },
+  'timing_subsidy':     { label: '補助金の期限を伝えて急かす', response: '「IT補助金の申請枠は毎年更新されますが、年度の締め切りが決まっています。今から動いておくと来年度の申請にも余裕を持って対応できます。」' },
+  'timing_competitor':  { label: '競合の動きを伝える', response: '「実は同じ地域の他のホテル様が今年から導入を始めているケースが増えています。チェックインの利便性は口コミ・評価サイトにも影響しますので、早めに情報収集だけでもいかがでしょうか。」' },
+  'timing_renovation':  { label: '改修・設備更新タイミングを合わせる', response: '「改修や設備更新をお考えの時期があれば、そのタイミングに合わせてご提案させていただくこともできます。来年・再来年以降でのご検討でも、ぜひお声がけください。」' },
+
+  // ── クレーム ──
+  'claim_apology':   { label: 'まず謝罪して鎮める', response: '「大変失礼いたしました。ご迷惑をおかけして申し訳ございません。以後、ご連絡を控えさせていただきます。もしご不明な点等ございましたらいつでもご連絡ください。」' },
+  'claim_record':    { label: '架電停止をHubSpotに記録する', response: '（架電クレームとしてHubSpotに記録し、今後の架電対象から除外する。ステータスを「架電クレーム」に変更する）' },
+  'claim_freq':      { label: '架電頻度が高い場合の対応', response: '「ご不快をおかけして誠に申し訳ございません。以後は一切ご連絡いたしません。ご迷惑をおかけしました。」（その後すぐに電話を切る）' },
 }
 
-const CATEGORIES = [
-  { id: 'cat_busy',       label: '⏰ 忙しい',      subs: ['busy_later', 'busy_now'] },
-  { id: 'cat_nointerest', label: '🚫 興味なし',    subs: ['nointerest_already', 'nointerest_nouse'] },
-  { id: 'cat_other',      label: '🔀 他社使用中',  subs: ['other_using', 'other_consider'] },
-  { id: 'cat_price',      label: '💰 費用・価格',  subs: ['price_expensive', 'price_budget'] },
-  { id: 'cat_timing',     label: '📅 タイミング',  subs: ['timing_later', 'timing_busy'] },
-  { id: 'cat_info',       label: '📋 資料希望',    subs: ['info_send'] },
+// ── カテゴリ→子ID マッピング ──
+const CATEGORY_ITEMS = [
+  { id: 'cat_busy',        children: ['busy_later', 'busy_short', 'busy_task', 'busy_mail', 'busy_time_ask', 'busy_empathy'] },
+  { id: 'cat_nointerest',  children: ['nointerest_reason', 'nointerest_future', 'nointerest_seminar', 'nointerest_flow', 'nointerest_info', 'nointerest_subsidy', 'nointerest_competitor'] },
+  { id: 'cat_other',       children: ['other_maker', 'other_compare', 'other_renewal', 'other_weakness', 'other_coexist'] },
+  { id: 'cat_price',       children: ['price_subsidy', 'price_running', 'price_season', 'price_small', 'price_roi', 'price_subsidy_detail'] },
+  { id: 'cat_key',         children: ['key_cylinder', 'key_smartlock', 'key_receipt', 'key_keybox', 'key_cost'] },
+  { id: 'cat_custom',      children: ['custom_order', 'custom_example', 'custom_ryokan', 'custom_hospi', 'custom_demo', 'custom_ui'] },
+  { id: 'cat_pms',         children: ['pms_list', 'pms_develop', 'pms_standalone', 'pms_api'] },
+  { id: 'cat_unmanned',    children: ['unmanned_pr', 'unmanned_night', 'unmanned_inbound', 'unmanned_hybrid', 'unmanned_elderly', 'unmanned_staff'] },
+  { id: 'cat_person',      children: ['person_time', 'person_front', 'person_callback', 'person_msg', 'person_name', 'person_email'] },
+  { id: 'cat_email',       children: ['email_spam', 'email_recheck', 'email_resend', 'email_domain', 'email_change'] },
+  { id: 'cat_seminar',     children: ['seminar_when', 'seminar_content', 'seminar_nudge', 'seminar_record'] },
+  { id: 'cat_inbound',     children: ['inbound_lang', 'inbound_passport', 'inbound_cc', 'inbound_demand'] },
+  { id: 'cat_size',        children: ['size_tablet', 'size_other', 'size_case', 'size_future'] },
+  { id: 'cat_timing',      children: ['timing_future', 'timing_task', 'timing_subsidy', 'timing_competitor', 'timing_renovation'] },
+  { id: 'cat_claim',       children: ['claim_apology', 'claim_record', 'claim_freq'] },
 ]
 
-function suggestByKeyword(kw: string): string[] {
-  if (!kw.trim()) return []
-  const k = kw.toLowerCase()
-  return Object.entries(OBJECTION_TREE)
-    .filter(([id, v]) => !id.startsWith('cat_') && (v.label.includes(kw) || v.response.includes(kw) || id.includes(k)))
-    .sort((a, b) => b[1].response.length - a[1].response.length)
+// ── キーワード→切り返しIDマッピング ──
+const KEYWORD_MAP: Array<{ keywords: string[]; ids: string[] }> = [
+  { keywords: ['忙しい', 'いそが', '今は', 'また今度', '後で', 'あとで', '手が離', 'タイミング悪', '時間ない'],
+    ids: ['busy_later', 'busy_short', 'busy_task'] },
+  { keywords: ['興味ない', '興味がない', '必要ない', '結構です', 'いらない', '要らない', '不要', 'ニーズがない', '考えてない'],
+    ids: ['nointerest_reason', 'nointerest_future', 'nointerest_info', 'nointerest_seminar'] },
+  { keywords: ['他社', '他のメーカー', '既に', 'すでに', '導入済み', '使ってる', '使っている', '入れてる', '入れている', 'もう使'],
+    ids: ['other_maker', 'other_compare', 'other_renewal'] },
+  { keywords: ['高い', 'たかい', '高そう', 'お金', '費用', 'コスト', '予算', '値段', '料金', '安くなる'],
+    ids: ['price_subsidy', 'price_running', 'price_season', 'price_small'] },
+  { keywords: ['補助金', 'IT補助', '助成'],
+    ids: ['price_subsidy'] },
+  { keywords: ['カードキー', 'カード', '鍵', 'かぎ', 'シリンダー', '物理キー', 'ドア'],
+    ids: ['key_cylinder', 'key_smartlock', 'key_receipt'] },
+  { keywords: ['業態', '合わない', 'うちには', '旅館', '民宿', '温泉', 'ゲストハウス', 'ホステル', '小規模', '規模が小さ'],
+    ids: ['custom_order', 'custom_example', 'custom_ryokan', 'size_tablet'] },
+  { keywords: ['pms', 'PMS', 'ホテルシステム', 'システム連携', '予約システム', 'ステイシー', 'スイートブック', 'ベッド4'],
+    ids: ['pms_list', 'pms_develop'] },
+  { keywords: ['無人', 'むじん', 'スタッフいない', '人がいない', '接客できない', '対面'],
+    ids: ['unmanned_pr', 'unmanned_night', 'unmanned_inbound'] },
+  { keywords: ['担当', 'たんとう', '不在', 'ふざい', '支配人', 'いない', '席を外', 'おりません', '出かけ'],
+    ids: ['person_time', 'person_front', 'person_callback', 'person_msg'] },
+  { keywords: ['メール', '届かない', '受け取れない', '迷惑', 'spam', '来ない', 'こない'],
+    ids: ['email_spam', 'email_recheck', 'email_resend'] },
+  { keywords: ['セミナー', '説明会', 'zoom', 'zoomで', 'オンライン', '参加', '日程'],
+    ids: ['seminar_when', 'seminar_content', 'seminar_nudge'] },
+  { keywords: ['外国', '英語', '中国語', '韓国語', 'インバウンド', '外国人', '訪日', 'パスポート', '多言語'],
+    ids: ['inbound_lang', 'inbound_passport'] },
+  { keywords: ['小さい', '小規模', '部屋数少', '客室少', '一軒家', 'シングル', '数室', '数部屋'],
+    ids: ['size_tablet', 'size_other'] },
+  { keywords: ['今は検討', '検討中ではない', '時期ではない', 'まだ先', 'そのうち', '来年', '再来年', '予算が'],
+    ids: ['timing_future', 'timing_task'] },
+  { keywords: ['かけるな', '電話しないで', 'もうかけ', '迷惑', 'クレーム', '怒', 'おこ', '二度と'],
+    ids: ['claim_apology', 'claim_record'] },
+]
+
+function suggestByKeyword(input: string): string[] {
+  if (!input.trim()) return []
+  const lower = input.toLowerCase()
+  const matched = new Map<string, number>()
+  for (const rule of KEYWORD_MAP) {
+    if (rule.keywords.some(kw => lower.includes(kw))) {
+      for (const id of rule.ids) {
+        matched.set(id, (matched.get(id) ?? 0) + 1)
+      }
+    }
+  }
+  return Array.from(matched.entries())
+    .sort((a, b) => b[1] - a[1])
     .slice(0, 6)
     .map(([id]) => id)
 }
@@ -51,13 +202,12 @@ function suggestByKeyword(kw: string): string[] {
 type AiSuggestion = { label: string; talk: string; point: string }
 
 const TABS = [
-  { id: 'hubspot',   label: '📊 HubSpot手順',    icon: '📊' },
-  { id: 'script',    label: '📞 トークスクリプト', icon: '📞' },
-  { id: 'yoneyama',  label: '💰 米山パターン',    icon: '💰' },
-  { id: 'status',    label: '🏷️ ステータス一覧',  icon: '🏷️' },
-  { id: 'knowledge', label: '💡 商品知識',         icon: '💡' },
-  { id: 'checklist', label: '✅ チェックリスト',   icon: '✅' },
-  { id: 'mail',      label: '✉️ メールテンプレ',   icon: '✉️' },
+  { id: 'hubspot',   label: '📊 HubSpot手順' },
+  { id: 'script',   label: '📞 トークスクリプト' },
+  { id: 'status',   label: '🏷️ ステータス一覧' },
+  { id: 'knowledge',label: '💡 商品知識' },
+  { id: 'checklist',label: '✅ チェックリスト' },
+  { id: 'mail',     label: '✉️ メールテンプレ' },
 ]
 
 export default function TeleapoPage() {
@@ -68,7 +218,6 @@ export default function TeleapoPage() {
   const [searchInput, setSearchInput] = useState('')
   const suggestions = suggestByKeyword(searchInput)
 
-  // AI切り返し
   const [aiInput, setAiInput] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[]>([])
@@ -98,43 +247,14 @@ export default function TeleapoPage() {
     }
   }, [])
 
-  // 米山パターン専用AI
-  const [yoneyamaInput, setYoneyamaInput] = useState('')
-  const [yoneyamaLoading, setYoneyamaLoading] = useState(false)
-  const [yoneyamaSuggestions, setYoneyamaSuggestions] = useState<AiSuggestion[]>([])
-  const [yoneyamaError, setYoneyamaError] = useState<string | null>(null)
-  const [yoneyamaSelectedIdx, setYoneyamaSelectedIdx] = useState<number | null>(null)
-
-  const fetchYoneyamaSuggestions = useCallback(async (text: string) => {
-    if (!text.trim()) return
-    setYoneyamaLoading(true)
-    setYoneyamaError(null)
-    setYoneyamaSuggestions([])
-    setYoneyamaSelectedIdx(null)
-    try {
-      const res = await fetch('/api/ai/teleapo-suggest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: text, pattern: 'yoneyama' }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'API error')
-      setYoneyamaSuggestions(data.suggestions ?? [])
-    } catch (e) {
-      setYoneyamaError(e instanceof Error ? e.message : 'エラーが発生しました')
-    } finally {
-      setYoneyamaLoading(false)
-    }
-  }, [])
-
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text)
     setCopiedKey(key)
     setTimeout(() => setCopiedKey(null), 2000)
   }
 
-  const clearResponse = () => {
-    setSelectedCat(null)
+  const selectCat = (id: string) => {
+    setSelectedCat(id === selectedCat ? null : id)
     setSelectedResponse(null)
   }
 
@@ -193,7 +313,7 @@ export default function TeleapoPage() {
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         {TABS.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
+            className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
               activeTab === tab.id
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
@@ -233,8 +353,6 @@ export default function TeleapoPage() {
               ))}
             </div>
           </div>
-
-          {/* HubSpotメモテンプレ */}
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
             <h2 className="text-base font-bold text-white mb-4">📝 HubSpotメモテンプレート</h2>
             <div className="space-y-3">
@@ -263,6 +381,154 @@ export default function TeleapoPage() {
       {/* ─── TAB: トークスクリプト ─── */}
       {activeTab === 'script' && (
         <div className="space-y-6">
+
+          {/* ⚡ 切り返しナビ（ボタン形式） */}
+          <div className="bg-slate-800 rounded-2xl border border-blue-800/40 p-6">
+            <h2 className="text-xl font-bold text-white mb-1">⚡ 切り返しナビ</h2>
+            <p className="text-base text-slate-400 mb-5">相手の反応をクリック → 対応方法を選ぶ → トークが表示される</p>
+
+            {/* カテゴリボタン */}
+            <div className="flex flex-wrap gap-3 mb-5">
+              {CATEGORY_ITEMS.map(cat => (
+                <button key={cat.id} onClick={() => selectCat(cat.id)}
+                  className={`px-5 py-3 rounded-xl text-base font-bold transition-all ${
+                    selectedCat === cat.id
+                      ? 'bg-blue-600 text-white shadow-lg scale-105'
+                      : 'bg-slate-700 text-slate-200 hover:bg-slate-600 hover:text-white border border-slate-600'
+                  }`}>
+                  {OBJECTION_TREE[cat.id]?.label}
+                </button>
+              ))}
+            </div>
+
+            {/* サブ選択 */}
+            {selectedCat && (
+              <div className="border-t border-slate-700 pt-5">
+                <p className="text-base text-blue-400 font-bold mb-4">どう対応しますか？</p>
+                <div className="flex flex-wrap gap-3 mb-5">
+                  {CATEGORY_ITEMS.find(c => c.id === selectedCat)?.children.map(childId => (
+                    <button key={childId} onClick={() => selectResponse(childId)}
+                      className={`px-5 py-3 rounded-xl text-base font-bold transition-all ${
+                        selectedResponse === childId
+                          ? 'bg-green-600 text-white shadow-lg scale-105'
+                          : 'bg-slate-700/70 text-slate-200 hover:bg-slate-600 hover:text-white border border-slate-600'
+                      }`}>
+                      {OBJECTION_TREE[childId]?.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* トーク表示 */}
+                {selectedResponse && (
+                  <div className="bg-green-950/60 border-2 border-green-700/70 rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-base text-green-400 font-bold">💬 切り返しトーク</p>
+                      <button onClick={() => copy(OBJECTION_TREE[selectedResponse]?.response || '', 'objection')}
+                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-colors ${copiedKey === 'objection' ? 'bg-green-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}`}>
+                        {copiedKey === 'objection' ? '✅ コピー済み' : '📋 コピー'}
+                      </button>
+                    </div>
+                    <p className="text-lg text-white leading-relaxed font-medium">
+                      {OBJECTION_TREE[selectedResponse]?.response}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 米山パターン — トークスクリプト */}
+          <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <span className="text-3xl">💰</span>
+              <div>
+                <h2 className="text-xl font-bold text-white">米山パターン — IT補助金全面訴求型</h2>
+                <p className="text-base text-yellow-300/80 mt-0.5">政府の積極支援・補助金申請代行を前面に出し、コスト障壁を最初に取り除くアプローチ</p>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {[
+                {
+                  label: 'STEP 1｜受付突破 — 担当者につなぐ',
+                  color: 'blue',
+                  text: '「お電話失礼いたします。デバイスエージェンシーの米山でございます。\nホテル・旅館様向けのIT補助金のご案内でご連絡しているのですが、\nご支配人様か、ご担当者様はいらっしゃいますでしょうか？」',
+                  point: 'IT補助金のご案内と言うだけで受付に止められにくくなる。「支配人様か担当者様」と二択にすることで名前がなくても取り次ぎを引き出せる。止められたら→「補助金の申請期限がありまして、担当の方に一度ご確認いただけますか」',
+                },
+                {
+                  label: 'STEP 2｜担当者への第一声 — 自然な補助金訴求',
+                  color: 'yellow',
+                  text: '「ありがとうございます。実はいま国のIT補助金を使って、\n自動チェックイン機をKIOSK型なら実質48万円〜、タブレット型なら13万円〜でご導入できる制度がありまして、\n補助金の申請も弊社が全部代行しています。今日は売り込みではなく、その制度のご案内でご連絡しました。\n今、2〜3分だけよろしいでしょうか？」',
+                  point: '「売り込みではなく」を明言するだけで警戒心が大きく下がる。金額（48万円〜/13万円〜）を先に言うことで「高いんでしょ」という先入観を防ぐ。「2〜3分」と時間を区切ることで断り口実を潰す。',
+                },
+                {
+                  label: 'STEP 3｜ヒアリング — 課題を自然に引き出す',
+                  color: 'purple',
+                  text: '「最近、うちの周りのホテル様からも夜間の対応とかインバウンドのお客様への対応で\n大変という声をよく聞くんですが、御社では今、何か運用で課題に感じているところはありますか？」',
+                  point: '具体例（夜間対応・インバウンド等）を出すことで課題を引き出しやすくなる。課題が出たら→「IT補助金で解決されているホテル様の事例があります」につなぐ。課題がなければ→メール送付に切り替える。',
+                },
+                {
+                  label: 'STEP 4｜課題あり → 事例提案 → アポ取り',
+                  color: 'green',
+                  text: '「そうですよね。実は、その課題をIT補助金を使ってうまく解決されているホテル様の事例が手元にあります。\n資料と補助金の申請スケジュールをメールでお送りしてもいいですか？\nその後、15分だけいただいて、補助金を使った具体的なご説明ができればと思いまして。」',
+                  point: '「資料を送る」→「15分だけ」の2段階でアポのハードルを下げる。日程は「来週の火曜か水曜、どちらがご都合よいですか？」と二択で聞く。Zoomでも可と伝えれば地方のホテルも対応できる。',
+                },
+                {
+                  label: "STEP 4'｜課題なし → 情報だけ置いて次につなぐ",
+                  color: 'slate',
+                  text: '「そうですか。IT補助金って毎年申請枠があるので、タイミングが来たときのために情報だけ持っておいてもらえれば十分です。\n補助金の概要と製品の資料をメールでお送りしてもいいですか？\nメールアドレスをいただければ今日中に送ります。」',
+                  point: '「資料送付 → 3週間以内に再架電」でインセンティブ対象を狙う。「今日中に送ります」と即行動を約束することで信頼感を出す。「無理に決めてもらわなくていい」→プレッシャーを外して防衛心を下げる。',
+                },
+              ].map((item, i) => (
+                <div key={i} className={`rounded-xl p-5 ${
+                  item.color === 'blue' ? 'bg-blue-950/40 border border-blue-800/40' :
+                  item.color === 'yellow' ? 'bg-yellow-950/40 border border-yellow-800/40' :
+                  item.color === 'purple' ? 'bg-purple-950/40 border border-purple-800/40' :
+                  item.color === 'green' ? 'bg-green-950/40 border border-green-800/40' :
+                  'bg-slate-700/50 border border-slate-600/40'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className={`text-base font-bold ${
+                      item.color === 'blue' ? 'text-blue-400' :
+                      item.color === 'yellow' ? 'text-yellow-400' :
+                      item.color === 'purple' ? 'text-purple-400' :
+                      item.color === 'green' ? 'text-green-400' : 'text-slate-400'
+                    }`}>{item.label}</p>
+                    <button onClick={() => copy(item.text, `ym_${i}`)}
+                      className={`text-sm px-3 py-1.5 rounded-lg font-medium transition-colors ${copiedKey === `ym_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                      {copiedKey === `ym_${i}` ? '✅' : '📋'}
+                    </button>
+                  </div>
+                  <p className="text-base text-slate-100 leading-relaxed whitespace-pre-line mb-3">{item.text}</p>
+                  <p className="text-sm text-slate-400 leading-relaxed border-t border-slate-600/50 pt-3">💡 {item.point}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* IT補助金断り文句別切り返し */}
+          <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
+            <h2 className="text-base font-bold text-white mb-4">🔄 断り文句別 切り返し（IT補助金訴求）</h2>
+            <div className="space-y-3">
+              {[
+                { obj: '「予算がない」「お金がかかる」', res: '「そうですよね。実はIT補助金を活用していただくと、弊社が申請を全て代行しますので、KIOSK型が48万円〜、タブレット型が13万円〜でご導入できます。月額費用も使わない月は0円なので、繁忙期だけのご利用も可能です。資料だけでもご覧になりませんか？」' },
+                { obj: '「他社製品を検討・使用中」', res: '「弊社はシリンダー錠対応・完全オーダーメイドカスタマイズという点で差別化できています。またIT補助金の申請代行は弊社の強みです。比較検討の資料としてお送りしてもよろしいでしょうか？」' },
+                { obj: '「今は時期が悪い」「来年以降で」', res: '「IT補助金の申請枠は毎年更新されますので、今すぐでなくても情報だけ持っておいていただくと、タイミングが来た時にすぐ動けます。今日中に資料をメールでお送りするだけですので、メールアドレスをお教えいただけますか？」' },
+                { obj: '「補助金って何ですか？」', res: '「IT導入補助金というもので、中小企業様がITシステムを導入する際に国が費用の最大2/3を補助してくれる制度です。弊社は申請手続きを全て代行しておりますので、御社は書類を揃えていただくだけでOKです。」' },
+              ].map((item, i) => (
+                <div key={i} className="bg-slate-700/50 rounded-xl p-4">
+                  <p className="text-base font-bold text-red-400 mb-2">❌ {item.obj}</p>
+                  <div className="flex items-start gap-3">
+                    <p className="text-base text-slate-200 leading-relaxed flex-1">✅ {item.res}</p>
+                    <button onClick={() => copy(item.res, `ym_obj_${i}`)}
+                      className={`text-xs px-3 py-1 rounded-lg font-medium flex-shrink-0 transition-colors ${copiedKey === `ym_obj_${i}` ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300 hover:bg-slate-500'}`}>
+                      {copiedKey === `ym_obj_${i}` ? '✅' : '📋'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* AI切り返し */}
           <div className="bg-slate-900 rounded-2xl border border-purple-800/50 p-6">
             <div className="flex items-center justify-between mb-1">
@@ -335,7 +601,7 @@ export default function TeleapoPage() {
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
             <h2 className="text-base font-bold text-white mb-3">🔍 キーワードで切り返しを検索</h2>
             <input type="text" value={searchInput} onChange={e => setSearchInput(e.target.value)}
-              placeholder="例：予算・他社・忙しい・インバウンド"
+              placeholder="例：予算・他社・忙しい・インバウンド・補助金"
               className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-base text-white placeholder-slate-500 focus:outline-none focus:border-blue-500" />
             {suggestions.length > 0 && (
               <div className="mt-3 space-y-2">
@@ -355,202 +621,6 @@ export default function TeleapoPage() {
             )}
           </div>
 
-          {/* 切り返しツリー */}
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-white">🔄 断り文句別 切り返しツリー</h2>
-              {selectedCat && <button onClick={clearResponse} className="text-xs text-slate-400 hover:text-white">← 戻る</button>}
-            </div>
-            {!selectedCat ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {CATEGORIES.map(cat => (
-                  <button key={cat.id} onClick={() => setSelectedCat(cat.id)}
-                    className="bg-slate-700/60 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-left transition-colors">
-                    <p className="text-base font-bold text-white">{cat.label}</p>
-                    <p className="text-xs text-slate-400 mt-1">{cat.subs.length}パターン</p>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {CATEGORIES.find(c => c.id === selectedCat)?.subs.map(subId => (
-                    <button key={subId} onClick={() => selectResponse(subId)}
-                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${selectedResponse === subId ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'}`}>
-                      {OBJECTION_TREE[subId]?.label}
-                    </button>
-                  ))}
-                </div>
-                {selectedResponse && OBJECTION_TREE[selectedResponse] && (
-                  <div className="bg-blue-950/40 border border-blue-800/50 rounded-xl p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-base font-bold text-blue-300">{OBJECTION_TREE[selectedResponse].label}</p>
-                      <button onClick={() => copy(OBJECTION_TREE[selectedResponse].response, 'tree_resp')}
-                        className={`text-sm px-4 py-2 rounded-xl font-bold transition-colors ${copiedKey === 'tree_resp' ? 'bg-green-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}`}>
-                        {copiedKey === 'tree_resp' ? '✅ コピー済み' : '📋 コピー'}
-                      </button>
-                    </div>
-                    <p className="text-base text-white leading-relaxed">{OBJECTION_TREE[selectedResponse].response}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ─── TAB: 米山パターン ─── */}
-      {activeTab === 'yoneyama' && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-yellow-900/40 to-orange-900/40 border border-yellow-700/50 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl">💰</span>
-              <div>
-                <h2 className="text-xl font-bold text-white">米山パターン — IT補助金全面訴求型</h2>
-                <p className="text-base text-yellow-300/80 mt-0.5">政府の積極支援・補助金申請代行を前面に出し、コスト障壁を最初に取り除くアプローチ</p>
-              </div>
-            </div>
-          </div>
-
-          {/* 米山パターン専用AI */}
-          <div className="bg-slate-900 rounded-2xl border border-yellow-800/50 p-6">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-xl font-bold text-white">🤖 AI切り返し（米山パターン専用）</h2>
-              <span className="text-xs bg-yellow-900/60 border border-yellow-700/50 text-yellow-300 px-2 py-1 rounded-lg">Gemini API</span>
-            </div>
-            <p className="text-base text-slate-400 mb-4">相手の発言を入力 → IT補助金訴求を含む切り返しをAIが生成</p>
-            <div className="flex gap-2 mb-4">
-              <div className="relative flex-1">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🎤</span>
-                <input type="text" value={yoneyamaInput} onChange={e => setYoneyamaInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && fetchYoneyamaSuggestions(yoneyamaInput)}
-                  placeholder="例：「予算がない」「他社で検討中」「今は時期が悪い」"
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl pl-11 pr-4 py-4 text-base text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/30" />
-                {yoneyamaInput && <button onClick={() => { setYoneyamaInput(''); setYoneyamaSuggestions([]); setYoneyamaSelectedIdx(null) }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xl">×</button>}
-              </div>
-              <button onClick={() => fetchYoneyamaSuggestions(yoneyamaInput)} disabled={!yoneyamaInput.trim() || yoneyamaLoading}
-                className={`px-6 py-4 rounded-xl text-base font-bold transition-all whitespace-nowrap ${yoneyamaLoading ? 'bg-yellow-900 text-yellow-400 cursor-wait' : yoneyamaInput.trim() ? 'bg-yellow-600 hover:bg-yellow-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
-                {yoneyamaLoading ? '⏳ 生成中...' : '✨ AI提案'}
-              </button>
-            </div>
-            {yoneyamaError && <div className="bg-red-950/50 border border-red-700/50 rounded-xl p-4 mb-4 text-base text-red-300">⚠️ {yoneyamaError}</div>}
-            {yoneyamaLoading && <div className="text-center py-8 text-yellow-400"><div className="text-2xl mb-2 animate-pulse">🤖</div><p className="text-base">Gemini AIが米山パターンで生成中...</p></div>}
-            {yoneyamaSuggestions.length > 0 && (
-              <div>
-                <p className="text-sm text-yellow-400 font-bold mb-3">💡 AI推奨切り返し ({yoneyamaSuggestions.length}件)</p>
-                <div className="flex flex-wrap gap-3 mb-4">
-                  {yoneyamaSuggestions.map((s, i) => (
-                    <button key={i} onClick={() => setYoneyamaSelectedIdx(yoneyamaSelectedIdx === i ? null : i)}
-                      className={`px-5 py-3 rounded-xl text-base font-bold transition-all ${yoneyamaSelectedIdx === i ? 'bg-yellow-600 text-white shadow-lg scale-105' : 'bg-yellow-900/50 text-yellow-200 hover:bg-yellow-700 hover:text-white border border-yellow-700/60'}`}>
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-                {yoneyamaSelectedIdx !== null && yoneyamaSuggestions[yoneyamaSelectedIdx] && (
-                  <div className="bg-yellow-950/60 border-2 border-yellow-700/70 rounded-2xl p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className="text-base text-yellow-400 font-bold">💬 {yoneyamaSuggestions[yoneyamaSelectedIdx].label}</p>
-                        <p className="text-sm text-yellow-300/70 mt-0.5">📌 {yoneyamaSuggestions[yoneyamaSelectedIdx].point}</p>
-                      </div>
-                      <button onClick={() => copy(yoneyamaSuggestions[yoneyamaSelectedIdx!].talk, 'yoneyama_ai')}
-                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-colors ${copiedKey === 'yoneyama_ai' ? 'bg-yellow-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}`}>
-                        {copiedKey === 'yoneyama_ai' ? '✅ コピー済み' : '📋 コピー'}
-                      </button>
-                    </div>
-                    <p className="text-lg text-white leading-relaxed font-medium">{yoneyamaSuggestions[yoneyamaSelectedIdx].talk}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* 米山パターン スクリプト */}
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-            <h2 className="text-xl font-bold text-white mb-4">📞 米山パターン — トークスクリプト</h2>
-            <div className="space-y-4">
-              {[
-                {
-                  label: 'STEP 1｜受付突破 — 担当者につなぐ',
-                  color: 'blue',
-                  text: '「お電話失礼いたします。デバイスエージェンシーの米山でございます。\nホテル・旅館様向けのIT補助金のご案内でご連絡しているのですが、\nご支配人様か、ご担当者様はいらっしゃいますでしょうか？」',
-                  point: 'IT補助金のご案内と言うだけで受付に止められにくくなる。「支配人様か担当者様」と二択にすることで名前がなくても取り次ぎを引き出せる。',
-                },
-                {
-                  label: 'STEP 2｜担当者への第一声 — 自然な補助金訴求',
-                  color: 'yellow',
-                  text: '「ありがとうございます。実はいま国のIT補助金を使って、\n自動チェックイン機をKIOSK型なら実質48万円〜、タブレット型なら13万円〜でご導入できる制度がありまして、\n補助金の申請も弊社が全部代行しています。今日は売り込みではなく、その制度のご案内でご連絡しました。\n今、2〜3分だけよろしいでしょうか？」',
-                  point: '「売り込みではなく」を明言するだけで警戒心が大きく下がる。金額を先に言うことで「高いんでしょ」という先入観を防ぐ。',
-                },
-                {
-                  label: 'STEP 3｜ヒアリング — 課題を自然に引き出す',
-                  color: 'purple',
-                  text: '「最近、うちの周りのホテル様からも夜間の対応とかインバウンドのお客様への対応で\n大変という声をよく聞くんですが、御社では今、何か運用で課題に感じているところはありますか？」',
-                  point: '具体例（夜間対応・インバウンド等）を出すことで課題を引き出しやすくなる。課題が出たら→IT補助金で解決された事例があります、につなぐ。',
-                },
-                {
-                  label: 'STEP 4｜課題あり → 事例提案 → アポ取り',
-                  color: 'green',
-                  text: '「そうですよね。実は、その課題をIT補助金を使ってうまく解決されているホテル様の事例が手元にあります。\n資料と補助金の申請スケジュールをメールでお送りしてもいいですか？\nその後、15分だけいただいて、補助金を使った具体的なご説明ができればと思いまして。」',
-                  point: '「資料を送る」→「15分だけ」の2段階でアポのハードルを下げる。日程は来週の火曜か水曜どちらが？と二択で聞く。',
-                },
-                {
-                  label: "STEP 4'｜課題なし → 情報だけ置いて次につなぐ",
-                  color: 'slate',
-                  text: '「そうですか。IT補助金って毎年申請枠があるので、タイミングが来たときのために情報だけ持っておいてもらえれば十分です。\n補助金の概要と製品の資料をメールでお送りしてもいいですか？\nメールアドレスをいただければ今日中に送ります。」',
-                  point: '「資料送付 → 3週間以内に再架電」でインセンティブ対象を狙う。メアドが取れたら施設名・担当者名をHubSpotに記録する。',
-                },
-              ].map((item, i) => (
-                <div key={i} className={`rounded-xl p-5 ${
-                  item.color === 'blue' ? 'bg-blue-950/40 border border-blue-800/40' :
-                  item.color === 'yellow' ? 'bg-yellow-950/40 border border-yellow-800/40' :
-                  item.color === 'purple' ? 'bg-purple-950/40 border border-purple-800/40' :
-                  item.color === 'green' ? 'bg-green-950/40 border border-green-800/40' :
-                  'bg-slate-700/50 border border-slate-600/40'
-                }`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <p className={`text-base font-bold ${
-                      item.color === 'blue' ? 'text-blue-400' :
-                      item.color === 'yellow' ? 'text-yellow-400' :
-                      item.color === 'purple' ? 'text-purple-400' :
-                      item.color === 'green' ? 'text-green-400' : 'text-slate-400'
-                    }`}>{item.label}</p>
-                    <button onClick={() => copy(item.text, `ym_${i}`)}
-                      className={`text-sm px-3 py-1.5 rounded-lg font-medium transition-colors ${copiedKey === `ym_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
-                      {copiedKey === `ym_${i}` ? '✅' : '📋'}
-                    </button>
-                  </div>
-                  <p className="text-base text-slate-100 leading-relaxed whitespace-pre-line mb-3">{item.text}</p>
-                  <p className="text-sm text-slate-400 leading-relaxed border-t border-slate-600/50 pt-3">💡 {item.point}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 断り文句別切り返し（IT補助金訴求） */}
-          <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
-            <h2 className="text-xl font-bold text-white mb-4">🔄 断り文句別 切り返し（IT補助金訴求）</h2>
-            <div className="space-y-3">
-              {[
-                { obj: '「予算がない」「お金がかかる」', res: '「そうですよね。実はIT補助金を活用していただくと、弊社が申請を全て代行しますので、KIOSK型が48万円〜、タブレット型が13万円〜でご導入できます。月額費用も使わない月は0円なので、繁忙期だけのご利用も可能です。資料だけでもご覧になりませんか？」' },
-                { obj: '「他社製品を検討・使用中」', res: '「弊社はシリンダー錠対応・完全オーダーメイドカスタマイズという点で差別化できています。またIT補助金の申請代行は弊社の強みです。比較検討の資料としてお送りしてもよろしいでしょうか？」' },
-                { obj: '「今は時期が悪い」「来年以降で」', res: '「IT補助金の申請枠は毎年更新されますので、今すぐでなくても情報だけ持っておいていただくと、タイミングが来た時にすぐ動けます。今日中に資料をメールでお送りするだけですので、メールアドレスをお教えいただけますか？」' },
-                { obj: '「補助金って何ですか？」', res: '「IT導入補助金というもので、中小企業様がITシステムを導入する際に国が費用の最大2/3を補助してくれる制度です。弊社は申請手続きを全て代行しておりますので、御社は書類を揃えていただくだけでOKです。」' },
-              ].map((item, i) => (
-                <div key={i} className="bg-slate-700/50 rounded-xl p-4">
-                  <p className="text-base font-bold text-red-400 mb-2">❌ {item.obj}</p>
-                  <div className="flex items-start gap-3">
-                    <p className="text-base text-slate-200 leading-relaxed flex-1">✅ {item.res}</p>
-                    <button onClick={() => copy(item.res, `ym_obj_${i}`)}
-                      className={`text-xs px-3 py-1 rounded-lg font-medium flex-shrink-0 transition-colors ${copiedKey === `ym_obj_${i}` ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300 hover:bg-slate-500'}`}>
-                      {copiedKey === `ym_obj_${i}` ? '✅' : '📋'}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       )}
 
@@ -629,7 +699,6 @@ export default function TeleapoPage() {
               ))}
             </div>
           </div>
-
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
             <h2 className="text-base font-bold text-white mb-4">🔑 訴求ポイント（必ず覚える）</h2>
             <div className="space-y-3">
@@ -662,7 +731,7 @@ export default function TeleapoPage() {
               {[
                 '施設名・電話番号・過去の接触履歴をHubSpotで確認した',
                 'トークスクリプトを一度声に出して確認した',
-                'VOICEVOXやZoomなど架電ツールが起動している',
+                'Zoomなど架電ツールが起動している',
                 'メモ帳（HubSpot）を開いている',
                 '資料送付用のメールテンプレートを準備している',
                 'セミナー日程（今週分）を把握している',
@@ -674,7 +743,6 @@ export default function TeleapoPage() {
               ))}
             </div>
           </div>
-
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
             <h2 className="text-base font-bold text-white mb-4">✅ 架電後チェックリスト</h2>
             <div className="space-y-2">
