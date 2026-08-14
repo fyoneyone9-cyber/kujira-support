@@ -256,37 +256,6 @@ export default function TeleapoPage() {
     setIsListening(false)
   }, [])
 
-  // 音声認識
-  const [isListening, setIsListening] = useState(false)
-  const recognitionRef = useRef<any>(null)
-
-  const startListening = useCallback(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SpeechRecognition) { alert('このブラウザは音声認識に対応していません（Chrome推奨）'); return }
-    const recog = new SpeechRecognition()
-    recog.lang = 'ja-JP'
-    recog.continuous = false
-    recog.interimResults = true
-    recog.onstart = () => setIsListening(true)
-    recog.onresult = (e: any) => {
-      const transcript = Array.from(e.results).map((r: any) => r[0].transcript).join('')
-      setAiInput(transcript)
-      if (e.results[e.results.length - 1].isFinal) {
-        setIsListening(false)
-        fetchAiSuggestions(transcript, aiPattern)
-      }
-    }
-    recog.onerror = () => setIsListening(false)
-    recog.onend = () => setIsListening(false)
-    recognitionRef.current = recog
-    recog.start()
-  }, [aiPattern, fetchAiSuggestions])
-
-  const stopListening = useCallback(() => {
-    recognitionRef.current?.stop()
-    setIsListening(false)
-  }, [])
-
   const fetchAiSuggestions = useCallback(async (text: string, pattern: string) => {
     if (!text.trim()) return
     setAiLoading(true)
