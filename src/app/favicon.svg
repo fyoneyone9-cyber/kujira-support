@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <!-- クジラ本体 -->
+  <ellipse cx="32" cy="34" rx="20" ry="13" fill="#38bdf8"/>
+  <!-- 頭部ハイライト -->
+  <ellipse cx="24" cy="28" rx="8" ry="6" fill="#7dd3fc"/>
+  <!-- 尾びれ -->
+  <path d="M50 38 Q58 30 62 38 Q58 44 50 42 Z" fill="#0ea5e9"/>
+  <path d="M50 42 Q58 50 62 42 Q58 36 50 38 Z" fill="#0284c7"/>
+  <!-- 目 -->
+  <circle cx="22" cy="30" r="2.5" fill="#0f172a"/>
+  <circle cx="23" cy="29" r="1" fill="white"/>
+  <!-- 水しぶき -->
+  <path d="M28 18 Q30 12 32 18" stroke="#bae6fd" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M33 16 Q35 10 37 16" stroke="#bae6fd" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="30" cy="12" r="1.5" fill="#bae6fd"/>
+  <circle cx="36" cy="10" r="1" fill="#bae6fd"/>
+</svg>

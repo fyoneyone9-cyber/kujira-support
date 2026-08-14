@@ -4,6 +4,7 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'KUJIRA Support System',
   description: '導入支援サポートシステム',
+  icons: { icon: '/favicon.svg' },
 }
 
 export default function RootLayout({
