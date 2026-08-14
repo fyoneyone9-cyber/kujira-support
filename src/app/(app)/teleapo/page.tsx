@@ -904,6 +904,24 @@ export default function TeleapoPage() {
                                         className="w-full px-3 py-2 bg-purple-700 hover:bg-purple-600 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2">
                                         {aiLoading ? '⏳ 生成中...' : '🤖 AI切り返しサジェストを起動'}
                                       </button>
+                                      {/* AI結果表示 */}
+                                      {aiLoading && <div className="text-center py-4 text-purple-400 animate-pulse text-sm mt-2">🤖 生成中...</div>}
+                                      {aiError && <div className="mt-2 text-xs text-red-400">⚠️ {aiError}</div>}
+                                      {aiSuggestions.length > 0 && (
+                                        <div className="mt-3 space-y-2">
+                                          <p className="text-xs text-purple-400 font-bold">💡 AI推奨切り返し</p>
+                                          {aiSuggestions.map((s, si) => (
+                                            <div key={si} className="bg-purple-950/60 border border-purple-700/50 rounded-lg p-3">
+                                              <p className="text-xs text-purple-300 font-bold mb-1">{s.label}</p>
+                                              <p className="text-sm text-white leading-relaxed mb-2">{s.talk}</p>
+                                              <button onClick={() => copy(s.talk, `ai_step_${i}_${si}`)}
+                                                className={`text-xs px-2 py-1 rounded transition-colors ${copiedKey === `ai_step_${i}_${si}` ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300 hover:bg-slate-500'}`}>
+                                                {copiedKey === `ai_step_${i}_${si}` ? '✅' : '📋 コピー'}
+                                              </button>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
                                     </div>
                                   )
                                 })()}
