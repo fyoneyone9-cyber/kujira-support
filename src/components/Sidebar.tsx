@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 
 const navItems = [
   { href: '/dashboard', label: 'ダッシュボード', icon: '🏠' },
+  { href: '/ai-summary', label: 'AI要約', icon: '📧' },
   { href: '/logs', label: 'Slackログ', icon: '💬' },
   { href: '/manuals', label: 'マニュアル', icon: '📋' },
   { href: '/nippou', label: '日報作成', icon: '📝' },
