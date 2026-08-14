@@ -952,23 +952,23 @@ export default function TeleapoPage() {
                         {hotelResult && (
                           <div className="mb-4 space-y-2">
                             {i === 0 && hotelResult.opening && (
-                              <div className="bg-cyan-950/60 border border-cyan-600/50 rounded-xl p-3">
-                                <div className="flex items-center justify-between mb-1">
-                                  <p className="text-xs font-bold text-cyan-400">🏨 AI提案：このホテル専用トーク</p>
+                              <div className="bg-cyan-950/60 border border-cyan-600/50 rounded-xl p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <p className="text-sm font-bold text-cyan-400">🏨 AI提案：このホテル専用トーク</p>
                                   <button onClick={() => copy(hotelResult.opening, 'hotel_open_step')}
-                                    className={`text-xs px-2 py-1 rounded transition-colors ${copiedKey === 'hotel_open_step' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                                    className={`text-sm px-3 py-1.5 rounded-lg font-bold transition-colors ${copiedKey === 'hotel_open_step' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
                                     {copiedKey === 'hotel_open_step' ? '✅' : '📋'}
                                   </button>
                                 </div>
-                                <p className="text-base text-cyan-100 leading-relaxed">{hotelResult.opening}</p>
+                                <p className="text-lg text-cyan-100 leading-relaxed">{hotelResult.opening}</p>
                               </div>
                             )}
                             {hotelResult.issues?.length > 0 && (
-                              <div className="bg-red-950/40 border border-red-700/30 rounded-xl p-3">
-                                <p className="text-xs font-bold text-red-400 mb-1">⚠️ AI提案：このホテルの課題</p>
-                                <ul className="space-y-0.5">
+                              <div className="bg-red-950/40 border border-red-700/30 rounded-xl p-4">
+                                <p className="text-sm font-bold text-red-400 mb-2">⚠️ AI提案：このホテルの課題</p>
+                                <ul className="space-y-1">
                                   {hotelResult.issues.map((issue, ii) => (
-                                    <li key={ii} className="text-sm text-slate-200 flex items-start gap-1">
+                                    <li key={ii} className="text-base text-slate-200 flex items-start gap-2">
                                       <span className="text-red-400 flex-shrink-0">•</span>{issue}
                                     </li>
                                   ))}
@@ -976,9 +976,9 @@ export default function TeleapoPage() {
                               </div>
                             )}
                             {hotelResult.tips && (
-                              <div className="bg-yellow-950/30 border border-yellow-700/30 rounded-xl p-3">
-                                <p className="text-xs font-bold text-yellow-400 mb-1">💡 AI提案：架電注意ポイント</p>
-                                <p className="text-sm text-slate-200 leading-relaxed">{hotelResult.tips}</p>
+                              <div className="bg-yellow-950/30 border border-yellow-700/30 rounded-xl p-4">
+                                <p className="text-sm font-bold text-yellow-400 mb-2">💡 AI提案：架電注意ポイント</p>
+                                <p className="text-base text-slate-200 leading-relaxed">{hotelResult.tips}</p>
                               </div>
                             )}
                           </div>
