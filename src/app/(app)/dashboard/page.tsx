@@ -99,6 +99,32 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      {/* 日次業務 */}
+      <div className="bg-slate-800 rounded-2xl border border-slate-700 mb-8">
+        <div className="p-5 border-b border-slate-700">
+          <h2 className="text-base font-semibold text-white">📋 日次業務</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5">
+          {[
+            { label: 'MailDealer（メール対応）', url: 'https://mdjack.maildealer.jp/index.php', icon: '📨' },
+            { label: 'MOVfax（FAX受信）', url: 'https://movfax.lcloud.jp/', icon: '📠' },
+            { label: 'Zoom Phone（架電）', url: 'https://app.zoom.us/wc/phone', icon: '📞' },
+          ].map((link) => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 rounded-xl transition-colors group"
+            >
+              <span className="text-xl">{link.icon}</span>
+              <span className="text-base text-slate-200 group-hover:text-white transition-colors font-medium">{link.label}</span>
+              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-xs">↗</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
       {/* 玄関集合機 */}
       <div className="bg-slate-800 rounded-2xl border border-slate-700 mb-8">
         <div className="p-5 border-b border-slate-700">
