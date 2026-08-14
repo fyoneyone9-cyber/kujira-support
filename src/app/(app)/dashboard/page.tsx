@@ -21,17 +21,25 @@ export default async function DashboardPage() {
       </div>
 
 
-      {/* Personal Support Link */}
-      <div className="mb-6">
-        <a
-          href="https://personal-support-mocha.vercel.app/dashboard"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 px-5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-purple-500 rounded-xl transition-colors group w-fit"
-        >
-          <span className="text-xl">🧑‍💼</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">パーソナルサポート</span>
-          <span className="text-slate-500 text-xs group-hover:text-slate-300 transition-colors">↗</span>
+      {/* Quick links */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        <a href="https://personal-support-mocha.vercel.app/dashboard" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-purple-500 rounded-xl transition-colors group">
+          <span className="text-lg">🧑‍💼</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">パーソナル</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
+        <a href="https://app.slack.com/client/T07G6EHESKG/C07GD3LRMD0" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-purple-500 rounded-xl transition-colors group">
+          <span className="text-lg">💬</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Slack（くじら）</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
+        <a href="https://app.slack.com/client/TB82LHSPM/CB82LJ1B5" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-purple-500 rounded-xl transition-colors group">
+          <span className="text-lg">💬</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Slack（個人）</span>
+          <span className="text-slate-500 text-xs">↗</span>
         </a>
       </div>
 
