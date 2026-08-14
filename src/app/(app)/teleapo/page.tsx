@@ -303,6 +303,20 @@ export default function TeleapoPage() {
         <p className="text-base text-slate-400 mt-1">株式会社デバイスエージェンシー ｜ スマートチェックイン架電</p>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        {TABS.map(tab => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
+              activeTab === tab.id
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+            }`}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* 参考資料リンク */}
       <div className="mb-6 bg-slate-800 rounded-2xl border border-slate-700 p-5">
         <p className="text-base text-slate-300 font-bold mb-4">📁 参考資料</p>
@@ -340,20 +354,6 @@ export default function TeleapoPage() {
             </div>
           </a>
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        {TABS.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
-              activeTab === tab.id
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
-            }`}>
-            {tab.label}
-          </button>
-        ))}
       </div>
 
       {/* ─── TAB: HubSpot手順 ─── */}
