@@ -293,6 +293,9 @@ export default function TeleapoPage() {
   const [aiPattern, setAiPattern] = useState<string>('yoneyama')
   const [stepMemos, setStepMemos] = useState<string[]>(['', '', '', '', ''])
   const updateMemo = (i: number, val: string) => setStepMemos(prev => prev.map((m, idx) => idx === i ? val : m))
+  const [stepNavOpen, setStepNavOpen] = useState<boolean[]>([false, false, false, false, false])
+  const toggleStepNav = (i: number) => setStepNavOpen(prev => prev.map((v, idx) => idx === i ? !v : v))
+  const [ymPattern, setYmPattern] = useState<number>(0)
 
   // ── ノウハウメモ ──
   const [memos, setMemos] = useState<TeleapoMemo[]>([])
@@ -767,82 +770,217 @@ export default function TeleapoPage() {
           </div>
 
           {/* 米山パターン — トークスクリプト */}
-          <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="text-3xl">💰</span>
-              <div>
-                <h2 className="text-xl font-bold text-white">米山パターン — IT補助金全面訴求型</h2>
-                <p className="text-base text-yellow-300/80 mt-0.5">政府の積極支援・補助金申請代行を前面に出し、コスト障壁を最初に取り除くアプローチ</p>
-              </div>
-            </div>
-            <div className="space-y-4">
-              {[
-                {
-                  label: 'STEP 1｜受付突破 — 担当者につなぐ',
-                  color: 'blue',
-                  text: '「お電話失礼いたします。デバイスエージェンシーの米山でございます。\nホテル・旅館様向けのIT補助金のご案内でご連絡しているのですが、\nご支配人様か、ご担当者様はいらっしゃいますでしょうか？」',
-                  point: 'IT補助金のご案内と言うだけで受付に止められにくくなる。「支配人様か担当者様」と二択にすることで名前がなくても取り次ぎを引き出せる。止められたら→「補助金の申請期限がありまして、担当の方に一度ご確認いただけますか」',
-                },
-                {
-                  label: 'STEP 2｜担当者への第一声 — 自然な補助金訴求',
-                  color: 'yellow',
-                  text: '「ありがとうございます。実はいま国のIT補助金を使って、\n自動チェックイン機をKIOSK型なら実質48万円〜、タブレット型なら13万円〜でご導入できる制度がありまして、\n補助金の申請も弊社が全部代行しています。今日は売り込みではなく、その制度のご案内でご連絡しました。\n今、2〜3分だけよろしいでしょうか？」',
-                  point: '「売り込みではなく」を明言するだけで警戒心が大きく下がる。金額（48万円〜/13万円〜）を先に言うことで「高いんでしょ」という先入観を防ぐ。「2〜3分」と時間を区切ることで断り口実を潰す。',
-                },
-                {
-                  label: 'STEP 3｜ヒアリング — 課題を自然に引き出す',
-                  color: 'purple',
-                  text: '「最近、うちの周りのホテル様からも夜間の対応とかインバウンドのお客様への対応で\n大変という声をよく聞くんですが、御社では今、何か運用で課題に感じているところはありますか？」',
-                  point: '具体例（夜間対応・インバウンド等）を出すことで課題を引き出しやすくなる。課題が出たら→「IT補助金で解決されているホテル様の事例があります」につなぐ。課題がなければ→メール送付に切り替える。',
-                },
-                {
-                  label: 'STEP 4｜課題あり → 事例提案 → アポ取り',
-                  color: 'green',
-                  text: '「そうですよね。実は、その課題をIT補助金を使ってうまく解決されているホテル様の事例が手元にあります。\n資料と補助金の申請スケジュールをメールでお送りしてもいいですか？\nその後、15分だけいただいて、補助金を使った具体的なご説明ができればと思いまして。」',
-                  point: '「資料を送る」→「15分だけ」の2段階でアポのハードルを下げる。日程は「来週の火曜か水曜、どちらがご都合よいですか？」と二択で聞く。Zoomでも可と伝えれば地方のホテルも対応できる。',
-                },
-                {
-                  label: "STEP 4'｜課題なし → 情報だけ置いて次につなぐ",
-                  color: 'slate',
-                  text: '「そうですか。IT補助金って毎年申請枠があるので、タイミングが来たときのために情報だけ持っておいてもらえれば十分です。\n補助金の概要と製品の資料をメールでお送りしてもいいですか？\nメールアドレスをいただければ今日中に送ります。」',
-                  point: '「資料送付 → 3週間以内に再架電」でインセンティブ対象を狙う。「今日中に送ります」と即行動を約束することで信頼感を出す。「無理に決めてもらわなくていい」→プレッシャーを外して防衛心を下げる。',
-                },
-              ].map((item, i) => (
-                <div key={i} className={`rounded-xl p-5 ${
-                  item.color === 'blue' ? 'bg-blue-950/40 border border-blue-800/40' :
-                  item.color === 'yellow' ? 'bg-yellow-950/40 border border-yellow-800/40' :
-                  item.color === 'purple' ? 'bg-purple-950/40 border border-purple-800/40' :
-                  item.color === 'green' ? 'bg-green-950/40 border border-green-800/40' :
-                  'bg-slate-700/50 border border-slate-600/40'
-                }`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <p className={`text-base font-bold ${
-                      item.color === 'blue' ? 'text-blue-400' :
-                      item.color === 'yellow' ? 'text-yellow-400' :
-                      item.color === 'purple' ? 'text-purple-400' :
-                      item.color === 'green' ? 'text-green-400' : 'text-slate-400'
-                    }`}>{item.label}</p>
-                    <button onClick={() => copy(item.text, `ym_${i}`)}
-                      className={`text-sm px-3 py-1.5 rounded-lg font-medium transition-colors ${copiedKey === `ym_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
-                      {copiedKey === `ym_${i}` ? '✅' : '📋'}
-                    </button>
-                  </div>
-                  <p className="text-base text-slate-100 leading-relaxed whitespace-pre-line mb-3">{item.text}</p>
-                  <p className="text-sm text-slate-400 leading-relaxed border-t border-slate-600/50 pt-3 mb-3">💡 {item.point}</p>
-                  <div className="border-t border-slate-600/40 pt-3">
-                    <p className="text-xs text-slate-500 mb-1">📝 メモ（このステップの反応・気づき）</p>
-                    <textarea
-                      value={stepMemos[i]}
-                      onChange={e => updateMemo(i, e.target.value)}
-                      placeholder="例：「予算がない」と言われた。補助金で突破できた。"
-                      rows={2}
-                      className="w-full bg-slate-900/60 border border-slate-600/60 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none"
-                    />
+          {(() => {
+            const YM_PATTERNS = [
+              {
+                name: '💰 IT補助金全面訴求型',
+                desc: '政府の積極支援・補助金申請代行を前面に出し、コスト障壁を最初に取り除くアプローチ',
+                steps: [
+                  { label: 'STEP 1｜受付突破', color: 'blue',
+                    text: '「お電話失礼いたします。デバイスエージェンシーの米山でございます。\nホテル・旅館様向けのIT補助金のご案内でご連絡しているのですが、\nご支配人様か、ご担当者様はいらっしゃいますでしょうか？」',
+                    point: 'IT補助金のご案内と言うだけで受付に止められにくくなる。「支配人様か担当者様」と二択にすることで名前がなくても取り次ぎを引き出せる。止められたら→「補助金の申請期限がありまして、担当の方に一度ご確認いただけますか」' },
+                  { label: 'STEP 2｜担当者への第一声', color: 'yellow',
+                    text: '「ありがとうございます。実はいま国のIT補助金を使って、\n自動チェックイン機をKIOSK型なら実質48万円〜、タブレット型なら13万円〜でご導入できる制度がありまして、\n補助金の申請も弊社が全部代行しています。今日は売り込みではなく、その制度のご案内でご連絡しました。\n今、2〜3分だけよろしいでしょうか？」',
+                    point: '「売り込みではなく」を明言するだけで警戒心が大きく下がる。金額を先に言うことで「高いんでしょ」という先入観を防ぐ。「2〜3分」と時間を区切ることで断り口実を潰す。' },
+                  { label: 'STEP 3｜ヒアリング', color: 'purple',
+                    text: '「最近、うちの周りのホテル様からも夜間の対応とかインバウンドのお客様への対応で\n大変という声をよく聞くんですが、御社では今、何か運用で課題に感じているところはありますか？」',
+                    point: '具体例（夜間対応・インバウンド等）を出すことで課題を引き出しやすくなる。課題が出たら→「IT補助金で解決されているホテル様の事例があります」につなぐ。課題がなければ→メール送付に切り替える。' },
+                  { label: 'STEP 4｜課題あり → アポ取り', color: 'green',
+                    text: '「そうですよね。実は、その課題をIT補助金を使ってうまく解決されているホテル様の事例が手元にあります。\n資料と補助金の申請スケジュールをメールでお送りしてもいいですか？\nその後、15分だけいただいて、補助金を使った具体的なご説明ができればと思いまして。」',
+                    point: '「資料を送る」→「15分だけ」の2段階でアポのハードルを下げる。日程は「来週の火曜か水曜、どちらがご都合よいですか？」と二択で聞く。' },
+                  { label: "STEP 4'｜課題なし → 情報置き", color: 'slate',
+                    text: '「そうですか。IT補助金って毎年申請枠があるので、タイミングが来たときのために情報だけ持っておいてもらえれば十分です。\n補助金の概要と製品の資料をメールでお送りしてもいいですか？\nメールアドレスをいただければ今日中に送ります。」',
+                    point: '「資料送付 → 3週間以内に再架電」でインセンティブ対象を狙う。「今日中に送ります」と即行動を約束することで信頼感を出す。' },
+                ],
+              },
+              {
+                name: '🏨 インバウンド課題共感型',
+                desc: '外国人客対応の苦労に共感してから製品メリットを提示。インバウンドが多い施設に刺さる。',
+                steps: [
+                  { label: 'STEP 1｜受付突破', color: 'blue',
+                    text: '「お電話失礼いたします。デバイスエージェンシーの米山でございます。\nインバウンドのお客様対応についてご案内があってお電話しているのですが、\nご支配人様か、ご担当者様はいらっしゃいますでしょうか？」',
+                    point: '「インバウンド対応」は今どの施設も頭を悩ませているキーワード。受付の方も共感しやすく取り次いでもらいやすい。' },
+                  { label: 'STEP 2｜共感で入る', color: 'yellow',
+                    text: '「ありがとうございます。最近、外国人のお客様が増えて、言葉の壁でチェックイン対応に時間がかかるというお声をよく伺うのですが、御社でもそういった場面はありますか？」',
+                    point: 'まず相手に話させる。「ある」と言えばそのまま課題→提案へ。「ない」と言えば「実は13か国語対応で今後のインバウンド増加にも備えられる」と将来訴求へ切り替える。' },
+                  { label: 'STEP 3｜13か国語対応訴求', color: 'purple',
+                    text: '「弊社の自動チェックイン機は13か国語に対応しておりまして、パスポートをかざすだけで外国人のお客様も自分でチェックインできる仕組みになっています。\nスタッフの方が英語や中国語を話せなくても対応できます。\nIT補助金を使うと実質13万円〜でご導入できるのですが、資料だけでも見ていただけますか？」',
+                    point: '「スタッフが語学堪能でなくてもOK」は強い訴求点。実際の導入事例（インバウンド比率が高い地域の施設）があれば添えると説得力が増す。' },
+                  { label: 'STEP 4｜セミナーへ誘導', color: 'green',
+                    text: '「毎週水曜11時・金曜13時にZoomで無料セミナーを開催しています。\n30分ほどで実際の画面操作もご覧いただけますので、ご都合のよい日程はございますか？\nオンラインですので全国どこからでもご参加いただけます。」',
+                    point: 'セミナーへの誘導は「アポ」より心理的ハードルが低い。「勉強会として」と伝えると参加しやすくなる。' },
+                  { label: "STEP 4'｜資料送付で締め", color: 'slate',
+                    text: '「では、13か国語対応の機能説明とインバウンド対応事例をまとめた資料をお送りします。\nメールアドレスをいただければ今日中にお送りしますので、お時間のある時にご覧いただけますか？」',
+                    point: '資料にはパスポートスキャン・多言語対応のスクリーンショットを入れると視覚的に伝わりやすい。' },
+                ],
+              },
+              {
+                name: '🆚 競合比較・乗り換え訴求型',
+                desc: '他社システムを使っている施設への切り口。「比較するだけ」のハードルで入り込む。',
+                steps: [
+                  { label: 'STEP 1｜受付突破', color: 'blue',
+                    text: '「お電話失礼いたします。デバイスエージェンシーの米山でございます。\n自動チェックイン機のご利用状況についてご確認でお電話しているのですが、\nご支配人様か、ご担当者様はいらっしゃいますでしょうか？」',
+                    point: '「ご利用状況の確認」という言い方で「すでに他社使ってます」という返答を想定済みのスタンスを取る。' },
+                  { label: 'STEP 2｜他社利用を確認', color: 'yellow',
+                    text: '「ありがとうございます。現在、自動チェックイン機やスマートロックは何かご利用でしょうか？\nもしすでにご利用であれば、比較のご参考として弊社の料金と機能をお伝えするだけでも構いません。」',
+                    point: '「すでに使ってます」→「比較の参考に」で会話を続ける。「使っていない」→補助金訴求型に切り替える。' },
+                  { label: 'STEP 3｜差別化3点訴求', color: 'purple',
+                    text: '「弊社は①完全オーダーメイドのカスタマイズ対応、②月額0円の閑散期プラン、③IT補助金申請の完全代行という3点で、既存の製品と差別化しています。\n特に月額費用を使わない月は0円にできる点は、他社にはほぼない仕組みです。\n今の月額費用と比較してみてもいいですか？」',
+                    point: '「月額0円」は強烈な差別化ポイント。「今の費用より安くなるかもしれない」という期待感で話を続けてもらう。' },
+                  { label: 'STEP 4｜乗り換え前提のアポ', color: 'green',
+                    text: '「契約期間がいつ終わるかによりますが、次の更新前に一度比較していただくのが一番です。\n15分だけZoomで実際の画面をお見せすることもできますが、いかがでしょうか？\n来週の火曜か水曜はいかがですか？」',
+                    point: '「契約更新前に情報収集」という文脈で会うことの合理性を作る。今すぐ乗り換えとは言わず、選択肢を広げるだけと伝える。' },
+                  { label: "STEP 4'｜情報置きで締め", color: 'slate',
+                    text: '「では、他社との機能・価格比較表をまとめた資料をお送りします。\n今すぐ変える必要はありませんが、次の更新タイミングで選択肢に入れていただければ十分です。\nメールアドレスをいただけますか？」',
+                    point: '比較表は「弊社が勝っている点」を視覚的に並べる。PMS連携実績・補助金代行・月額0円の3点を軸にする。' },
+                ],
+              },
+              {
+                name: '📊 導入事例・数字訴求型',
+                desc: '「実際に導入した施設の結果」から入るROI重視アプローチ。決裁権者への刺さりが強い。',
+                steps: [
+                  { label: 'STEP 1｜受付突破', color: 'blue',
+                    text: '「お電話失礼いたします。デバイスエージェンシーの米山でございます。\nチェックイン業務の省人化についてご案内があってお電話しているのですが、\nご支配人様か、ご担当者様はいらっしゃいますでしょうか？」',
+                    point: '「省人化」は経営層に刺さるキーワード。人件費削減・スタッフ配置見直しを考えている施設に響きやすい。' },
+                  { label: 'STEP 2｜事例から入る', color: 'yellow',
+                    text: '「ありがとうございます。先月も神奈川県のホテル様に自動チェックイン機をご導入いただいたのですが、\nフロントの夜間対応スタッフをゼロにできて、月30万円以上のコスト削減になったとご報告いただきました。\n御社でも夜間フロントのコストは課題になっていますか？」',
+                    point: '具体的な地域・数字を出すことで信憑性が上がる。「ゼロにできた」という結果は強い。施設規模や地域が近いほど刺さる。' },
+                  { label: 'STEP 3｜ROI計算を一緒にする', color: 'purple',
+                    text: '「例えばフロントスタッフが夜間に1名いる場合、時給1,200円×8時間×30日で月28万円以上かかります。\nIT補助金でKIOSK型を実質48万円でご導入いただくと、2か月以内に回収できる計算になります。\n御社の今の夜間体制はどのような感じですか？」',
+                    point: '「2か月で回収」という数字はインパクトが大きい。相手の実情を聞きながら、その施設専用の数字にカスタマイズすると説得力が増す。' },
+                  { label: 'STEP 4｜事例資料 → アポ', color: 'green',
+                    text: '「実際の導入事例（コスト削減額・スタッフ配置の変化）をまとめた資料があります。\nお送りした上で、具体的な導入シミュレーションを15分でご説明できればと思いますが、いかがでしょうか？」',
+                    point: '「シミュレーション」という言葉でアポの目的を具体化する。「見積もり」より心理的ハードルが低い。' },
+                  { label: "STEP 4'｜数字だけ置いて次へ", color: 'slate',
+                    text: '「では、導入事例と月別コスト比較表をメールでお送りします。\n数字で見ていただく方が分かりやすいと思いますので、ご確認いただけましたら、また改めてご連絡してもよろしいでしょうか？」',
+                    point: '再架電の許可を取ることが重要。「また改めて」と言うことで次回の架電を断りにくくする。' },
+                ],
+              },
+              {
+                name: '🌙 夜間・無人運営訴求型',
+                desc: '深夜対応・無人フロントの課題から入る。小規模施設・民宿・ペンションに刺さりやすい。',
+                steps: [
+                  { label: 'STEP 1｜受付突破', color: 'blue',
+                    text: '「お電話失礼いたします。デバイスエージェンシーの米山でございます。\n夜間・深夜のフロント対応についてご案内があってお電話しているのですが、\nご支配人様か、オーナー様はいらっしゃいますでしょうか？」',
+                    point: '「夜間対応」は宿泊施設の普遍的な悩み。オーナー兼フロントの小規模施設に特に刺さる。' },
+                  { label: 'STEP 2｜夜間の苦労に共感', color: 'yellow',
+                    text: '「ありがとうございます。夜遅いチェックインや深夜の問い合わせで、スタッフが起きて対応しているという施設様からよくお聞きするのですが、御社ではいかがですか？」',
+                    point: '小規模施設のオーナーは自分が深夜対応していることが多い。「分かってくれている」という共感を作ることが重要。' },
+                  { label: 'STEP 3｜無人モード訴求', color: 'purple',
+                    text: '「弊社の自動チェックイン機には「無人モード」という機能があって、深夜帯は機械がチェックインを自動で行います。\nスマートロックと連携すれば、フロントがいなくてもお客様がセルフでお部屋に入れます。\nIT補助金で実質13万円〜でご導入できますので、今の深夜対応のコストと比べると…」',
+                    point: 'スマートロック連携は「完全無人化」のイメージを作る。「フロントがいなくていい」という解放感を強調する。' },
+                  { label: 'STEP 4｜デモ見せるアポ', color: 'green',
+                    text: '「実際の無人チェックインの流れをZoomで画面共有しながらご覧いただくことができます。\n15分ほどで「うちでも使えるか」のイメージがついていただけると思いますが、今週か来週でご都合はいかがでしょうか？」',
+                    point: 'デモを見せると「具体的に使えるイメージ」が湧く。映像・画面で見せる方が口頭説明より断然伝わりやすい。' },
+                  { label: "STEP 4'｜深夜対応コスト比較で締め", color: 'slate',
+                    text: '「では、深夜対応コストの削減シミュレーションと、無人チェックインの手順をまとめた資料をお送りします。\n今すぐでなくても、参考資料として持っておいていただければと思います。\nメールアドレスをいただけますか？」',
+                    point: '「今すぐでなくても」でプレッシャーを外す。小規模オーナーは即決できないケースが多いので、資料→再架電のサイクルで関係を作る。' },
+                ],
+              },
+            ]
+            const pat = YM_PATTERNS[ymPattern]
+            const colorClass = (c: string) => ({
+              blue: { bg: 'bg-blue-950/40 border border-blue-800/40', text: 'text-blue-400' },
+              yellow: { bg: 'bg-yellow-950/40 border border-yellow-800/40', text: 'text-yellow-400' },
+              purple: { bg: 'bg-purple-950/40 border border-purple-800/40', text: 'text-purple-400' },
+              green: { bg: 'bg-green-950/40 border border-green-800/40', text: 'text-green-400' },
+              slate: { bg: 'bg-slate-700/50 border border-slate-600/40', text: 'text-slate-400' },
+            }[c] ?? { bg: 'bg-slate-700/50 border border-slate-600/40', text: 'text-slate-400' })
+
+            return (
+              <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-3xl">💰</span>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">米山パターン</h2>
+                    <p className="text-base text-yellow-300/80 mt-0.5">{pat.desc}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+
+                {/* パターン切り替えタブ */}
+                <div className="flex flex-wrap gap-2 mb-5 pb-4 border-b border-slate-700">
+                  {YM_PATTERNS.map((p, idx) => (
+                    <button key={idx} onClick={() => setYmPattern(idx)}
+                      className={`text-sm px-3 py-2 rounded-xl font-bold transition-all ${ymPattern === idx ? 'bg-yellow-600 text-white shadow-lg scale-105' : 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'}`}>
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="space-y-4">
+                  {pat.steps.map((item, i) => {
+                    const cc = colorClass(item.color)
+                    return (
+                      <div key={i} className={`rounded-xl p-5 ${cc.bg}`}>
+                        <div className="flex items-center justify-between mb-3">
+                          <p className={`text-base font-bold ${cc.text}`}>{item.label}</p>
+                          <button onClick={() => copy(item.text, `ym_${ymPattern}_${i}`)}
+                            className={`text-sm px-3 py-1.5 rounded-lg font-medium transition-colors ${copiedKey === `ym_${ymPattern}_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                            {copiedKey === `ym_${ymPattern}_${i}` ? '✅' : '📋'}
+                          </button>
+                        </div>
+                        <p className="text-base text-slate-100 leading-relaxed whitespace-pre-line mb-3">{item.text}</p>
+                        <p className="text-sm text-slate-400 leading-relaxed border-t border-slate-600/50 pt-3 mb-3">💡 {item.point}</p>
+
+                        {/* 切り返しナビ折りたたみ */}
+                        <div className="border-t border-slate-600/40 pt-3 mb-3">
+                          <button onClick={() => toggleStepNav(i)}
+                            className={`w-full text-left text-sm font-bold px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${stepNavOpen[i] ? 'bg-blue-900/40 text-blue-300' : 'bg-slate-700/60 text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`}>
+                            <span>⚡ 切り返しナビ</span>
+                            <span>{stepNavOpen[i] ? '▲ 閉じる' : '▼ 開く'}</span>
+                          </button>
+                          {stepNavOpen[i] && (
+                            <div className="mt-3 bg-slate-900/60 rounded-xl p-4">
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                {CATEGORY_ITEMS.map(cat => (
+                                  <button key={cat.id} onClick={() => selectCat(cat.id)}
+                                    className={`px-3 py-2 rounded-lg text-sm font-bold transition-all ${selectedCat === cat.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
+                                    {OBJECTION_TREE[cat.id]?.label}
+                                  </button>
+                                ))}
+                              </div>
+                              {selectedCat && (
+                                <div className="border-t border-slate-700 pt-3">
+                                  <div className="flex flex-wrap gap-2 mb-3">
+                                    {CATEGORY_ITEMS.find(c => c.id === selectedCat)?.children.map(childId => (
+                                      <button key={childId} onClick={() => selectResponse(childId)}
+                                        className={`px-3 py-2 rounded-lg text-sm font-bold transition-all ${selectedResponse === childId ? 'bg-green-600 text-white shadow-lg' : 'bg-slate-700/70 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
+                                        {OBJECTION_TREE[childId]?.label}
+                                      </button>
+                                    ))}
+                                  </div>
+                                  {selectedResponse && (
+                                    <div className="bg-green-950/60 border border-green-700/70 rounded-xl p-4">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <p className="text-sm text-green-400 font-bold">💬 切り返しトーク</p>
+                                        <button onClick={() => copy(OBJECTION_TREE[selectedResponse]?.response || '', `step_nav_${i}`)}
+                                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${copiedKey === `step_nav_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'}`}>
+                                          {copiedKey === `step_nav_${i}` ? '✅' : '📋'}
+                                        </button>
+                                      </div>
+                                      <p className="text-base text-white leading-relaxed">{OBJECTION_TREE[selectedResponse]?.response}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="border-t border-slate-600/40 pt-3">
+                          <p className="text-xs text-slate-500 mb-1">📝 メモ</p>
+                          <textarea value={stepMemos[i]} onChange={e => updateMemo(i, e.target.value)}
+                            placeholder="例：「予算がない」と言われた。補助金で突破できた。"
+                            rows={2}
+                            className="w-full bg-slate-900/60 border border-slate-600/60 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none" />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* IT補助金断り文句別切り返し */}
           <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
