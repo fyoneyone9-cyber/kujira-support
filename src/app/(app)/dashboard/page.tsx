@@ -1,17 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
 
 export default async function DashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
-  const [
-    { data: recentManuals },
-    { data: recentLogs },
-  ] = await Promise.all([
-    supabase.from('manuals').select('id, title, category, created_at').order('created_at', { ascending: false }).limit(5),
-    supabase.from('slack_logs').select('id, title, content, created_at').order('created_at', { ascending: false }).limit(5),
-  ])
 
   return (
     <div>
@@ -128,61 +119,6 @@ export default async function DashboardPage() {
               <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-sm">↗</span>
             </a>
           ))}
-        </div>
-      </div>
-
-      {/* Two columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Logs */}
-        <div className="bg-slate-800 rounded-2xl border border-slate-700">
-          <div className="p-5 border-b border-slate-700 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-white">最近のSlackログ</h2>
-            <Link href="/logs" className="text-xs text-slate-400 hover:text-white transition-colors">すべて見る →</Link>
-          </div>
-          <div className="divide-y divide-slate-700">
-            {recentLogs && recentLogs.length > 0 ? (
-              recentLogs.map((log) => (
-                <Link key={log.id} href={`/logs/${log.id}`} className="block p-4 hover:bg-slate-700/50 transition-colors">
-                  <p className="text-white text-sm font-medium truncate">{log.title || '(タイトルなし)'}</p>
-                  <p className="text-slate-500 text-xs mt-0.5 truncate font-mono">{log.content?.slice(0, 60)}...</p>
-                  <p className="text-slate-600 text-xs mt-1">{new Date(log.created_at).toLocaleDateString('ja-JP')}</p>
-                </Link>
-              ))
-            ) : (
-              <div className="p-10 text-center">
-                <p className="text-slate-500 text-sm">まだログがありません</p>
-                <Link href="/logs/new" className="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300">貼り付ける →</Link>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Manuals */}
-        <div className="bg-slate-800 rounded-2xl border border-slate-700">
-          <div className="p-5 border-b border-slate-700 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-white">最近のマニュアル</h2>
-            <Link href="/manuals" className="text-xs text-slate-400 hover:text-white transition-colors">すべて見る →</Link>
-          </div>
-          <div className="divide-y divide-slate-700">
-            {recentManuals && recentManuals.length > 0 ? (
-              recentManuals.map((manual) => (
-                <div key={manual.id} className="p-4 flex items-center justify-between hover:bg-slate-700/50 transition-colors">
-                  <div>
-                    <p className="text-white text-sm font-medium">{manual.title}</p>
-                    {manual.category && (
-                      <span className="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded mt-1 inline-block">{manual.category}</span>
-                    )}
-                  </div>
-                  <p className="text-slate-500 text-xs">{new Date(manual.created_at).toLocaleDateString('ja-JP')}</p>
-                </div>
-              ))
-            ) : (
-              <div className="p-10 text-center">
-                <p className="text-slate-500 text-sm">マニュアルがまだありません</p>
-                <Link href="/manuals/new" className="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300">作成する →</Link>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>
