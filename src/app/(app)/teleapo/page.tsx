@@ -837,7 +837,7 @@ export default function TeleapoPage() {
                                 <div className="flex flex-wrap gap-2 mb-3">
                                   {CATEGORY_ITEMS.map(cat => (
                                     <button key={cat.id} onClick={() => selectCat(cat.id)}
-                                      className={`px-3 py-2 rounded-lg text-sm font-bold transition-all ${selectedCat === cat.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
+                                      className={`px-4 py-3 rounded-xl text-base font-bold transition-all ${selectedCat === cat.id ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
                                       {OBJECTION_TREE[cat.id]?.label}
                                     </button>
                                   ))}
@@ -847,7 +847,7 @@ export default function TeleapoPage() {
                                     <div className="flex flex-wrap gap-2 mb-3">
                                       {CATEGORY_ITEMS.find(c => c.id === selectedCat)?.children.map(childId => (
                                         <button key={childId} onClick={() => selectResponse(childId)}
-                                          className={`px-3 py-2 rounded-lg text-sm font-bold transition-all ${selectedResponse === childId ? 'bg-green-600 text-white shadow-lg' : 'bg-slate-700/70 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
+                                          className={`px-4 py-3 rounded-xl text-base font-bold transition-all ${selectedResponse === childId ? 'bg-green-600 text-white shadow-lg scale-105' : 'bg-slate-700/70 text-slate-200 hover:bg-slate-600 border border-slate-600'}`}>
                                           {OBJECTION_TREE[childId]?.label}
                                         </button>
                                       ))}
