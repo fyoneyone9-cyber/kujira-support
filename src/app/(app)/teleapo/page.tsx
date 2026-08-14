@@ -130,7 +130,7 @@ const OBJECTION_TREE: Record<string, { label: string; response: string }> = {
   'cat_pmsname':     { label: '🖥️ PMSメーカー名が出てきた', response: '' },
   'pmsname_nehops':  { label: 'NEHOPS（NEC）', response: '「NECのNEHOPS（ネホップス）ですね。承知しました。連携実績も増えており、弊社からメーカーへ連携依頼することも可能です。ぜひ一度ご相談させてください。」' },
   'pmsname_glovia':  { label: 'GLOVIA smart（富士通）', response: '「富士通のGLOVIA smartですね。承知しました。弊社はリストにないPMSでも諦めず、メーカーへ直接連携依頼して進めております。詳しくはご相談ください。」' },
-  'pmsname_wincal':  { label: 'Wincal（アルメックス）', response: '「アルメックスのWincalですね。USENグループのアルメックスですね。連携について弊社から対応できますので、ぜひご相談ください。」' },
+  'pmsname_wincal':  { label: 'Wincal（アルメックス）', response: '「アルメックス（USEN-ALME）のWincalですね。正直にお伝えすると、アルメックスの場合は基本的にPMSを乗り換えていただくしか連携の方法がない状況です。乗り換えのご検討が可能であればご提供できますが、現状のシステムは変えたくないということであれば、弊社からのご提案自体が難しくなります。その点だけご確認させていただけますか。」' },
   'pmsname_staysee': { label: 'Staysee / AirHost / Beds24', response: '「はい、連携実績がございます。弊社との連携をスムーズに進めることができます。詳しい資料をお送りしてもよろしいでしょうか。」' },
   'pmsname_airhost': { label: 'エアホスト', response: '「エアホストですね。対応しております。PMS・サイトコントローラー問わず対応できますので、ぜひ詳しくお話しさせてください。」' },
   'pmsname_neppan':  { label: 'ねっぱん！', response: '「ねっぱん！はサイトコントローラー版とPMS版がありますが、どちらをお使いでしょうか。2026年1月に楽天トラベルサービスへ合併・改称されましたね。いずれも連携について弊社からご対応できます。」' },
@@ -157,6 +157,14 @@ const OBJECTION_TREE: Record<string, { label: string; response: string }> = {
   'ope_stat':        { label: '宿泊旅行統計調査', response: '「宿泊実績定期報告の機能があり、統計調査用のデータをDMSから出力できます。手集計は不要になります。」' },
   'ope_network':     { label: 'LANがない・回線がない', response: '「有線・無線どちらでも構いません。また回線工事が難しい場所には弊社のLTE SIMをご活用いただくことで、回線工事なしで接続できます。固定IPも不要です。」' },
   'ope_season':      { label: '季節営業・閑散期', response: '「シーズン営業のご利用が可能です。動かさない月は月額保守費用を停止できます。ただし端末メーカーへの保守費用は別途かかります。完全にゼロにはなりません。」' },
+  'ope_checkout_rush': { label: '朝チェックアウトで混む', response: '「QRコードをお部屋に掲示しておくだけで、お客様がスマホで読み取ってチェックアウトを完了できます。フロントに来る必要がなくなり、朝の混雑が大幅に解消されます。精算なし物件またはチェックイン時精算が前提です。」' },
+  'ope_before_checkout': { label: '精算がチェックアウト時に集中する', response: '「前日精算の機能があり、チェックアウト当日ではなく前日に精算を済ませていただく運用が可能です。朝の精算集中を分散でき、チェックアウト時の待ち行列を解消できます。」' },
+  'ope_identity':    { label: '本人確認はどうするの（無人時）', response: '「無人モードONのとき、お客様が個人情報を入力し終えるとDMS（管理画面）に呼び出し画面が表示され、スタッフがビデオ通話で対応します。撮影した顔写真をパスポート写真と照合し、「承認する」を押して完了です。現地に人はいませんが、確認する人はいます。」' },
+  'ope_kiosk_explain': { label: '「要するに精算機でしょ？」と言われた', response: '「精算は機能の一部です。チェックイン・宿泊者名簿の電子化・鍵の自動発行・多言語対応・統計レポートまで一台に集約できます。精算機との一番の違いは「フロント業務全体を代替できる」点です。」' },
+  'ope_deepnight':   { label: '深夜のチェックインが心配', response: '「無人モードをONにして端末を置いておくだけで、深夜でもお客様が自力でチェックイン・精算・鍵の受け取りまで完結できます。スタッフがいなくても完全対応可能です。」' },
+  'ope_tourist_stat': { label: '宿泊旅行統計調査が大変', response: '「宿泊実績定期報告の機能があります。チェックインデータから自動で集計でき、DMSから出力するだけです。手集計で丸一日かかっていた作業が不要になります。」' },
+  'ope_card_checkin': { label: 'カード読み取りでチェックイン', response: '「カード読み取りアプリを使うと、カードキーをかざすだけで朝食付きかどうかなどお客様の情報が確認できます。スタッフが宿泊者リストを都度確認する手間が省けます。」' },
+  'ope_almex_connect': { label: 'アルメックスとの連携はできる？', response: '「アルメックスの場合は、基本的にPMSの乗り換えが前提になります。他のPMSのように弊社からメーカーへ連携依頼を進めることが難しい唯一の例外です。PMSの乗り換えが可能であればご提供できますが、現状維持の場合は残念ながらご提案が難しくなります。」' },
 }
 
 // ── カテゴリ→子ID マッピング ──
@@ -178,7 +186,7 @@ const CATEGORY_ITEMS = [
   { id: 'cat_claim',       children: ['claim_apology', 'claim_record', 'claim_freq'] },
   { id: 'cat_pmsname',     children: ['pmsname_nehops', 'pmsname_glovia', 'pmsname_wincal', 'pmsname_staysee', 'pmsname_airhost', 'pmsname_neppan', 'pmsname_unknown'] },
   { id: 'cat_locktype',    children: ['locktype_miwa', 'locktype_epic', 'locktype_remote', 'locktype_nochange', 'locktype_keybox'] },
-  { id: 'cat_operation',   children: ['ope_unmanned_mode', 'ope_checkin_search', 'ope_id_check', 'ope_cardkey_num', 'ope_group', 'ope_passport_jp', 'ope_kessai', 'ope_invoice', 'ope_stat', 'ope_network', 'ope_season'] },
+  { id: 'cat_operation',   children: ['ope_unmanned_mode', 'ope_checkin_search', 'ope_id_check', 'ope_identity', 'ope_cardkey_num', 'ope_group', 'ope_passport_jp', 'ope_kessai', 'ope_invoice', 'ope_stat', 'ope_network', 'ope_season', 'ope_checkout_rush', 'ope_before_checkout', 'ope_kiosk_explain', 'ope_deepnight', 'ope_tourist_stat', 'ope_card_checkin', 'ope_almex_connect'] },
 ]
 
 // ── キーワード→切り返しIDマッピング ──
@@ -215,6 +223,20 @@ const KEYWORD_MAP: Array<{ keywords: string[]; ids: string[] }> = [
     ids: ['timing_future', 'timing_task'] },
   { keywords: ['かけるな', '電話しないで', 'もうかけ', '迷惑', 'クレーム', '怒', 'おこ', '二度と'],
     ids: ['claim_apology', 'claim_record'] },
+  { keywords: ['朝チェックアウト', 'チェックアウトで混む', 'チェックアウト渋滞', 'チェックアウト時間', '朝混む'],
+    ids: ['ope_checkout_rush', 'ope_before_checkout'] },
+  { keywords: ['精算が集中', '精算が混む', '精算待ち', '前日精算'],
+    ids: ['ope_before_checkout', 'ope_checkout_rush'] },
+  { keywords: ['深夜', '夜中', '夜遅い', '0時', '深夜対応', '夜間'],
+    ids: ['ope_deepnight', 'unmanned_night'] },
+  { keywords: ['精算機', '自動精算機', 'それだけ', '要するに', 'ただの'],
+    ids: ['ope_kiosk_explain'] },
+  { keywords: ['本人確認', '誰でも入れる', '不法', '無人で確認', 'ID確認'],
+    ids: ['ope_identity', 'ope_id_check'] },
+  { keywords: ['アルメックス', 'Wincal', 'ウィンカル', 'USEN'],
+    ids: ['ope_almex_connect', 'pmsname_wincal'] },
+  { keywords: ['統計', '宿泊統計', '統計調査', '手集計', '宿泊旅行'],
+    ids: ['ope_tourist_stat', 'ope_stat'] },
 ]
 
 function suggestByKeyword(input: string): string[] {
