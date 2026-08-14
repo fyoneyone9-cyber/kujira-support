@@ -982,30 +982,6 @@ export default function TeleapoPage() {
             )
           })()}
 
-          {/* IT補助金断り文句別切り返し */}
-          <div className="bg-slate-800 rounded-2xl border border-yellow-700/40 p-6">
-            <h2 className="text-base font-bold text-white mb-4">🔄 断り文句別 切り返し（IT補助金訴求）</h2>
-            <div className="space-y-3">
-              {[
-                { obj: '「予算がない」「お金がかかる」', res: '「そうですよね。実はIT補助金を活用していただくと、弊社が申請を全て代行しますので、KIOSK型が48万円〜、タブレット型が13万円〜でご導入できます。月額費用も使わない月は0円なので、繁忙期だけのご利用も可能です。資料だけでもご覧になりませんか？」' },
-                { obj: '「他社製品を検討・使用中」', res: '「弊社はシリンダー錠対応・完全オーダーメイドカスタマイズという点で差別化できています。またIT補助金の申請代行は弊社の強みです。比較検討の資料としてお送りしてもよろしいでしょうか？」' },
-                { obj: '「今は時期が悪い」「来年以降で」', res: '「IT補助金の申請枠は毎年更新されますので、今すぐでなくても情報だけ持っておいていただくと、タイミングが来た時にすぐ動けます。今日中に資料をメールでお送りするだけですので、メールアドレスをお教えいただけますか？」' },
-                { obj: '「補助金って何ですか？」', res: '「IT導入補助金というもので、中小企業様がITシステムを導入する際に国が費用の最大2/3を補助してくれる制度です。弊社は申請手続きを全て代行しておりますので、御社は書類を揃えていただくだけでOKです。」' },
-              ].map((item, i) => (
-                <div key={i} className="bg-slate-700/50 rounded-xl p-4">
-                  <p className="text-base font-bold text-red-400 mb-2">❌ {item.obj}</p>
-                  <div className="flex items-start gap-3">
-                    <p className="text-base text-slate-200 leading-relaxed flex-1">✅ {item.res}</p>
-                    <button onClick={() => copy(item.res, `ym_obj_${i}`)}
-                      className={`text-xs px-3 py-1 rounded-lg font-medium flex-shrink-0 transition-colors ${copiedKey === `ym_obj_${i}` ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300 hover:bg-slate-500'}`}>
-                      {copiedKey === `ym_obj_${i}` ? '✅' : '📋'}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
       )}
 
