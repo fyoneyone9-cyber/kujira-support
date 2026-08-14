@@ -265,7 +265,18 @@ const TABS = [
   { id: 'knowledge',label: '💡 商品知識' },
   { id: 'checklist',label: '✅ チェックリスト' },
   { id: 'mail',     label: '✉️ メールテンプレ' },
+  { id: 'memo',     label: '📝 ノウハウメモ' },
 ]
+
+const MEMO_CATEGORIES = [
+  { id: 'subsidy',   label: '💰 補助金' },
+  { id: 'objection', label: '🔄 断り切り返し' },
+  { id: 'pms',       label: '💻 PMS・システム' },
+  { id: 'script',    label: '📞 トーク気づき' },
+  { id: 'other',     label: '📌 その他' },
+]
+
+type TeleapoMemo = { id: string; content: string; category: string; created_at: string }
 
 export default function TeleapoPage() {
   const [activeTab, setActiveTab] = useState('hubspot')
@@ -283,6 +294,54 @@ export default function TeleapoPage() {
   const [aiPattern, setAiPattern] = useState<string>('yoneyama')
   const [stepMemos, setStepMemos] = useState<string[]>(['', '', '', '', ''])
   const updateMemo = (i: number, val: string) => setStepMemos(prev => prev.map((m, idx) => idx === i ? val : m))
+
+  // ── ノウハウメモ ──
+  const [memos, setMemos] = useState<TeleapoMemo[]>([])
+  const [memosLoaded, setMemosLoaded] = useState(false)
+  const [memoInput, setMemoInput] = useState('')
+  const [memoCat, setMemoCat] = useState('other')
+  const [memoSaving, setMemoSaving] = useState(false)
+  const [memoFilter, setMemoFilter] = useState('all')
+
+  const loadMemos = useCallback(async () => {
+    const res = await fetch('/api/teleapo-memo')
+    if (!res.ok) return
+    const data = await res.json()
+    setMemos(data.memos ?? [])
+    setMemosLoaded(true)
+  }, [])
+
+  const saveMemo = useCallback(async () => {
+    if (!memoInput.trim()) return
+    setMemoSaving(true)
+    try {
+      const res = await fetch('/api/teleapo-memo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: memoInput, category: memoCat }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setMemos(prev => [data.memo, ...prev])
+        setMemoInput('')
+      }
+    } finally {
+      setMemoSaving(false)
+    }
+  }, [memoInput, memoCat])
+
+  const deleteMemo = useCallback(async (id: string) => {
+    await fetch('/api/teleapo-memo', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    setMemos(prev => prev.filter(m => m.id !== id))
+  }, [])
+
+  useEffect(() => {
+    if (activeTab === 'memo' && !memosLoaded) loadMemos()
+  }, [activeTab, memosLoaded, loadMemos])
 
   const fetchAiSuggestions = useCallback(async (text: string, pattern: string) => {
     if (!text.trim() || text.trim().length < 80) return
@@ -1114,6 +1173,89 @@ https://us02web.zoom.us/j/XXXXXXXXXX
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ─── TAB: ノウハウメモ ─── */}
+      {activeTab === 'memo' && (
+        <div className="space-y-6">
+          {/* 入力エリア */}
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+            <h2 className="text-xl font-bold text-white mb-4">📝 気づき・ノウハウを記録する</h2>
+            <div className="flex gap-2 mb-3 flex-wrap">
+              {MEMO_CATEGORIES.map(cat => (
+                <button key={cat.id} onClick={() => setMemoCat(cat.id)}
+                  className={`text-sm px-3 py-1.5 rounded-full font-medium transition-colors ${memoCat === cat.id ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={memoInput}
+              onChange={e => setMemoInput(e.target.value)}
+              placeholder="例：「補助金の申請期限があります」と言うだけで受付突破率が上がる。支配人か担当者の二択にするとどちらかに繋いでもらいやすい。"
+              rows={4}
+              className="w-full bg-slate-700 text-white rounded-xl px-4 py-3 text-base placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+            <div className="flex justify-between items-center mt-3">
+              <span className="text-sm text-slate-400">{memoInput.length}文字</span>
+              <button onClick={saveMemo} disabled={memoSaving || !memoInput.trim()}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-colors text-sm">
+                {memoSaving ? '保存中…' : '💾 保存'}
+              </button>
+            </div>
+          </div>
+
+          {/* フィルタ */}
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={() => setMemoFilter('all')}
+              className={`text-sm px-3 py-1.5 rounded-full font-medium transition-colors ${memoFilter === 'all' ? 'bg-slate-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+              すべて
+            </button>
+            {MEMO_CATEGORIES.map(cat => (
+              <button key={cat.id} onClick={() => setMemoFilter(cat.id)}
+                className={`text-sm px-3 py-1.5 rounded-full font-medium transition-colors ${memoFilter === cat.id ? 'bg-slate-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* メモ一覧 */}
+          {!memosLoaded ? (
+            <div className="text-center text-slate-400 py-12">読み込み中…</div>
+          ) : memos.filter(m => memoFilter === 'all' || m.category === memoFilter).length === 0 ? (
+            <div className="text-center text-slate-500 py-12 bg-slate-800 rounded-2xl border border-slate-700">
+              <p className="text-4xl mb-3">📭</p>
+              <p>まだメモがありません。気づきを記録しよう！</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {memos
+                .filter(m => memoFilter === 'all' || m.category === memoFilter)
+                .map(memo => {
+                  const cat = MEMO_CATEGORIES.find(c => c.id === memo.category)
+                  return (
+                    <div key={memo.id} className="bg-slate-800 rounded-2xl border border-slate-700 p-5">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">
+                          {cat?.label ?? memo.category}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-slate-500">
+                            {new Date(memo.created_at).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <button onClick={() => deleteMemo(memo.id)}
+                            className="text-xs text-slate-600 hover:text-red-400 transition-colors">
+                            🗑
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-base text-slate-200 leading-relaxed whitespace-pre-wrap">{memo.content}</p>
+                    </div>
+                  )
+                })}
+            </div>
+          )}
         </div>
       )}
 
