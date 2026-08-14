@@ -296,6 +296,39 @@ export default function TeleapoPage() {
   const [stepNavOpen, setStepNavOpen] = useState<boolean[]>([false, false, false, false, false])
   const toggleStepNav = (i: number) => setStepNavOpen(prev => prev.map((v, idx) => idx === i ? !v : v))
   const [ymPattern, setYmPattern] = useState<number>(0)
+
+  // ── ホテル分析 ──
+  const [hotelInput, setHotelInput] = useState('')
+  const [hotelAnalyzing, setHotelAnalyzing] = useState(false)
+  const [hotelResult, setHotelResult] = useState<{
+    recommended: string[]
+    reason: string
+    issues: string[]
+    opening: string
+    tips: string
+  } | null>(null)
+  const [hotelError, setHotelError] = useState<string | null>(null)
+
+  const analyzeHotel = async () => {
+    if (!hotelInput.trim()) return
+    setHotelAnalyzing(true)
+    setHotelResult(null)
+    setHotelError(null)
+    try {
+      const res = await fetch('/api/ai/hotel-analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: hotelInput }),
+      })
+      const data = await res.json()
+      if (data.error) setHotelError(data.error)
+      else setHotelResult(data)
+    } catch {
+      setHotelError('通信エラーが発生しました')
+    } finally {
+      setHotelAnalyzing(false)
+    }
+  }
   const [stepSearch, setStepSearch] = useState<string[]>(['', '', '', '', ''])
   const updateStepSearch = (i: number, val: string) => setStepSearch(prev => prev.map((v, idx) => idx === i ? val : v))
   const [stepMemoInput, setStepMemoInput] = useState<string[]>(['', '', '', '', ''])
@@ -647,6 +680,89 @@ export default function TeleapoPage() {
       {/* ─── TAB: トークスクリプト ─── */}
       {activeTab === 'script' && (
         <div className="space-y-6">
+
+          {/* ホテル分析 */}
+          <div className="bg-slate-800 rounded-2xl border border-cyan-800/40 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">🏨</span>
+              <div>
+                <h2 className="text-xl font-bold text-white">ホテル分析 — 最適アプローチ提案</h2>
+                <p className="text-sm text-cyan-300/70 mt-0.5">ホテル名またはURLを入力すると、AIが最適な営業パターンと口コミ課題を分析します</p>
+              </div>
+            </div>
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={hotelInput}
+                onChange={e => setHotelInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && analyzeHotel()}
+                placeholder="例：ホテル〇〇 海老名 または https://..."
+                className="flex-1 bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-base text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+              />
+              <button onClick={analyzeHotel} disabled={hotelAnalyzing || !hotelInput.trim()}
+                className="px-5 py-3 bg-cyan-700 hover:bg-cyan-600 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-xl font-bold transition-colors text-base whitespace-nowrap">
+                {hotelAnalyzing ? '⏳ 分析中...' : '🔍 分析'}
+              </button>
+            </div>
+
+            {hotelAnalyzing && (
+              <div className="text-center py-6 text-cyan-400 animate-pulse">
+                <div className="text-3xl mb-2">🤖</div>
+                <p className="text-base">口コミ・サイト情報を収集してAI分析中...</p>
+              </div>
+            )}
+
+            {hotelError && (
+              <div className="bg-red-950/50 border border-red-700/50 rounded-xl p-4 text-red-300 text-base">⚠️ {hotelError}</div>
+            )}
+
+            {hotelResult && (
+              <div className="space-y-4">
+                {/* 推奨パターン */}
+                <div className="bg-cyan-950/40 border border-cyan-700/40 rounded-xl p-4">
+                  <p className="text-sm font-bold text-cyan-400 mb-2">🎯 推奨アプローチ</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {hotelResult.recommended.map((r, i) => (
+                      <span key={i} className="px-3 py-1.5 bg-cyan-700 text-white rounded-lg text-sm font-bold">{r}</span>
+                    ))}
+                  </div>
+                  <p className="text-base text-slate-200 leading-relaxed">{hotelResult.reason}</p>
+                </div>
+
+                {/* 口コミから見えた課題 */}
+                {hotelResult.issues?.length > 0 && (
+                  <div className="bg-red-950/30 border border-red-700/30 rounded-xl p-4">
+                    <p className="text-sm font-bold text-red-400 mb-2">⚠️ 口コミ・情報から見えた課題</p>
+                    <ul className="space-y-1">
+                      {hotelResult.issues.map((issue, i) => (
+                        <li key={i} className="text-base text-slate-200 flex items-start gap-2">
+                          <span className="text-red-400 flex-shrink-0">•</span>{issue}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* カスタムトーク */}
+                <div className="bg-green-950/40 border border-green-700/40 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-bold text-green-400">💬 このホテル専用 受付突破トーク</p>
+                    <button onClick={() => copy(hotelResult.opening, 'hotel_opening')}
+                      className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors ${copiedKey === 'hotel_opening' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                      {copiedKey === 'hotel_opening' ? '✅' : '📋 コピー'}
+                    </button>
+                  </div>
+                  <p className="text-base text-white leading-relaxed whitespace-pre-wrap">{hotelResult.opening}</p>
+                </div>
+
+                {/* 注意ポイント */}
+                <div className="bg-yellow-950/30 border border-yellow-700/30 rounded-xl p-4">
+                  <p className="text-sm font-bold text-yellow-400 mb-1">💡 架電時の注意ポイント</p>
+                  <p className="text-base text-slate-200 leading-relaxed">{hotelResult.tips}</p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* 米山パターン — トークスクリプト */}
           {(() => {
