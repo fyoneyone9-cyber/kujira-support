@@ -228,7 +228,7 @@ export default function TeleapoPage() {
   const updateMemo = (i: number, val: string) => setStepMemos(prev => prev.map((m, idx) => idx === i ? val : m))
 
   const fetchAiSuggestions = useCallback(async (text: string, pattern: string) => {
-    if (!text.trim()) return
+    if (!text.trim() || text.trim().length < 80) return
     setAiLoading(true)
     setAiError(null)
     setAiSuggestions([])
@@ -266,7 +266,9 @@ export default function TeleapoPage() {
       setAiInput(transcript)
       if (e.results[e.results.length - 1].isFinal) {
         setIsListening(false)
-        fetchAiSuggestions(transcript, aiPattern)
+        if (transcript.trim().length >= 80) {
+          fetchAiSuggestions(transcript, aiPattern)
+        }
       }
     }
     recog.onerror = () => setIsListening(false)
@@ -601,9 +603,9 @@ export default function TeleapoPage() {
                 title={isListening ? '停止' : 'マイク入力'}>
                 {isListening ? '⏹️' : '🎙️'}
               </button>
-              <button onClick={() => fetchAiSuggestions(aiInput, aiPattern)} disabled={!aiInput.trim() || aiLoading}
-                className={`px-6 py-4 rounded-xl text-base font-bold transition-all whitespace-nowrap ${aiLoading ? 'bg-purple-900 text-purple-400 cursor-wait' : aiInput.trim() ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
-                {aiLoading ? '⏳ 生成中...' : '✨ AI提案'}
+              <button onClick={() => fetchAiSuggestions(aiInput, aiPattern)} disabled={aiInput.trim().length < 80 || aiLoading}
+                className={`px-6 py-4 rounded-xl text-base font-bold transition-all whitespace-nowrap ${aiLoading ? 'bg-purple-900 text-purple-400 cursor-wait' : aiInput.trim().length >= 80 ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
+                {aiLoading ? '⏳ 生成中...' : aiInput.trim().length > 0 && aiInput.trim().length < 80 ? `あと${80 - aiInput.trim().length}文字` : '✨ AI提案'}
               </button>
             </div>
             {isListening && <div className="flex items-center gap-2 bg-red-950/40 border border-red-700/40 rounded-xl p-4 mb-4 text-base text-red-300 animate-pulse">🎙️ 音声認識中… 相手の声を聞かせてください</div>}
