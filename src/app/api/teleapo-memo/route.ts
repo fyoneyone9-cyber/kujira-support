@@ -8,19 +8,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// テーブル作成（初回のみ）
-async function ensureTable() {
-  await supabase.rpc('exec_sql', {
-    sql: `
-      CREATE TABLE IF NOT EXISTS teleapo_memos (
-        id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-        content text NOT NULL,
-        category text NOT NULL DEFAULT 'other',
-        created_at timestamptz DEFAULT now()
-      );
-    `
-  }).catch(() => null) // rpcがなければ無視
-}
 
 export async function GET() {
   const { data, error } = await supabase
