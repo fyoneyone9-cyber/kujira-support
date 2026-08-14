@@ -134,7 +134,7 @@ export default function NewManualPage() {
           <p className="text-red-400 text-sm bg-red-400/10 px-4 py-3 rounded-xl">{error}</p>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <button
             type="submit"
             disabled={loading || !title.trim()}
@@ -142,6 +142,38 @@ export default function NewManualPage() {
           >
             {loading ? '保存中...' : '保存する'}
           </button>
+          {content && (
+            <button
+              type="button"
+              onClick={() => {
+                const win = window.open('', '_blank')
+                if (!win) return
+                win.document.write(`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${title}</title><style>
+                  body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #1a1a1a; line-height: 1.8; }
+                  h1 { font-size: 24px; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 8px; }
+                  .meta { font-size: 13px; color: #666; margin-bottom: 32px; }
+                  h2 { font-size: 18px; margin-top: 28px; color: #0284c7; }
+                  h3 { font-size: 15px; margin-top: 20px; }
+                  ul, ol { padding-left: 24px; }
+                  li { margin: 4px 0; }
+                  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+                  pre { background: #f1f5f9; padding: 16px; border-radius: 8px; overflow-x: auto; }
+                  hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }
+                  @media print { body { margin: 20px; } }
+                </style></head><body>
+                <h1>${title}</h1>
+                <div class="meta">${category ? `カテゴリ: ${category} ｜ ` : ''}作成日: ${new Date().toLocaleDateString('ja-JP')}</div>
+                <div id="content"></div>
+                <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+                <script>document.getElementById('content').innerHTML = marked.parse(${JSON.stringify(content)}); window.onload = () => { window.print(); }</script>
+                </body></html>`)
+                win.document.close()
+              }}
+              className="px-6 py-3 bg-red-700 hover:bg-red-600 text-white font-medium rounded-xl transition-colors"
+            >
+              📄 PDF出力
+            </button>
+          )}
           <button
             type="button"
             onClick={() => router.back()}
