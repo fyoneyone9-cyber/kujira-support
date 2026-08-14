@@ -227,6 +227,28 @@ export default function TeleapoPage() {
   const [stepMemos, setStepMemos] = useState<string[]>(['', '', '', '', ''])
   const updateMemo = (i: number, val: string) => setStepMemos(prev => prev.map((m, idx) => idx === i ? val : m))
 
+  const fetchAiSuggestions = useCallback(async (text: string, pattern: string) => {
+    if (!text.trim()) return
+    setAiLoading(true)
+    setAiError(null)
+    setAiSuggestions([])
+    setAiSelectedIdx(null)
+    try {
+      const res = await fetch('/api/ai/teleapo-suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: text, pattern }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'API error')
+      setAiSuggestions(data.suggestions ?? [])
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : 'エラーが発生しました')
+    } finally {
+      setAiLoading(false)
+    }
+  }, [])
+
   // 音声認識
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
@@ -256,28 +278,6 @@ export default function TeleapoPage() {
   const stopListening = useCallback(() => {
     recognitionRef.current?.stop()
     setIsListening(false)
-  }, [])
-
-  const fetchAiSuggestions = useCallback(async (text: string, pattern: string) => {
-    if (!text.trim()) return
-    setAiLoading(true)
-    setAiError(null)
-    setAiSuggestions([])
-    setAiSelectedIdx(null)
-    try {
-      const res = await fetch('/api/ai/teleapo-suggest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: text, pattern }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'API error')
-      setAiSuggestions(data.suggestions ?? [])
-    } catch (e) {
-      setAiError(e instanceof Error ? e.message : 'エラーが発生しました')
-    } finally {
-      setAiLoading(false)
-    }
   }, [])
 
   const copy = (text: string, key: string) => {
