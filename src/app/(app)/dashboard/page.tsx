@@ -57,7 +57,7 @@ export default async function DashboardPage() {
               className="flex items-center gap-3 px-4 py-3 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 rounded-xl transition-colors group"
             >
               <span className="text-xl">{link.icon}</span>
-              <span className="text-sm text-slate-200 group-hover:text-white transition-colors font-medium">{link.label}</span>
+              <span className="text-base text-slate-200 group-hover:text-white transition-colors font-medium">{link.label}</span>
               <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-xs">↗</span>
             </a>
           ))}
