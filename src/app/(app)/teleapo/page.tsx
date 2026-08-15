@@ -764,37 +764,8 @@ export default function TeleapoPage() {
                   <p className="text-base text-slate-200 leading-relaxed">{hotelResult.reason}</p>
                 </div>
 
-                {/* 口コミから見えた課題 */}
-                {hotelResult.issues?.length > 0 && (
-                  <div className="bg-red-950/30 border border-red-700/30 rounded-xl p-4">
-                    <p className="text-sm font-bold text-red-400 mb-2">⚠️ 口コミ・情報から見えた課題</p>
-                    <ul className="space-y-1">
-                      {hotelResult.issues.map((issue, i) => (
-                        <li key={i} className="text-base text-slate-200 flex items-start gap-2">
-                          <span className="text-red-400 flex-shrink-0">•</span>{issue}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* カスタムトーク */}
-                <div className="bg-green-950/40 border border-green-700/40 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-bold text-green-400">💬 このホテル専用 受付突破トーク</p>
-                    <button onClick={() => copy(hotelResult.opening, 'hotel_opening')}
-                      className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-colors ${copiedKey === 'hotel_opening' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
-                      {copiedKey === 'hotel_opening' ? '✅' : '📋 コピー'}
-                    </button>
-                  </div>
-                  <p className="text-base text-white leading-relaxed whitespace-pre-wrap">{hotelResult.opening}</p>
-                </div>
-
-                {/* 注意ポイント */}
-                <div className="bg-yellow-950/30 border border-yellow-700/30 rounded-xl p-4">
-                  <p className="text-sm font-bold text-yellow-400 mb-1">💡 架電時の注意ポイント</p>
-                  <p className="text-base text-slate-200 leading-relaxed">{hotelResult.tips}</p>
-                </div>
+                {/* 課題・注意・専用トークはSTEPパネル内に表示するためここでは省略 */}
+                <p className="text-sm text-slate-400">👇 下のSTEPパネルを開くと、このホテル専用AIトーク・課題・注意ポイントが確認できます</p>
               </div>
             )}
           </div>
@@ -1003,7 +974,7 @@ export default function TeleapoPage() {
                               </div>
                             )}
 
-                            {/* AI課題・注意（折りたたみ） */}
+                            {/* AI課題・注意（STEP 1のみ表示） */}
                             {hotelResult && (hotelResult.issues?.length > 0 || hotelResult.tips) && i === 0 && (
                               <div className="px-5 py-2 grid grid-cols-1 gap-2">
                                 {hotelResult.issues?.length > 0 && (
