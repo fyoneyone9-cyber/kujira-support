@@ -934,7 +934,7 @@ export default function TeleapoPage() {
                     // STEP 3（index=2）はSTEP 2に統合したため非表示
                     if (i === 2) return null
                     const cc = colorClass(item.color)
-                    const stepLabels = ['STEP 1', 'STEP 2｜ヒアリング', '', 'STEP 3｜アポ取り', 'STEP 3\'｜情報置き']
+                    const stepLabels = ['STEP 1', 'STEP 2', '', 'STEP 3', 'STEP 3\'']
                     const isOpen = stepNavOpen[i]
                     const stepKeys = ['step1', 'step2', 'step3', 'step4', 'step4b'] as const
                     const customTalk = hotelResult
