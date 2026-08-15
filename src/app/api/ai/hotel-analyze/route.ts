@@ -61,7 +61,11 @@ async function gemini(prompt: string): Promise<string> {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 16384, temperature: 0.3 },
+            generationConfig: {
+              maxOutputTokens: 16384,
+              temperature: 0.3,
+              responseMimeType: 'application/json',
+            },
           }),
         }
       )
@@ -168,18 +172,13 @@ ${companyContext()}
 
   try {
     const text = await gemini(prompt)
-    // ```json ... ``` ブロックも含めて抽出
-    const jsonMatch = text.match(/```json\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/)
-    const jsonStr = jsonMatch?.[1] ?? jsonMatch?.[0]
-    if (!jsonStr) {
-      console.error('JSON not found in response:', text.slice(0, 500))
-      return NextResponse.json({ error: 'AI応答の解析に失敗しました' }, { status: 500 })
-    }
     let data: Record<string, unknown>
     try {
-      data = JSON.parse(jsonStr)
+      // JSON modeなので直接パース。念のため```json```ブロックも除去
+      const cleaned = text.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim()
+      data = JSON.parse(cleaned)
     } catch (parseErr) {
-      console.error('JSON parse error:', parseErr, jsonStr.slice(0, 300))
+      console.error('JSON parse error:', parseErr, '\nRaw:', text.slice(0, 500))
       return NextResponse.json({ error: 'AI応答のJSON解析に失敗しました' }, { status: 500 })
     }
     if (!data.opening && (data.steps as Record<string, string>)?.step1) {
