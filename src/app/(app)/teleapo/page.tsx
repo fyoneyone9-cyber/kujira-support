@@ -292,7 +292,7 @@ export default function TeleapoPage() {
   const [aiPattern, setAiPattern] = useState<string>('yoneyama')
   const [stepMemos, setStepMemos] = useState<string[]>(['', '', '', '', ''])
   const updateMemo = (i: number, val: string) => setStepMemos(prev => prev.map((m, idx) => idx === i ? val : m))
-  const [stepNavOpen, setStepNavOpen] = useState<boolean[]>([false, false, false, false, false])
+  const [stepNavOpen, setStepNavOpen] = useState<boolean[]>([true, false, false, false, false])
   const toggleStepNav = (i: number) => setStepNavOpen(prev => prev.map((v, idx) => idx === i ? !v : v))
   const [ymPattern, setYmPattern] = useState<number>(0)
 
@@ -992,7 +992,7 @@ export default function TeleapoPage() {
                               <div className="px-5 pt-4 pb-2">
                                 <div className="bg-cyan-950/70 border border-cyan-500/60 rounded-xl p-4">
                                   <div className="flex items-center justify-between mb-3">
-                                    <p className="text-sm font-black text-cyan-400 tracking-wide">🏨 このホテル専用AIトーク</p>
+                                    <p className="text-sm font-black text-cyan-400 tracking-wide">🏨 {stepLabels[i]}｜このホテル専用AIトーク</p>
                                     <button onClick={() => copy(customTalk, `hotel_step_${i}`)}
                                       className={`text-sm px-3 py-1.5 rounded-lg font-bold transition-colors ${copiedKey === `hotel_step_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
                                       {copiedKey === `hotel_step_${i}` ? '✅ コピー済' : '📋 コピー'}
