@@ -987,7 +987,7 @@ export default function TeleapoPage() {
                                     </summary>
                                     <ul className="mt-2 space-y-1 px-3">
                                       {hotelResult.issues.map((issue, ii) => (
-                                        <li key={ii} className="text-sm text-slate-200 flex items-start gap-2">
+                                        <li key={ii} className="text-base text-slate-200 flex items-start gap-2">
                                           <span className="text-red-400 flex-shrink-0">•</span>{issue}
                                         </li>
                                       ))}
@@ -1000,7 +1000,7 @@ export default function TeleapoPage() {
                                       <span>💡 架電注意ポイント</span>
                                       <span className="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
                                     </summary>
-                                    <p className="mt-2 px-3 text-sm text-slate-200 leading-relaxed">{hotelResult.tips}</p>
+                                    <p className="mt-2 px-3 text-base text-slate-200 leading-relaxed">{hotelResult.tips}</p>
                                   </details>
                                 )}
                               </div>
@@ -1021,8 +1021,8 @@ export default function TeleapoPage() {
                                       {copiedKey === `ym_${ymPattern}_${i}` ? '✅' : '📋'}
                                     </button>
                                   </div>
-                                  <p className="text-base text-slate-100 leading-relaxed whitespace-pre-line mb-2">{item.text}</p>
-                                  <p className="text-sm text-slate-400 leading-relaxed border-t border-slate-600/40 pt-2">💡 {item.point}</p>
+                                  <p className="text-lg text-slate-100 leading-relaxed whitespace-pre-line mb-2">{item.text}</p>
+                                  <p className="text-base text-slate-400 leading-relaxed border-t border-slate-600/40 pt-2">💡 {item.point}</p>
                                 </div>
                               </details>
                             </div>
