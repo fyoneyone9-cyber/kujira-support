@@ -1032,8 +1032,7 @@ export default function TeleapoPage() {
                                   <span>⚡ 切り返しナビ</span>
                                   <span className="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
                                 </summary>
-                                <div className="mt-3 bg-slate-900/60 rounded-xl p-4 space-y-4">(
-                            <div className="mt-3 bg-slate-900/60 rounded-xl p-4 space-y-4">
+                                <div className="mt-3 bg-slate-900/60 rounded-xl p-4 space-y-4">
                               {/* 切り返しナビ */}
                               <div>
                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -1151,7 +1150,7 @@ export default function TeleapoPage() {
                               </div>
                             </div>
                           </details>
-                            </div>
+                            </div>{/* 切り返しナビwrapper */}
 
                             {/* メモ欄 */}
                             <div className="px-5 pb-4">
