@@ -20,6 +20,12 @@ export default async function DashboardPage() {
           <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">パーソナル</span>
           <span className="text-slate-500 text-xs">↗</span>
         </a>
+        <a href="/teleapo" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-500 rounded-xl transition-colors group">
+          <span className="text-lg">📞</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">テレアポ</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
         <a href="https://attendance-app-prod-716327310989.asia-northeast1.run.app/login" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-green-500 rounded-xl transition-colors group">
           <span className="text-lg">🕐</span>
