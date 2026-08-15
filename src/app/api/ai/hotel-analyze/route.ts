@@ -83,26 +83,71 @@ async function gemini(prompt: string): Promise<string> {
   throw lastError ?? new Error('Gemini API failed')
 }
 
+// フォールバック①: Jina経由クロール
+async function jinaFetch(url: string): Promise<string> {
+  try {
+    const res = await fetch(`https://r.jina.ai/${url}`, {
+      headers: { Accept: 'text/plain' },
+      signal: AbortSignal.timeout(7000),
+    })
+    const text = await res.text()
+    return text.length > 150 ? text.slice(0, 2500) : ''
+  } catch { return '' }
+}
+
+// フォールバック②: DuckDuckGo instant answer API
+async function duckduckgoSearch(query: string): Promise<string> {
+  try {
+    const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&no_html=1`
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) })
+    const data = await res.json()
+    const parts = [
+      data.Abstract,
+      data.Answer,
+      ...(data.RelatedTopics ?? []).slice(0, 5).map((t: { Text?: string }) => t.Text ?? ''),
+    ].filter(Boolean)
+    return parts.join('\n').slice(0, 2000)
+  } catch { return '' }
+}
+
 export async function POST(request: Request) {
   const { input } = await request.json()
   if (!input?.trim()) return NextResponse.json({ error: 'input required' }, { status: 400 })
 
   const hotelName = input.trim()
 
-  // Step1: Google検索グラウンディングで口コミ・施設情報を収集
+  // Step1: 3段階フォールバックで口コミ・施設情報を収集
   let reviewInfo = ''
+
+  // 方法①: Gemini Google検索グラウンディング（最強・リアルタイム）
   try {
     reviewInfo = await geminiWithSearch(
       `「${hotelName}」という宿泊施設について、以下の情報をWeb検索して日本語でまとめてください：
 ・施設の種類・規模・客室数・立地・特徴
 ・じゃらん・楽天トラベル・TripAdvisor・Google・一休などの口コミ・評判（チェックイン・フロント対応・スタッフ・待ち時間に関するものを重点的に）
-・インバウンド客の多さ
-・夜間・深夜チェックインの対応状況
-・スタッフ人手不足に関する情報
+・インバウンド客の多さ・夜間・深夜チェックインの対応状況・スタッフ人手不足に関する情報
 できるだけ具体的に、口コミの内容も引用してまとめてください。`
     )
-  } catch {
-    reviewInfo = '検索情報取得失敗'
+  } catch { /* fall through */ }
+
+  // 方法②: Jina並列クロール（じゃらん・楽天・TripAdvisor）
+  if (!reviewInfo || reviewInfo.length < 100) {
+    const enc = encodeURIComponent(hotelName)
+    const jinaTargets = [
+      { label: 'じゃらん', url: `https://www.jalan.net/yado/search/?kwd=${enc}` },
+      { label: '楽天トラベル', url: `https://travel.rakuten.co.jp/keyword/${enc}/` },
+      { label: 'TripAdvisor', url: `https://www.tripadvisor.jp/Search?q=${enc}` },
+      { label: 'Yahoo!トラベル', url: `https://travel.yahoo.co.jp/search?kw=${enc}` },
+    ]
+    const results = await Promise.allSettled(jinaTargets.map(t => jinaFetch(t.url)))
+    reviewInfo = results
+      .map((r, i) => r.status === 'fulfilled' && r.value ? `【${jinaTargets[i].label}】\n${r.value}` : '')
+      .filter(Boolean).join('\n\n').slice(0, 5000)
+  }
+
+  // 方法③: DuckDuckGo instant answer
+  if (!reviewInfo || reviewInfo.length < 100) {
+    reviewInfo = await duckduckgoSearch(`${hotelName} 口コミ 評判 チェックイン`)
   }
 
   // Step2: 分析・トーク生成
