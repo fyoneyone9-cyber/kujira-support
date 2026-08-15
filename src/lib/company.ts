@@ -50,6 +50,25 @@ export const COMPANY = {
     '人手不足・スタッフ採用難に悩む宿泊施設',
   ],
 
+  // 製品ラインナップ
+  productLine: [
+    {
+      name: 'AdvaNceD IoT スマートチェックイン（DMS / クラウドスマートロック連携）',
+      url: 'https://and-iot.jp/dms/',
+      summary: 'スマートロック（RemoteLOCK・SwitchBotなど）と連携した無人チェックインシステム。ライトプラン初期費用54,780円〜。',
+    },
+    {
+      name: 'AdvaNceD IoT スマートチェックイン for カードロック',
+      url: 'https://and-iot.jp/dms-cardlock/',
+      summary: '美和ロック・GOAL等の既存カードロックと連携。KIOSK大型タブレット・卓上タブレット・Windowsタブレットの3タイプから選択。Windowsタブレットは初期費用750,000円＋本体203,800円〜。月額9,800円/施設＋500円/室。',
+    },
+    {
+      name: 'AdvaNceD IoT スマートチェックイン with キーボックス',
+      url: 'https://and-iot.jp/dms-keybox/',
+      summary: '既存ドア・鍵を交換せずに導入可能。独自開発キーボックスと連動して物理鍵を無人渡し・回収。キーボックス筐体費用200,000円〜（16ボックス）。',
+    },
+  ],
+
   talkRules: [
     '架電者は必ず「株式会社デバイスエージェンシーの米山」で固定（プレースホルダー禁止）',
     'プロとして「ご案内に参りました」スタンスで話す（「情報収集していたところ」「知りました」などの素人表現禁止）',
@@ -66,9 +85,11 @@ export function companyContext(): string {
   return `【弊社・製品情報】
 会社名: ${COMPANY.name}
 架電担当: ${COMPANY.caller}
-製品名: ${COMPANY.product}
 
-主な機能:
+製品ラインナップ（施設の設備に応じて最適な製品を提案すること）:
+${COMPANY.productLine.map(p => `・${p.name}\n  ${p.summary}`).join('\n')}
+
+共通機能:
 ${COMPANY.features.map(f => `・${f}`).join('\n')}
 
 活用できる補助金:
