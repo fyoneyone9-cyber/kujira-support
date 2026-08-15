@@ -1,74 +1,118 @@
 import { NextResponse } from 'next/server'
-import { gemini } from '@/lib/gemini'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-async function crawl(url: string): Promise<string> {
-  try {
-    const res = await fetch(`https://r.jina.ai/${url}`, {
-      headers: { Accept: 'text/plain' },
-      signal: AbortSignal.timeout(8000),
-    })
-    const text = await res.text()
-    return text.length > 100 ? text.slice(0, 2500) : ''
-  } catch {
-    return ''
+const KEYS = [
+  process.env.GEMINI_API_KEY_1,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+].filter(Boolean) as string[]
+
+const MODEL = 'gemini-2.5-flash'
+
+// Google検索グラウンディング付きGemini呼び出し
+async function geminiWithSearch(prompt: string): Promise<string> {
+  let lastError: Error | null = null
+  for (const key of KEYS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            tools: [{ google_search: {} }],
+            generationConfig: { maxOutputTokens: 8192 },
+          }),
+        }
+      )
+      if (res.status === 429 || res.status === 503) {
+        lastError = new Error(`rate_limit: ${res.status}`)
+        continue
+      }
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error?.message ?? `HTTP ${res.status}`)
+      }
+      const data = await res.json()
+      return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith('rate_limit')) {
+        lastError = e; continue
+      }
+      throw e
+    }
   }
+  throw lastError ?? new Error('Gemini API failed')
 }
 
-async function searchReviews(hotelName: string): Promise<string> {
-  const enc = encodeURIComponent(hotelName)
-  const queries = [
-    { label: 'じゃらん',         url: `https://www.jalan.net/yado/search/?kwd=${enc}` },
-    { label: '楽天トラベル',      url: `https://travel.rakuten.co.jp/keyword/${enc}/` },
-    { label: 'TripAdvisor',      url: `https://www.tripadvisor.jp/Search?q=${enc}` },
-    { label: 'Google Maps',      url: `https://www.google.com/maps/search/${enc}` },
-    { label: '一休.com',         url: `https://www.ikyu.com/search/?pname=${enc}` },
-    { label: 'るるぶトラベル',    url: `https://travel.rurouby.co.jp/search/?keyword=${enc}` },
-    { label: 'Yahoo!トラベル',   url: `https://travel.yahoo.co.jp/search?kw=${enc}` },
-    { label: 'ホテル公式サイト検索', url: `https://r.jina.ai/https://www.google.com/search?q=${enc}+口コミ+チェックイン+フロント+評判&hl=ja` },
-  ]
-
-  const results = await Promise.allSettled(queries.map(q => crawl(q.url)))
-
-  return results
-    .map((r, i) => {
-      if (r.status === 'fulfilled' && r.value.length > 100) {
-        return `【${queries[i].label}】\n${r.value}`
+// 通常Gemini（JSON生成用）
+async function gemini(prompt: string): Promise<string> {
+  let lastError: Error | null = null
+  for (const key of KEYS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: 8192 },
+          }),
+        }
+      )
+      if (res.status === 429 || res.status === 503) {
+        lastError = new Error(`rate_limit: ${res.status}`); continue
       }
-      return ''
-    })
-    .filter(Boolean)
-    .join('\n\n')
-    .slice(0, 8000)
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error?.message ?? `HTTP ${res.status}`)
+      }
+      const data = await res.json()
+      return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith('rate_limit')) {
+        lastError = e; continue
+      }
+      throw e
+    }
+  }
+  throw lastError ?? new Error('Gemini API failed')
 }
 
 export async function POST(request: Request) {
   const { input } = await request.json()
   if (!input?.trim()) return NextResponse.json({ error: 'input required' }, { status: 400 })
 
-  const isUrl = input.trim().startsWith('http')
+  const hotelName = input.trim()
 
-  let crawlText = ''
-  if (isUrl) {
-    crawlText = await crawl(input.trim())
+  // Step1: Google検索グラウンディングで口コミ・施設情報を収集
+  let reviewInfo = ''
+  try {
+    reviewInfo = await geminiWithSearch(
+      `「${hotelName}」という宿泊施設について、以下の情報をWeb検索して日本語でまとめてください：
+・施設の種類・規模・客室数・立地・特徴
+・じゃらん・楽天トラベル・TripAdvisor・Google・一休などの口コミ・評判（チェックイン・フロント対応・スタッフ・待ち時間に関するものを重点的に）
+・インバウンド客の多さ
+・夜間・深夜チェックインの対応状況
+・スタッフ人手不足に関する情報
+できるだけ具体的に、口コミの内容も引用してまとめてください。`
+    )
+  } catch {
+    reviewInfo = '検索情報取得失敗'
   }
 
-  const hotelName = isUrl
-    ? (crawlText.match(/施設名[：:]\s*(.+)/)?.[1] ?? input.trim())
-    : input.trim()
-
-  const reviewText = await searchReviews(hotelName)
-
+  // Step2: 分析・トーク生成
   const prompt = `あなたはホテル・旅館向け自動チェックイン機の営業担当アシスタントです。
-以下の情報から、このホテルへの最適な営業アプローチを分析し、各ステップ専用のカスタムトークを生成してください。
+以下の施設情報・口コミ情報をもとに、最適な営業アプローチと各ステップのカスタムトークを生成してください。
 
-【ホテル情報】
-${crawlText ? `サイト内容:\n${crawlText}\n` : `ホテル名/入力: ${hotelName}\n`}
+【施設名】${hotelName}
 
-【口コミ・評判情報（じゃらん・楽天・TripAdvisor・一休・Google Maps等）】
-${reviewText || '口コミ取得不可。ホテル名・地域・業態（温泉施設なら日帰り対応、小規模旅館なら深夜対応、シティホテルならインバウンドなど）から課題を推定してください。'}
+【Web検索で収集した施設情報・口コミ】
+${reviewInfo}
 
 6パターンから最適アプローチを優先度順（1位から）に1〜3個選び、各ステップのカスタムトークを生成してください。recommendedは必ず優先度の高い順に並べること：
 1. 💰 IT補助金全面訴求型
@@ -81,13 +125,13 @@ ${reviewText || '口コミ取得不可。ホテル名・地域・業態（温泉
 必ずJSON形式のみで出力（前後に説明不要）:
 {
   "recommended": ["パターン名"],
-  "reason": "このホテルにこのパターンが刺さる理由（2〜3文）",
-  "issues": ["口コミ・情報から見えた課題1", "課題2", "課題3"],
+  "reason": "このホテルにこのパターンが刺さる理由（口コミの具体的な内容を引用しながら2〜3文）",
+  "issues": ["口コミ・情報から見えた具体的な課題1", "課題2", "課題3"],
   "tips": "このホテルへの架電で特に注意すべきポイント",
   "steps": {
-    "step1": "【STEP1 受付突破】推奨パターンを全て組み合わせた1本の受付突破トーク。架電者は必ず「株式会社デバイスエージェンシーの米山」固定。プレースホルダー禁止。①IT補助金または人手不足補助金が使える旨②補助金申請から導入まで弊社が全て代行する旨を自然に盛り込む。推奨パターンが複数ある場合は両方の訴求を1つのトークにまとめること。絶対禁止：「情報が見当たらない」「困っているのではないか」「お困りごとがあるのではないか」など相手を困っていると決めつけたり、情報不足を口に出す表現は使わないこと。あくまで業界全体のトレンドや補助金の締め切りを理由に架電する形にすること。また「ご連絡いたしました」は不自然な敬語なので必ず「ご連絡させていただきました」を使うこと。トークの最後は必ず「ご支配人様か、ご担当者様はいらっしゃいますでしょうか？」で締めること",
-    "step2": "【STEP2 担当者への第一声】架電者は「米山」固定。推奨パターン全ての訴求を組み合わせた共感トーク。口コミ・地域・業態の特徴を反映し、複数パターンの強みを自然につなげること",
-    "step3": "【STEP3 ヒアリング】推奨パターン全てに対応する課題を引き出せる質問トーク。複数の課題を確認できるよう質問を工夫すること",
+    "step1": "【STEP1 受付突破のみ】推奨パターン全てを組み合わせた1本の受付突破トーク。架電者は必ず「株式会社デバイスエージェンシーの米山」固定。プレースホルダー禁止。①IT補助金または人手不足補助金が使える旨②補助金申請から導入まで弊社が全て代行する旨を自然に盛り込む。絶対禁止：「情報が見当たらない」「困っているのではないか」「お困りごとがあるのではないか」など。あくまで業界トレンドや補助金締め切りを理由に架電する形にする。「ご連絡いたしました」禁止→「ご連絡させていただきました」を使う。トークの最後は必ず「ご支配人様か、ご担当者様はいらっしゃいますでしょうか？」で締める",
+    "step2": "【STEP2 担当者への第一声】架電者は「米山」固定。推奨パターン全ての訴求を組み合わせた共感トーク。口コミの具体的な内容を反映する",
+    "step3": "【STEP3 ヒアリング】推奨パターン全てに対応する課題を引き出せる質問トーク",
     "step4": "【STEP4 課題あり→アポ取り】推奨パターン全ての解決策を組み合わせたアポ獲得トーク",
     "step4b": "【STEP4' 課題なし→情報置き】推奨パターン全ての訴求を盛り込んだ資料送付・次回架電トーク"
   },
@@ -99,7 +143,6 @@ ${reviewText || '口コミ取得不可。ホテル名・地域・業態（温泉
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) return NextResponse.json({ error: 'AI応答の解析に失敗しました' }, { status: 500 })
     const data = JSON.parse(jsonMatch[0])
-    // 後方互換
     if (!data.opening && data.steps?.step1) data.opening = data.steps.step1
     return NextResponse.json({ ok: true, ...data })
   } catch (e) {
