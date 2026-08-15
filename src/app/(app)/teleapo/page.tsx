@@ -277,7 +277,7 @@ const MEMO_CATEGORIES = [
 type TeleapoMemo = { id: string; content: string; category: string; created_at: string }
 
 export default function TeleapoPage() {
-  const [activeTab, setActiveTab] = useState('hubspot')
+  const [activeTab, setActiveTab] = useState('script')
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [selectedCat, setSelectedCat] = useState<string | null>(null)
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null)
