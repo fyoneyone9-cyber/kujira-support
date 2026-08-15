@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { companyContext } from '@/lib/company'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -154,7 +155,9 @@ export async function POST(request: Request) {
   const prompt = `あなたはホテル・旅館向け自動チェックイン機の営業担当アシスタントです。
 以下の施設情報・口コミ情報をもとに、最適な営業アプローチと各ステップのカスタムトークを生成してください。
 
-【施設名】${hotelName}
+${companyContext()}
+
+【架電先施設名】${hotelName}
 
 【Web検索で収集した施設情報・口コミ】
 ${reviewInfo}
