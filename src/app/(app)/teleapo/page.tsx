@@ -264,7 +264,6 @@ const TABS = [
   { id: 'status',   label: '🏷️ ステータス一覧' },
   { id: 'knowledge',label: '💡 商品知識' },
   { id: 'mail',     label: '✉️ メールテンプレ' },
-  { id: 'memo',     label: '📝 ノウハウメモ' },
 ]
 
 const MEMO_CATEGORIES = [
