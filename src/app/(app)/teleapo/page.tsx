@@ -931,8 +931,10 @@ export default function TeleapoPage() {
 
                 <div className="space-y-3">
                   {pat.steps.map((item, i) => {
+                    // STEP 3（index=2）はSTEP 2に統合したため非表示
+                    if (i === 2) return null
                     const cc = colorClass(item.color)
-                    const stepLabels = ['STEP 1', 'STEP 2', 'STEP 3', 'STEP 4', 'STEP 4\'']
+                    const stepLabels = ['STEP 1', 'STEP 2｜ヒアリング', '', 'STEP 3｜アポ取り', 'STEP 3\'｜情報置き']
                     const isOpen = stepNavOpen[i]
                     const stepKeys = ['step1', 'step2', 'step3', 'step4', 'step4b'] as const
                     const customTalk = hotelResult
