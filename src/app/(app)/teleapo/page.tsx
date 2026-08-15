@@ -726,8 +726,8 @@ export default function TeleapoPage() {
               <div className="space-y-4">
                 {/* 推奨パターン */}
                 <div className="bg-cyan-950/40 border border-cyan-700/40 rounded-xl p-4">
-                  <p className="text-sm font-bold text-cyan-400 mb-2">🎯 推奨アプローチ</p>
-                  <div className="flex flex-wrap gap-2 mb-3">
+                  <p className="text-sm font-bold text-cyan-400 mb-3">🎯 推奨アプローチ（おすすめ順）</p>
+                  <div className="flex flex-col gap-3 mb-3">
                     {hotelResult.recommended.map((r, ri) => {
                       const patternMap: Record<string, number> = {
                         'IT補助金': 0, '補助金全面': 0,
@@ -738,14 +738,23 @@ export default function TeleapoPage() {
                         '夜間': 5, '無人': 5,
                       }
                       const patIdx = Object.entries(patternMap).find(([k]) => r.includes(k))?.[1] ?? -1
+                      const rankLabels = ['🥇 第1位', '🥈 第2位', '🥉 第3位']
+                      const rankColors = [
+                        'bg-yellow-500 text-slate-900',
+                        'bg-slate-400 text-slate-900',
+                        'bg-orange-700 text-white',
+                      ]
                       return (
-                        <div key={ri} className="flex items-center gap-2">
-                          <span className="px-3 py-1.5 bg-cyan-700 text-white rounded-lg text-sm font-bold">{r}</span>
+                        <div key={ri} className="flex items-center gap-3">
+                          <span className={`text-xs font-black px-2 py-1 rounded-lg whitespace-nowrap ${rankColors[ri] ?? 'bg-slate-600 text-white'}`}>
+                            {rankLabels[ri] ?? `第${ri + 1}位`}
+                          </span>
+                          <span className="px-3 py-1.5 bg-cyan-700 text-white rounded-lg text-sm font-bold flex-1">{r}</span>
                           {patIdx >= 0 && (
                             <button
                               onClick={() => { setYmPattern(patIdx); const el = document.getElementById('ym-pattern-section'); el?.scrollIntoView({ behavior: 'smooth' }) }}
-                              className="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg text-sm font-bold transition-colors">
-                              このパターンで架電 ↓
+                              className="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
+                              架電 ↓
                             </button>
                           )}
                         </div>
