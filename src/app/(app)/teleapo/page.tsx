@@ -958,71 +958,110 @@ export default function TeleapoPage() {
                   ))}
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {pat.steps.map((item, i) => {
                     const cc = colorClass(item.color)
+                    const stepLabels = ['STEP 1', 'STEP 2', 'STEP 3', 'STEP 4', 'STEP 4\'']
+                    const isOpen = stepNavOpen[i]
+                    const stepKeys = ['step1', 'step2', 'step3', 'step4', 'step4b'] as const
+                    const customTalk = hotelResult
+                      ? (hotelResult.steps?.[stepKeys[i]] ?? (i === 0 ? hotelResult.opening : ''))
+                      : ''
                     return (
-                      <div key={i} className={`rounded-xl p-5 ${cc.bg}`}>
-                        {/* ホテル分析：各STEPに専用トーク表示 */}
-                        {hotelResult && (() => {
-                          const stepKeys = ['step1', 'step2', 'step3', 'step4', 'step4b'] as const
-                          const stepKey = stepKeys[i]
-                          const customTalk = hotelResult.steps?.[stepKey] ?? (i === 0 ? hotelResult.opening : '')
-                          const copyKey = `hotel_step_${i}`
-                          return (
-                            <div className="mb-4 space-y-2">
-                              {customTalk && (
-                                <div className="bg-cyan-950/60 border border-cyan-600/50 rounded-xl p-4">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <p className="text-sm font-bold text-cyan-400">🏨 AI提案：このホテル専用トーク</p>
-                                    <button onClick={() => copy(customTalk, copyKey)}
-                                      className={`text-sm px-3 py-1.5 rounded-lg font-bold transition-colors ${copiedKey === copyKey ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
-                                      {copiedKey === copyKey ? '✅' : '📋'}
+                      <div key={i} className={`rounded-2xl border ${isOpen ? 'border-slate-500' : 'border-slate-700/50'} overflow-hidden`}>
+                        {/* ── アコーディオンヘッダー ── */}
+                        <button
+                          onClick={() => toggleStepNav(i)}
+                          className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${isOpen ? cc.bg : 'bg-slate-800/80 hover:bg-slate-800'}`}>
+                          {/* STEP番号バッジ */}
+                          <span className={`flex-shrink-0 w-16 h-10 rounded-xl flex items-center justify-center text-sm font-black ${isOpen ? 'bg-white/20 text-white' : 'bg-slate-700 text-slate-300'}`}>
+                            {stepLabels[i]}
+                          </span>
+                          {/* ラベル */}
+                          <span className={`flex-1 text-base font-bold ${isOpen ? cc.text : 'text-slate-300'}`}>{item.label}</span>
+                          {/* AI提案ありバッジ */}
+                          {customTalk && <span className="text-xs px-2 py-1 rounded-full bg-cyan-700/60 text-cyan-300 font-bold flex-shrink-0">🏨 AI提案あり</span>}
+                          <span className={`text-slate-400 flex-shrink-0 ${isOpen ? 'rotate-180' : ''} transition-transform`}>▼</span>
+                        </button>
+
+                        {/* ── 展開コンテンツ ── */}
+                        {isOpen && (
+                          <div className={`${cc.bg} border-t border-slate-600/40`}>
+                            {/* AI専用トーク（常時最上部・目立つ） */}
+                            {customTalk && (
+                              <div className="px-5 pt-4 pb-2">
+                                <div className="bg-cyan-950/70 border border-cyan-500/60 rounded-xl p-4">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <p className="text-sm font-black text-cyan-400 tracking-wide">🏨 このホテル専用AIトーク</p>
+                                    <button onClick={() => copy(customTalk, `hotel_step_${i}`)}
+                                      className={`text-sm px-3 py-1.5 rounded-lg font-bold transition-colors ${copiedKey === `hotel_step_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                                      {copiedKey === `hotel_step_${i}` ? '✅ コピー済' : '📋 コピー'}
                                     </button>
                                   </div>
                                   <p className="text-lg text-cyan-100 leading-relaxed whitespace-pre-wrap">{customTalk}</p>
                                 </div>
-                              )}
-                              {hotelResult.issues?.length > 0 && (
-                                <div className="bg-red-950/40 border border-red-700/30 rounded-xl p-4">
-                                  <p className="text-sm font-bold text-red-400 mb-2">⚠️ AI提案：このホテルの課題</p>
-                                  <ul className="space-y-1">
-                                    {hotelResult.issues.map((issue, ii) => (
-                                      <li key={ii} className="text-base text-slate-200 flex items-start gap-2">
-                                        <span className="text-red-400 flex-shrink-0">•</span>{issue}
-                                      </li>
-                                    ))}
-                                  </ul>
+                              </div>
+                            )}
+
+                            {/* AI課題・注意（折りたたみ） */}
+                            {hotelResult && (hotelResult.issues?.length > 0 || hotelResult.tips) && i === 0 && (
+                              <div className="px-5 py-2 grid grid-cols-1 gap-2">
+                                {hotelResult.issues?.length > 0 && (
+                                  <details className="group">
+                                    <summary className="cursor-pointer text-sm font-bold text-red-400 px-3 py-2 bg-red-950/30 rounded-lg list-none flex items-center justify-between">
+                                      <span>⚠️ AIが見つけた課題 ({hotelResult.issues.length}件)</span>
+                                      <span className="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+                                    </summary>
+                                    <ul className="mt-2 space-y-1 px-3">
+                                      {hotelResult.issues.map((issue, ii) => (
+                                        <li key={ii} className="text-sm text-slate-200 flex items-start gap-2">
+                                          <span className="text-red-400 flex-shrink-0">•</span>{issue}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </details>
+                                )}
+                                {hotelResult.tips && (
+                                  <details className="group">
+                                    <summary className="cursor-pointer text-sm font-bold text-yellow-400 px-3 py-2 bg-yellow-950/30 rounded-lg list-none flex items-center justify-between">
+                                      <span>💡 架電注意ポイント</span>
+                                      <span className="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+                                    </summary>
+                                    <p className="mt-2 px-3 text-sm text-slate-200 leading-relaxed">{hotelResult.tips}</p>
+                                  </details>
+                                )}
+                              </div>
+                            )}
+
+                            {/* 標準トーク（折りたたみ） */}
+                            <div className="px-5 py-2">
+                              <details className="group">
+                                <summary className="cursor-pointer text-sm font-bold text-slate-400 px-3 py-2 bg-slate-700/50 rounded-lg list-none flex items-center justify-between hover:bg-slate-700">
+                                  <span>📄 標準トーク（米山パターン）</span>
+                                  <span className="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div className="mt-2 px-3">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className={`text-xs font-bold ${cc.text}`}>{item.label}</p>
+                                    <button onClick={() => copy(item.text, `ym_${ymPattern}_${i}`)}
+                                      className={`text-xs px-2 py-1 rounded-lg font-bold transition-colors ${copiedKey === `ym_${ymPattern}_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                                      {copiedKey === `ym_${ymPattern}_${i}` ? '✅' : '📋'}
+                                    </button>
+                                  </div>
+                                  <p className="text-base text-slate-100 leading-relaxed whitespace-pre-line mb-2">{item.text}</p>
+                                  <p className="text-sm text-slate-400 leading-relaxed border-t border-slate-600/40 pt-2">💡 {item.point}</p>
                                 </div>
-                              )}
-                              {hotelResult.tips && (
-                                <div className="bg-yellow-950/30 border border-yellow-700/30 rounded-xl p-4">
-                                  <p className="text-sm font-bold text-yellow-400 mb-2">💡 AI提案：架電注意ポイント</p>
-                                  <p className="text-base text-slate-200 leading-relaxed">{hotelResult.tips}</p>
-                                </div>
-                              )}
+                              </details>
                             </div>
-                          )
-                        })()}
-                        <div className="flex items-center justify-between mb-3">
-                          <p className={`text-base font-bold ${cc.text}`}>{item.label}</p>
-                          <button onClick={() => copy(item.text, `ym_${ymPattern}_${i}`)}
-                            className={`text-sm px-3 py-1.5 rounded-lg font-medium transition-colors ${copiedKey === `ym_${ymPattern}_${i}` ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
-                            {copiedKey === `ym_${ymPattern}_${i}` ? '✅' : '📋'}
-                          </button>
-                        </div>
-                        <p className="text-lg text-slate-100 leading-relaxed whitespace-pre-line mb-3">{item.text}</p>
-                        <p className="text-base text-slate-400 leading-relaxed border-t border-slate-600/50 pt-3 mb-3">💡 {item.point}</p>
 
-                        {/* 切り返しナビ折りたたみ */}
-                        <div className="border-t border-slate-600/40 pt-3 mb-3">
-                          <button onClick={() => toggleStepNav(i)}
-                            className={`w-full text-left text-sm font-bold px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${stepNavOpen[i] ? 'bg-blue-900/40 text-blue-300' : 'bg-slate-700/60 text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`}>
-                            <span>⚡ 切り返しナビ</span>
-                            <span>{stepNavOpen[i] ? '▲ 閉じる' : '▼ 開く'}</span>
-                          </button>
-
-                          {stepNavOpen[i] && (
+                            {/* 切り返しナビ（折りたたみ） */}
+                            <div className="px-5 pt-2 pb-4">
+                              <details className="group">
+                                <summary className="cursor-pointer text-sm font-bold text-blue-300 px-3 py-2 bg-blue-900/30 rounded-lg list-none flex items-center justify-between hover:bg-blue-900/50">
+                                  <span>⚡ 切り返しナビ</span>
+                                  <span className="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div className="mt-3 bg-slate-900/60 rounded-xl p-4 space-y-4">(
                             <div className="mt-3 bg-slate-900/60 rounded-xl p-4 space-y-4">
                               {/* 切り返しナビ */}
                               <div>
@@ -1121,7 +1160,7 @@ export default function TeleapoPage() {
 
                               {/* メモ保存 */}
                               <div className="border-t border-slate-700 pt-3">
-                                <p className="text-xs text-slate-400 font-bold mb-2">💾 気づきをメモ保存（ノウハウメモに追加）</p>
+                                <p className="text-xs text-slate-400 font-bold mb-2">💾 気づきをメモ保存</p>
                                 <div className="flex gap-2">
                                   <input
                                     type="text"
@@ -1140,16 +1179,18 @@ export default function TeleapoPage() {
                                 </div>
                               </div>
                             </div>
-                          )}
-                        </div>
+                          </details>
+                            </div>
 
-                        <div className="border-t border-slate-600/40 pt-3">
-                          <p className="text-xs text-slate-500 mb-1">📝 メモ</p>
-                          <textarea value={stepMemos[i]} onChange={e => updateMemo(i, e.target.value)}
-                            placeholder="例：「予算がない」と言われた。補助金で突破できた。"
-                            rows={2}
-                            className="w-full bg-slate-900/60 border border-slate-600/60 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none" />
-                        </div>
+                            {/* メモ欄 */}
+                            <div className="px-5 pb-4">
+                              <textarea value={stepMemos[i]} onChange={e => updateMemo(i, e.target.value)}
+                                placeholder="例：「予算がない」と言われた。補助金で突破できた。"
+                                rows={2}
+                                className="w-full bg-slate-900/60 border border-slate-600/60 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none" />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )
                   })}
