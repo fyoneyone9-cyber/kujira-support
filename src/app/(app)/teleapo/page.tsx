@@ -306,6 +306,13 @@ export default function TeleapoPage() {
     issues: string[]
     opening: string
     tips: string
+    steps?: {
+      step1?: string
+      step2?: string
+      step3?: string
+      step4?: string
+      step4b?: string
+    }
   } | null>(null)
   const [hotelError, setHotelError] = useState<string | null>(null)
 
@@ -948,41 +955,47 @@ export default function TeleapoPage() {
                     const cc = colorClass(item.color)
                     return (
                       <div key={i} className={`rounded-xl p-5 ${cc.bg}`}>
-                        {/* ホテル分析メモ（STEP1のみ受付突破トーク、全STEPに課題・注意） */}
-                        {hotelResult && (
-                          <div className="mb-4 space-y-2">
-                            {i === 0 && hotelResult.opening && (
-                              <div className="bg-cyan-950/60 border border-cyan-600/50 rounded-xl p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <p className="text-sm font-bold text-cyan-400">🏨 AI提案：このホテル専用トーク</p>
-                                  <button onClick={() => copy(hotelResult.opening, 'hotel_open_step')}
-                                    className={`text-sm px-3 py-1.5 rounded-lg font-bold transition-colors ${copiedKey === 'hotel_open_step' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
-                                    {copiedKey === 'hotel_open_step' ? '✅' : '📋'}
-                                  </button>
+                        {/* ホテル分析：各STEPに専用トーク表示 */}
+                        {hotelResult && (() => {
+                          const stepKeys = ['step1', 'step2', 'step3', 'step4', 'step4b'] as const
+                          const stepKey = stepKeys[i]
+                          const customTalk = hotelResult.steps?.[stepKey] ?? (i === 0 ? hotelResult.opening : '')
+                          const copyKey = `hotel_step_${i}`
+                          return (
+                            <div className="mb-4 space-y-2">
+                              {customTalk && (
+                                <div className="bg-cyan-950/60 border border-cyan-600/50 rounded-xl p-4">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className="text-sm font-bold text-cyan-400">🏨 AI提案：このホテル専用トーク</p>
+                                    <button onClick={() => copy(customTalk, copyKey)}
+                                      className={`text-sm px-3 py-1.5 rounded-lg font-bold transition-colors ${copiedKey === copyKey ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                                      {copiedKey === copyKey ? '✅' : '📋'}
+                                    </button>
+                                  </div>
+                                  <p className="text-lg text-cyan-100 leading-relaxed whitespace-pre-wrap">{customTalk}</p>
                                 </div>
-                                <p className="text-lg text-cyan-100 leading-relaxed">{hotelResult.opening}</p>
-                              </div>
-                            )}
-                            {hotelResult.issues?.length > 0 && (
-                              <div className="bg-red-950/40 border border-red-700/30 rounded-xl p-4">
-                                <p className="text-sm font-bold text-red-400 mb-2">⚠️ AI提案：このホテルの課題</p>
-                                <ul className="space-y-1">
-                                  {hotelResult.issues.map((issue, ii) => (
-                                    <li key={ii} className="text-base text-slate-200 flex items-start gap-2">
-                                      <span className="text-red-400 flex-shrink-0">•</span>{issue}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            {hotelResult.tips && (
-                              <div className="bg-yellow-950/30 border border-yellow-700/30 rounded-xl p-4">
-                                <p className="text-sm font-bold text-yellow-400 mb-2">💡 AI提案：架電注意ポイント</p>
-                                <p className="text-base text-slate-200 leading-relaxed">{hotelResult.tips}</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                              )}
+                              {hotelResult.issues?.length > 0 && (
+                                <div className="bg-red-950/40 border border-red-700/30 rounded-xl p-4">
+                                  <p className="text-sm font-bold text-red-400 mb-2">⚠️ AI提案：このホテルの課題</p>
+                                  <ul className="space-y-1">
+                                    {hotelResult.issues.map((issue, ii) => (
+                                      <li key={ii} className="text-base text-slate-200 flex items-start gap-2">
+                                        <span className="text-red-400 flex-shrink-0">•</span>{issue}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              {hotelResult.tips && (
+                                <div className="bg-yellow-950/30 border border-yellow-700/30 rounded-xl p-4">
+                                  <p className="text-sm font-bold text-yellow-400 mb-2">💡 AI提案：架電注意ポイント</p>
+                                  <p className="text-base text-slate-200 leading-relaxed">{hotelResult.tips}</p>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })()}
                         <div className="flex items-center justify-between mb-3">
                           <p className={`text-base font-bold ${cc.text}`}>{item.label}</p>
                           <button onClick={() => copy(item.text, `ym_${ymPattern}_${i}`)}

@@ -10,34 +10,38 @@ async function crawl(url: string): Promise<string> {
       headers: { Accept: 'text/plain' },
       signal: AbortSignal.timeout(8000),
     })
-    return (await res.text()).slice(0, 3000)
+    const text = await res.text()
+    return text.length > 100 ? text.slice(0, 2500) : ''
   } catch {
     return ''
   }
 }
 
 async function searchReviews(hotelName: string): Promise<string> {
+  const enc = encodeURIComponent(hotelName)
   const queries = [
-    `https://www.jalan.net/yado/search/?kwd=${encodeURIComponent(hotelName)}`,
-    `https://travel.rakuten.co.jp/keyword/${encodeURIComponent(hotelName)}/`,
-    `https://www.tripadvisor.jp/Search?q=${encodeURIComponent(hotelName)}`,
+    { label: 'じゃらん',         url: `https://www.jalan.net/yado/search/?kwd=${enc}` },
+    { label: '楽天トラベル',      url: `https://travel.rakuten.co.jp/keyword/${enc}/` },
+    { label: 'TripAdvisor',      url: `https://www.tripadvisor.jp/Search?q=${enc}` },
+    { label: 'Google Maps',      url: `https://www.google.com/maps/search/${enc}` },
+    { label: '一休.com',         url: `https://www.ikyu.com/search/?pname=${enc}` },
+    { label: 'るるぶトラベル',    url: `https://travel.rurouby.co.jp/search/?keyword=${enc}` },
+    { label: 'Yahoo!トラベル',   url: `https://travel.yahoo.co.jp/search?kw=${enc}` },
+    { label: 'ホテル公式サイト検索', url: `https://r.jina.ai/https://www.google.com/search?q=${enc}+口コミ+チェックイン+フロント+評判&hl=ja` },
   ]
 
-  const results = await Promise.allSettled(
-    queries.map(url => crawl(url))
-  )
+  const results = await Promise.allSettled(queries.map(q => crawl(q.url)))
 
   return results
     .map((r, i) => {
       if (r.status === 'fulfilled' && r.value.length > 100) {
-        const labels = ['じゃらん', '楽天トラベル', 'TripAdvisor']
-        return `【${labels[i]}】\n${r.value}`
+        return `【${queries[i].label}】\n${r.value}`
       }
       return ''
     })
     .filter(Boolean)
     .join('\n\n')
-    .slice(0, 6000)
+    .slice(0, 8000)
 }
 
 export async function POST(request: Request) {
@@ -46,28 +50,27 @@ export async function POST(request: Request) {
 
   const isUrl = input.trim().startsWith('http')
 
-  // クロール
   let crawlText = ''
-  let reviewText = ''
-
   if (isUrl) {
     crawlText = await crawl(input.trim())
   }
 
-  // 口コミ検索（じゃらん・楽天トラベル・TripAdvisor）
-  const hotelName = isUrl ? (crawlText.match(/施設名[：:]\s*(.+)/)?.[1] ?? input.trim()) : input.trim()
-  reviewText = await searchReviews(hotelName)
+  const hotelName = isUrl
+    ? (crawlText.match(/施設名[：:]\s*(.+)/)?.[1] ?? input.trim())
+    : input.trim()
+
+  const reviewText = await searchReviews(hotelName)
 
   const prompt = `あなたはホテル・旅館向け自動チェックイン機の営業担当アシスタントです。
-以下の情報から、このホテルへの最適な営業アプローチを分析してください。
+以下の情報から、このホテルへの最適な営業アプローチを分析し、各ステップ専用のカスタムトークを生成してください。
 
 【ホテル情報】
 ${crawlText ? `サイト内容:\n${crawlText}\n` : `ホテル名/入力: ${hotelName}\n`}
 
-【口コミ・評判情報（じゃらん・楽天トラベル・TripAdvisor）】
-${reviewText || '口コミサイトからの取得ができませんでした。ホテル名・地域・業態から推測して分析してください。温泉施設なら日帰り客対応、小規模旅館なら深夜対応、シティホテルならインバウンド対応など、業態に合った課題を推定して回答してください。'}
+【口コミ・評判情報（じゃらん・楽天・TripAdvisor・一休・Google Maps等）】
+${reviewText || '口コミ取得不可。ホテル名・地域・業態（温泉施設なら日帰り対応、小規模旅館なら深夜対応、シティホテルならインバウンドなど）から課題を推定してください。'}
 
-以下の6パターンから最適なアプローチを1〜2個選び、理由と刺さりポイントを教えてください：
+6パターンから最適アプローチを1〜2個選び、各ステップのカスタムトークを生成してください：
 1. 💰 IT補助金全面訴求型
 2. 🏨 インバウンド課題共感型
 3. 🆚 競合比較・乗り換え訴求型
@@ -75,13 +78,20 @@ ${reviewText || '口コミサイトからの取得ができませんでした。
 5. 📋 宿泊名簿・本人確認DX型
 6. 🌙 夜間・無人運営訴求型
 
-必ずJSON形式のみで出力してください（前後に説明不要）:
+必ずJSON形式のみで出力（前後に説明不要）:
 {
-  "recommended": ["パターン名（例：💰 IT補助金全面訴求型）"],
+  "recommended": ["パターン名"],
   "reason": "このホテルにこのパターンが刺さる理由（2〜3文）",
   "issues": ["口コミ・情報から見えた課題1", "課題2", "課題3"],
-  "opening": "受付突破のファーストトーク例（ホテル名・地域・業態・口コミの特徴を反映して専用にカスタマイズすること。必ず以下を含めること：①IT補助金または人手不足補助金が使える旨、②補助金申請から導入まで弊社が全て代行する旨）",
-  "tips": "このホテルへの架電で特に注意すべきポイント"
+  "tips": "このホテルへの架電で特に注意すべきポイント",
+  "steps": {
+    "step1": "【STEP1 受付突破】このホテル専用トーク。必ず①IT補助金または人手不足補助金が使える旨②補助金申請から導入まで弊社が全て代行する旨を含める",
+    "step2": "【STEP2 担当者への第一声】このホテルの課題・業態に合わせた共感トーク（口コミの特徴や地域性を反映）",
+    "step3": "【STEP3 ヒアリング】このホテルに刺さりそうな課題を引き出す質問トーク",
+    "step4": "【STEP4 課題あり→アポ取り】このホテル専用のアポ獲得トーク",
+    "step4b": "【STEP4' 課題なし→情報置き】このホテル専用の資料送付・次回架電につなぐトーク"
+  },
+  "opening": "step1と同じ内容（後方互換用）"
 }`
 
   try {
@@ -89,6 +99,8 @@ ${reviewText || '口コミサイトからの取得ができませんでした。
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) return NextResponse.json({ error: 'AI応答の解析に失敗しました' }, { status: 500 })
     const data = JSON.parse(jsonMatch[0])
+    // 後方互換
+    if (!data.opening && data.steps?.step1) data.opening = data.steps.step1
     return NextResponse.json({ ok: true, ...data })
   } catch (e) {
     return NextResponse.json({ error: 'AI分析に失敗しました' }, { status: 500 })
