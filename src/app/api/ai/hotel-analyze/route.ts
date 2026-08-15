@@ -185,12 +185,26 @@ ${reviewInfo}
 
   try {
     const text = await gemini(prompt)
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) return NextResponse.json({ error: 'AI応答の解析に失敗しました' }, { status: 500 })
-    const data = JSON.parse(jsonMatch[0])
-    if (!data.opening && data.steps?.step1) data.opening = data.steps.step1
+    // ```json ... ``` ブロックも含めて抽出
+    const jsonMatch = text.match(/```json\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/)
+    const jsonStr = jsonMatch?.[1] ?? jsonMatch?.[0]
+    if (!jsonStr) {
+      console.error('JSON not found in response:', text.slice(0, 500))
+      return NextResponse.json({ error: 'AI応答の解析に失敗しました' }, { status: 500 })
+    }
+    let data: Record<string, unknown>
+    try {
+      data = JSON.parse(jsonStr)
+    } catch (parseErr) {
+      console.error('JSON parse error:', parseErr, jsonStr.slice(0, 300))
+      return NextResponse.json({ error: 'AI応答のJSON解析に失敗しました' }, { status: 500 })
+    }
+    if (!data.opening && (data.steps as Record<string, string>)?.step1) {
+      data.opening = (data.steps as Record<string, string>).step1
+    }
     return NextResponse.json({ ok: true, ...data })
   } catch (e) {
-    return NextResponse.json({ error: 'AI分析に失敗しました' }, { status: 500 })
+    console.error('hotel-analyze error:', e)
+    return NextResponse.json({ error: `AI分析に失敗しました: ${e instanceof Error ? e.message : String(e)}` }, { status: 500 })
   }
 }
