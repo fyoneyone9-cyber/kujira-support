@@ -295,15 +295,43 @@ export default function PayCubePage() {
         </div>
       )}
 
+      {/* 関連リンク */}
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {[
+          { label: 'PayCube保守システム（ログイン）', url: 'https://dist.paycube-service.com/paycube/customer_detail.php', icon: '🔐', desc: 'ID/PW: devicee' },
+          { label: '進捗管理シート', url: 'https://docs.google.com/spreadsheets/d/107wEIMY-wiIcPg0K_cDfyVGajKoFmluto8wJdSbqeOg/edit?gid=849544635#gid=849544635', icon: '📊', desc: 'K列まで入力 → 野田さんへ連絡' },
+          { label: 'PayCube保守マニュアル', url: '/manuals', icon: '📋', desc: '操作手順・エスカレーション基準' },
+          { label: 'MailDealer（メール対応）', url: 'https://mdjack.maildealer.jp/index.php', icon: '📨', desc: '顧客への連絡はこちらから' },
+          { label: 'Zoom Phone（架電）', url: 'https://app.zoom.us/wc/phone', icon: '📞', desc: '無償→有償切替の顧客連絡' },
+          { label: 'くじらCRM', url: 'https://d1zlma8f7wwwsg.cloudfront.net/login', icon: '🐋', desc: '顧客情報の確認' },
+          { label: '工程管理シート', url: 'https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=602309486#gid=602309486', icon: '📈', desc: '全体進捗の管理' },
+          { label: 'くじら社内Wiki', url: 'https://www.notion.so/kujira-device-agency/Wiki-dc27874409f24d549bb439103f852185', icon: '📖', desc: 'Notion Wiki' },
+        ].map(link => (
+          <a
+            key={link.url}
+            href={link.url}
+            target={link.url.startsWith('http') ? '_blank' : undefined}
+            rel={link.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+            className="flex items-center gap-3 px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-500 rounded-xl transition-colors group"
+          >
+            <span className="text-2xl">{link.icon}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">{link.label}</p>
+              <p className="text-xs text-slate-500">{link.desc}</p>
+            </div>
+            <span className="text-slate-500 text-xs">↗</span>
+          </a>
+        ))}
+      </div>
+
       {/* 操作ガイド */}
-      <div className="mt-8 p-5 bg-slate-800 border border-slate-700 rounded-xl">
+      <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
         <h3 className="font-bold text-white mb-3">📖 対応ガイド</h3>
         <div className="space-y-2 text-sm text-slate-300">
           <p>🔴 <strong className="text-red-300">緊急（2週間以内）</strong>：即座に顧客へ連絡 → 保守システムで更新登録 → 進捗シートK列入力 → 野田さんへ連絡</p>
           <p>🟠 <strong className="text-orange-300">要対応（1ヶ月以内）</strong>：顧客へ連絡開始。無償保守は加入意思・希望プランを確認してから登録</p>
           <p>🟡 <strong className="text-yellow-300">注意（2ヶ月以内）</strong>：準備開始。有償保守は同プランで延長、無償保守は顧客確認が必要</p>
           <p>⚠️ 期限切れ後の<strong>再加入はシステム登録不可</strong> → 吉井さんへエスカレーション</p>
-          <p>📋 <a href="/manuals" className="text-blue-400 hover:underline">操作マニュアル詳細はこちら</a></p>
         </div>
       </div>
     </div>
