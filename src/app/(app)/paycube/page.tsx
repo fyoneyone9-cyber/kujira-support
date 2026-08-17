@@ -540,6 +540,54 @@ export default function PayCubePage() {
         </div>
       </div>
 
+      {/* 費用回収フロー */}
+      <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
+        <h3 className="font-bold text-white mb-4">💰 費用回収フロー（有償保守加入確定後）</h3>
+        <div className="space-y-3">
+          {[
+            { n:'1', icon:'📝', title:'見積書を作成', desc:'フォーマット（見積書Excel）に記入。プラン・金額・見積期限を記載。', note:'料金は税別。フォーマットは野田さんから入手' },
+            { n:'2', icon:'✅', title:'社長へ見積書の承認依頼', desc:'送付前に必ず社長の承認を取る。', note:'承認前に顧客へ送付しない' },
+            { n:'3', icon:'📧', title:'顧客へ見積書を送付', desc:'メールに見積書PDFを添付して送付。同時に申込書（Pay Cube有償保守プラン申込書.xlsx）の記入・返送を依頼。', note:'急ぎの場合は申込書回収を待たずに次のステップへ（野田さんに確認）' },
+            { n:'4', icon:'📄', title:'顧客から申込書を回収', desc:'記入・押印済みの申込書をメールで受領。押印・署名は顧客担当者のものでOK。', note:'' },
+            { n:'5', icon:'🏦', title:'岡田さん（総務）へ請求書発行依頼', desc:'見積書・申込書・有償保守開始日・納品日を添えてメールで依頼。支払期日は月末（コンラックスへの入金に間に合わせる）。', note:'支払期日は顧客に事前確認が必要' },
+            { n:'6', icon:'📞', title:'コンラックス吉井さんへ保守登録連絡', desc:'加入意思が確定したら吉井さん（090-3567-7162）へ連絡し、保守登録を依頼。', note:'⚠️ 吉井さんが勝手に手続きを進めることがある。確認なしで進めさせない' },
+            { n:'7', icon:'📊', title:'進捗管理シートに記録', desc:'保守期間（開始日〜終了日）をシートに記載。金額はU列に記入。', note:'管理シートのU列が請求総額' },
+          ].map(r => (
+            <div key={r.n} className="flex gap-3 items-start">
+              <div className="w-7 h-7 rounded-full bg-blue-700 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{r.n}</div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span>{r.icon}</span>
+                  <p className="font-medium text-white text-sm">{r.title}</p>
+                </div>
+                <p className="text-sm text-slate-300 mt-0.5 ml-6">{r.desc}</p>
+                {r.note && <p className="text-xs text-yellow-400 mt-0.5 ml-6">⚠️ {r.note}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="p-3 bg-slate-700/50 rounded-lg text-sm">
+            <p className="text-xs font-bold text-slate-400 mb-2">📌 よく使う連絡先</p>
+            <ul className="space-y-1 text-slate-300">
+              <li>🏦 請求書発行：岡田さん（総務）</li>
+              <li>📞 保守登録：コンラックス吉井さん <span className="font-mono text-white">090-3567-7162</span></li>
+              <li>✅ 最終確認：野田さん</li>
+            </ul>
+          </div>
+          <div className="p-3 bg-slate-700/50 rounded-lg text-sm">
+            <p className="text-xs font-bold text-slate-400 mb-2">⚠️ 注意事項</p>
+            <ul className="space-y-1 text-slate-300 text-xs">
+              <li>• 料金はすべて<span className="text-yellow-300 font-medium">税別</span></li>
+              <li>• 吉井さんが確認なしで手続きを勝手に進める場合あり → 事前に釘を刺す</li>
+              <li>• コンラックスへの入金は月末 → 請求書発行は早めに</li>
+              <li>• 愛真館は社長判断で請求保留中（米山さんへ確認）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       {/* 保守プラン料金表 */}
       <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
         <h3 className="font-bold text-white mb-1">💴 保守プラン料金表</h3>
