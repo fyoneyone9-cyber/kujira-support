@@ -57,6 +57,8 @@ export default function PayCubePage() {
   const [filter, setFilter] = useState<'alert' | 'review' | 'all'>('alert')
   const [updating, setUpdating] = useState<string | null>(null)
   const [showAdd, setShowAdd] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<string | null>(null)
   const [stats, setStats] = useState<{ total: number; lastImport: string | null } | null>(null)
   const [form, setForm] = useState({
     client_name: '', management_no: '', plan_name: '', plan_type: 'paid',
@@ -211,13 +213,49 @@ export default function PayCubePage() {
         >
           🔄 手動チェック実行
         </button>
+        <label className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ml-auto ${importing ? 'bg-slate-600 text-slate-400' : 'bg-purple-700 hover:bg-purple-600 text-white'}`}>
+          {importing ? '⏳ 取込中...' : '📥 CSVで一括更新'}
+          <input
+            type="file"
+            accept=".csv"
+            className="hidden"
+            disabled={importing}
+            onChange={async (e) => {
+              const file = e.target.files?.[0]
+              if (!file) return
+              setImporting(true)
+              setImportResult(null)
+              const fd = new FormData()
+              fd.append('file', file)
+              const res = await fetch('/api/paycube/import-csv', { method: 'POST', body: fd })
+              const d = await res.json()
+              if (d.ok) {
+                setImportResult(`✅ 取込完了：有効${d.imported}件 ＋ 要確認${d.needs_review}件`)
+                loadStats()
+                load()
+              } else {
+                setImportResult(`❌ エラー：${d.error}`)
+              }
+              setImporting(false)
+              e.target.value = ''
+            }}
+          />
+        </label>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-green-700 text-white hover:bg-green-600 transition-colors ml-auto"
+          className="px-4 py-2 rounded-lg text-sm font-medium bg-green-700 text-white hover:bg-green-600 transition-colors"
         >
           ＋ 契約登録
         </button>
       </div>
+
+      {/* 取込結果 */}
+      {importResult && (
+        <div className={`mb-3 px-4 py-3 rounded-lg text-sm font-medium ${importResult.startsWith('✅') ? 'bg-green-900/60 border border-green-600 text-green-200' : 'bg-red-900/60 border border-red-600 text-red-200'}`}>
+          {importResult}
+          <span className="ml-2 text-xs text-slate-400">スプレッドシートをCSVでダウンロード → このボタンで再取込すれば常に最新状態になります</span>
+        </div>
+      )}
 
       {/* 新規登録フォーム */}
       {showAdd && (
