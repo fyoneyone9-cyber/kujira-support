@@ -2,11 +2,5 @@
   "framework": "nextjs",
   "buildCommand": "next build",
   "devCommand": "next dev",
-  "installCommand": "npm install",
-  "crons": [
-    {
-      "path": "/api/paycube/check-alerts",
-      "schedule": "0 9 * * 1-5"
-    }
-  ]
+  "installCommand": "npm install"
 }
