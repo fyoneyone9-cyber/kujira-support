@@ -47,12 +47,13 @@ const statusLabel: Record<string, string> = {
   contacted: '📞 連絡済',
   renewed: '✅ 更新完了',
   expired: '❌ 期限切れ',
+  needs_review: '🔍 要確認',
 }
 
 export default function PayCubePage() {
   const [contracts, setContracts] = useState<Contract[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'alert' | 'all'>('alert')
+  const [filter, setFilter] = useState<'alert' | 'review' | 'all'>('alert')
   const [updating, setUpdating] = useState<string | null>(null)
   const [showAdd, setShowAdd] = useState(false)
   const [form, setForm] = useState({
@@ -63,7 +64,8 @@ export default function PayCubePage() {
 
   const load = async () => {
     setLoading(true)
-    const res = await fetch(`/api/paycube/contracts${filter === 'alert' ? '?mode=alert' : ''}`)
+    const mode = filter === 'alert' ? '?mode=alert' : filter === 'review' ? '?mode=review' : ''
+    const res = await fetch(`/api/paycube/contracts${mode}`)
     const d = await res.json()
     setContracts(d.contracts || [])
     setLoading(false)
@@ -149,6 +151,12 @@ export default function PayCubePage() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'alert' ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
         >
           🔔 アラート対象のみ ({loading ? '...' : contracts.filter(c => getAlertLevel(c.end_date) !== 'ok').length})
+        </button>
+        <button
+          onClick={() => setFilter('review')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'review' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+        >
+          🔍 要確認物件 (36)
         </button>
         <button
           onClick={() => setFilter('all')}
@@ -419,6 +427,14 @@ export default function PayCubePage() {
           </div>
         </div>
       </div>
+      {/* 要確認バナー */}
+      {filter === 'review' && contracts.length > 0 && (
+        <div className="mb-4 p-4 bg-purple-950/60 border border-purple-600 rounded-xl text-sm text-purple-200">
+          <p className="font-bold mb-1">🔍 要確認物件とは</p>
+          <p className="text-purple-300 text-xs">保守終了日データなし、または保守期限切れの物件です。保守システムで現状を確認し、対応を判断してください。期限切れ後の再加入は<strong>吉井さんへエスカレーション</strong>が必要です。</p>
+        </div>
+      )}
+
       {/* アラート発生時の対応フロー */}
       <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
         <h3 className="font-bold text-white mb-4">🚨 アラート発生時の対応フロー</h3>

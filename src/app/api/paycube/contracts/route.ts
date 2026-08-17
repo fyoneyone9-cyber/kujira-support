@@ -23,6 +23,8 @@ export async function GET(req: NextRequest) {
     query = query
       .lte('end_date', twoMonthsLater.toISOString().split('T')[0])
       .gte('end_date', today.toISOString().split('T')[0])
+  } else if (mode === 'review') {
+    query = query.eq('status', 'needs_review')
   }
 
   const { data, error } = await query
