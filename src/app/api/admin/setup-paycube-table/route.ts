@@ -9,30 +9,7 @@ export async function GET() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // テーブル作成
-  const { error } = await supabase.rpc('exec_sql', {
-    sql: `
-      create table if not exists paycube_contracts (
-        id uuid default gen_random_uuid() primary key,
-        client_name text not null,
-        management_no text,
-        management_no_dealer text,
-        product_type text,
-        serial_no_hard text,
-        serial_no_bill text,
-        plan_name text,
-        plan_type text default 'paid',
-        start_date date,
-        end_date date not null,
-        status text default 'active',
-        contacted_at timestamptz,
-        renewed_at timestamptz,
-        notes text,
-        created_at timestamptz default now(),
-        updated_at timestamptz default now()
-      );
-    `
-  }).catch(() => ({ error: null }))
+  // テーブル存在確認のみ行う（テーブル作成はSQLエディタで実行）
 
   // RPC不可の場合はダイレクトにテーブル存在確認
   const { data, error: selectErr } = await supabase

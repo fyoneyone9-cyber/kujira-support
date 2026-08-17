@@ -1,0 +1,8 @@
+
+> kujira-support@0.1.1 build
+> next build
+
+Microsoft Windows [Version 10.0.26200.9168]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\fyone\Desktop\kujira-support>
