@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import PayCubeAlertBanner from '@/components/PayCubeAlertBanner'
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -6,6 +7,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
+      <PayCubeAlertBanner />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">ダッシュボード</h1>
         <p className="text-slate-400 text-sm mt-1">ようこそ、{user?.email}</p>
