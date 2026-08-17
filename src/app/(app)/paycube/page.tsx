@@ -419,6 +419,55 @@ export default function PayCubePage() {
           </div>
         </div>
       </div>
+      {/* 保守プラン料金表 */}
+      <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
+        <h3 className="font-bold text-white mb-1">💴 保守プラン料金表</h3>
+        <p className="text-xs text-slate-500 mb-4">出典：PayCube保守対応のご提案（株式会社デバイスエージェンシー）</p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-600">
+                <th className="text-left py-2 px-3 text-slate-400 font-medium">プラン</th>
+                <th className="text-right py-2 px-3 text-slate-400 font-medium">年払い料金</th>
+                <th className="text-left py-2 px-3 text-slate-400 font-medium">備考</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-700">
+              {[
+                { plan: 'コールセンター機能', price: '¥28,800', note: '365日・24時間' },
+                { plan: 'オンサイト保守機能', price: '¥31,700', note: '365日・9時〜21時' },
+                { plan: '部品代込プラン（Option）', price: '¥24,000', note: '別途請求なし（電源・基盤除く）' },
+                { plan: 'コールセンター＋オンサイト set', price: '¥57,600', note: '¥2,900お得' },
+                { plan: 'コールセンター＋オンサイト＋部品代込 set', price: '¥81,600', note: '最も手厚いプラン' },
+                { plan: '設置・取説 / 撤去', price: '¥61,200', note: '1件あたり・平日9〜15時' },
+                { plan: 'スポット保守', price: '¥84,000〜', note: '平日9〜17時・5営業日以内・部品代別途' },
+              ].map((r, i) => (
+                <tr key={i} className="hover:bg-slate-700/40 transition-colors">
+                  <td className="py-2.5 px-3 text-slate-200">{r.plan}</td>
+                  <td className="py-2.5 px-3 text-right font-mono font-bold text-white">{r.price}</td>
+                  <td className="py-2.5 px-3 text-slate-400 text-xs">{r.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="p-3 bg-slate-700/50 rounded-lg">
+            <p className="text-xs font-bold text-slate-300 mb-2">📦 無償保守期間</p>
+            <p className="text-sm text-slate-300">設置日または稼働日から <span className="text-white font-bold">6ヶ月間</span></p>
+            <p className="text-xs text-slate-500 mt-1">オンサイト保守＋部品代 無償</p>
+          </div>
+          <div className="p-3 bg-slate-700/50 rounded-lg">
+            <p className="text-xs font-bold text-slate-300 mb-2">⚠️ 注意事項</p>
+            <ul className="text-xs text-slate-400 space-y-1">
+              <li>• 部品代込プランの対象外：電源・本体基盤</li>
+              <li>• 離島：別途交通費等が発生</li>
+              <li>• 改造品・仕様変更品はオンサイト除外</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       {/* 顧客送付メールテンプレート */}
       <MailTemplate />
     </div>
