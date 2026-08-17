@@ -473,7 +473,15 @@ export default function PayCubePage() {
             </div>
             <div className="flex gap-3 items-start">
               <span className="text-purple-400 font-bold min-w-[24px]">④</span>
-              <p>顧客の意思確認が取れたら「📞 連絡済みにする」ボタンを押す</p>
+              <div>
+                <p>クラウドサインから申込書を送付</p>
+                <a href="https://app.cloudsign.jp/" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline">→ クラウドサインを開く</a>
+                <p className="text-xs text-slate-500 mt-0.5">顧客に電子署名してもらう</p>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="text-purple-400 font-bold min-w-[24px]">⑤</span>
+              <p>署名完了を確認したら「📞 連絡済みにする」ボタンを押す</p>
             </div>
           </div>
         </div>
