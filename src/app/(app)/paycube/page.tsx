@@ -589,7 +589,10 @@ export default function PayCubePage() {
         </div>
       </div>
 
-      {/* 顧客送付メールテンプレート */}
+      {/* 更新案内メールテンプレート（有償保守） */}
+      <RenewalMailTemplate />
+
+      {/* 顧客送付メールテンプレート（無償→有償） */}
       <MailTemplate />
     </div>
   )
@@ -671,6 +674,104 @@ ${myName || '【署名】'}
         </button>
       </div>
       <p className="text-xs text-slate-500 mt-2">※ 添付ファイル：御見積書PDF（別途作成）／ 内容は自由にアレンジ可</p>
+    </div>
+  )
+}
+
+function RenewalMailTemplate() {
+  const [copied, setCopied] = useState(false)
+  const [company, setCompany] = useState('')
+  const [contact, setContact] = useState('')
+  const [myName, setMyName] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [planName, setPlanName] = useState('コールセンター＋オンサイト＋部品代込プラン')
+  const [deadline, setDeadline] = useState('')
+
+  const body = `${company || '【会社名/物件名】'}
+${contact || '【ご担当者名】'}様
+
+いつも大変お世話になっております。
+株式会社デバイスエージェンシーの${myName || '【自分の名前】'}でございます。
+
+標記の件につきまして、ご連絡申し上げます。
+現在ご契約いただいております現金精算機「PayCube」の
+保守サービス（${planName}）が
+${endDate || '【YYYY年M月D日】'}をもちまして契約期間満了となります。
+
+つきましては、引き続き同プランにての更新をご案内申し上げます。
+
+■ 保守サービスにご加入いただくメリット
+
+【対応スピード】
+保守契約がない場合、故障時は「スポット対応」となり、
+ご対応まで最大5営業日のお時間をいただくことになります。
+保守契約にご加入いただくことで、365日・9時〜21時の
+優先対応が可能となります。
+
+【費用リスクの軽減】
+保守契約なしで故障した場合、修理費・部品代・出張費が
+都度発生し、1回の修理で数万〜数十万円になるケースもございます。
+（例：紙幣払出機の交換 ¥120,000 / 硬貨入金部モジュール ¥96,000）
+保守契約（部品代込プラン）にご加入いただくと、
+これらの部品代が定額内に含まれます。
+
+【コールセンター対応】
+365日・24時間のコールセンターにより、夜間・休日の
+トラブル時もすぐにご相談いただけます。
+
+ご不明な点やご変更のご希望がございましたら、
+${deadline || '【YYYY年M月D日】'}までにご連絡賜りますようお願い申し上げます。
+
+何卒よろしくお願い申し上げます。
+
+${myName || '【署名】'}
+株式会社デバイスエージェンシー`
+
+  const copy = () => {
+    navigator.clipboard.writeText(body)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-bold text-white">🔄 更新案内メールテンプレート（有償保守）</h3>
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <span>件名：</span>
+          <span className="text-slate-300 font-medium">現金精算機PayCube 保守サービス更新のご案内</span>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+        {[
+          { label: '会社名/物件名', val: company,   set: setCompany,   placeholder: '例：ガーランドコート宇佐美' },
+          { label: 'ご担当者名',   val: contact,   set: setContact,   placeholder: '例：山田' },
+          { label: '自分の名前',   val: myName,    set: setMyName,    placeholder: '例：米山' },
+          { label: '保守終了日',   val: endDate,   set: setEndDate,   placeholder: '例：2026年8月19日' },
+          { label: '現在のプラン', val: planName,  set: setPlanName,  placeholder: '例：コールセンター＋オンサイト＋部品代込プラン' },
+          { label: '返信期限',     val: deadline,  set: setDeadline,  placeholder: '例：2026年8月18日' },
+        ].map(({ label, val, set, placeholder }) => (
+          <div key={label}>
+            <label className="text-xs text-slate-400 mb-1 block">{label}</label>
+            <input
+              type="text"
+              value={val}
+              placeholder={placeholder}
+              onChange={e => set(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+        ))}
+      </div>
+      <div className="relative">
+        <pre className="w-full p-4 bg-slate-900 border border-slate-600 rounded-lg text-sm text-slate-200 whitespace-pre-wrap font-sans leading-relaxed">{body}</pre>
+        <button
+          onClick={copy}
+          className={`absolute top-3 right-3 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-slate-600 hover:bg-slate-500 text-white'}`}
+        >
+          {copied ? '✅ コピー済み' : '📋 コピー'}
+        </button>
+      </div>
     </div>
   )
 }
