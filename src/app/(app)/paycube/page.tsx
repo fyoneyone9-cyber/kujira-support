@@ -588,6 +588,62 @@ export default function PayCubePage() {
         </div>
       </div>
 
+      {/* コンラックスからの請求構造 */}
+      <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
+        <h3 className="font-bold text-white mb-1">🧾 コンラックス（仕入）請求の仕組み</h3>
+        <p className="text-xs text-slate-500 mb-4">出典：2026年3月分請求書（株式会社日本コンラックス → デバイスエージェンシー）</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs font-bold text-slate-400 mb-2">📌 請求フロー</p>
+            <div className="space-y-2 text-sm text-slate-300">
+              <div className="flex gap-2 items-center">
+                <span className="px-2 py-0.5 bg-blue-800 text-blue-200 rounded text-xs">コンラックス</span>
+                <span className="text-slate-500">→</span>
+                <span className="px-2 py-0.5 bg-slate-600 text-slate-200 rounded text-xs">デバイスエージェンシー</span>
+                <span className="text-slate-500">→</span>
+                <span className="px-2 py-0.5 bg-green-800 text-green-200 rounded text-xs">顧客</span>
+              </div>
+              <p className="text-xs text-slate-400">コンラックスへの支払は月末。顧客への請求は月末を基本に先方と調整。</p>
+            </div>
+            <div className="mt-3 space-y-1 text-xs text-slate-300">
+              <p className="font-bold text-slate-400">振込先（コンラックス）</p>
+              <p>三井住友銀行 日比谷支店 当座 6732482</p>
+              <p>みずほ銀行 芝支店 当座 0104220</p>
+              <p className="text-slate-500">口座名：株式会社日本コンラックス</p>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-slate-400 mb-2">💴 仕入価格（コンラックスからの請求単価）</p>
+            <table className="w-full text-xs">
+              <tbody className="divide-y divide-slate-700">
+                {[
+                  { plan: 'オンサイト＋部品代込パック（年間）', price: '¥46,400' },
+                ].map((r, i) => (
+                  <tr key={i}>
+                    <td className="py-1.5 text-slate-300">{r.plan}</td>
+                    <td className="py-1.5 text-right font-mono font-bold text-white">{r.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="text-xs text-yellow-400 mt-2">⚠️ 顧客への売値（¥81,600）と仕入価格（¥46,400）は別。差額が利益。</p>
+          </div>
+        </div>
+
+        {/* 申込書重要事項 */}
+        <div className="mt-4 p-3 bg-slate-700/50 rounded-lg">
+          <p className="text-xs font-bold text-slate-300 mb-2">📋 申込書 重要事項（顧客への説明必須）</p>
+          <ul className="text-xs text-slate-400 space-y-1">
+            <li>• 支払確認後に有償保守プランが適用（前払い）</li>
+            <li>• 契約最低期間は<span className="text-white">1年間</span>。中途解約でも残期間の料金が発生</li>
+            <li>• 契約は<span className="text-white">1年ごと自動更新</span>。翌年分は更新日の1ヶ月前までに支払いが必要</li>
+            <li>• 解約は次回更新日の<span className="text-white">3ヶ月前</span>までに連絡が必要</li>
+            <li>• 支払遅延の場合はサービスが一時停止される可能性あり</li>
+            <li>• お問い合わせ：TEL 050-3627-9865 / support@and-iot.jp</li>
+          </ul>
+        </div>
+      </div>
+
       {/* 保守プラン料金表 */}
       <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
         <h3 className="font-bold text-white mb-1">💴 保守プラン料金表</h3>
