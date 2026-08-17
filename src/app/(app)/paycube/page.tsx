@@ -14,6 +14,7 @@ type Contract = {
   contacted_at: string | null
   renewed_at: string | null
   notes: string
+  created_at: string
 }
 
 type AlertLevel = 'critical' | 'urgent' | 'warning' | 'ok'
@@ -56,6 +57,7 @@ export default function PayCubePage() {
   const [filter, setFilter] = useState<'alert' | 'review' | 'all'>('alert')
   const [updating, setUpdating] = useState<string | null>(null)
   const [showAdd, setShowAdd] = useState(false)
+  const [stats, setStats] = useState<{ total: number; lastImport: string | null } | null>(null)
   const [form, setForm] = useState({
     client_name: '', management_no: '', plan_name: '', plan_type: 'paid',
     start_date: '', end_date: '', notes: '', product_type: '',
@@ -71,7 +73,18 @@ export default function PayCubePage() {
     setLoading(false)
   }
 
+  const loadStats = async () => {
+    const res = await fetch('/api/paycube/contracts')
+    const d = await res.json()
+    const all: Contract[] = d.contracts || []
+    const lastImport = all.length > 0
+      ? all.reduce((a, b) => a.created_at > b.created_at ? a : b).created_at
+      : null
+    setStats({ total: all.length, lastImport })
+  }
+
   useEffect(() => { load() }, [filter])
+  useEffect(() => { loadStats() }, [])
 
   const updateStatus = async (id: string, status: string) => {
     setUpdating(id)
@@ -109,6 +122,34 @@ export default function PayCubePage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">🔔 PayCube保守期限アラート</h1>
         <p className="text-slate-400 text-sm mt-1">2ヶ月前から自動アラート。期限切れ前に顧客連絡・更新手続きを完了してください。</p>
+      </div>
+
+      {/* データステータスバー */}
+      <div className="flex flex-wrap gap-3 mb-4 text-xs">
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
+          <span className="text-slate-400">📦 登録件数</span>
+          <span className="font-bold text-white">{stats ? `${stats.total}件` : '...'}</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
+          <span className="text-slate-400">🕐 最終取込</span>
+          <span className="font-bold text-white">
+            {stats?.lastImport
+              ? new Date(stats.lastImport).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+              : '...'}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
+          <span className="text-slate-400">🔗 データソース</span>
+          <a
+            href="https://docs.google.com/spreadsheets/d/107wEIMY-wiIcPg0K_cDfyVGajKoFmluto8wJdSbqeOg/edit?gid=849544635#gid=849544635"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:underline font-medium"
+          >
+            進捗管理シート ↗
+          </a>
+          <span className="text-slate-500">（手動CSV取込）</span>
+        </div>
       </div>
 
       {/* アラートサマリーバナー */}
