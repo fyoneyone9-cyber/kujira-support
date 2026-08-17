@@ -419,6 +419,119 @@ export default function PayCubePage() {
           </div>
         </div>
       </div>
+      {/* アラート発生時の対応フロー */}
+      <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
+        <h3 className="font-bold text-white mb-4">🚨 アラート発生時の対応フロー</h3>
+
+        {/* 現在のプラン分岐 */}
+        <div className="mb-5">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">STEP 1 ── 現在のプランを確認する</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-4 bg-green-950/50 border border-green-700 rounded-xl">
+              <p className="font-bold text-green-300 mb-2">✅ 有償保守の場合</p>
+              <ul className="text-sm text-slate-300 space-y-1">
+                <li>→ 顧客への連絡 <span className="text-green-400 font-medium">不要</span></li>
+                <li>→ 同プランで期間延長して登録するだけ</li>
+                <li className="text-slate-500 text-xs mt-1">※ STEP 3（システム登録）へ進む</li>
+              </ul>
+            </div>
+            <div className="p-4 bg-purple-950/50 border border-purple-700 rounded-xl">
+              <p className="font-bold text-purple-300 mb-2">⚠️ 無償保守の場合</p>
+              <ul className="text-sm text-slate-300 space-y-1">
+                <li>→ 顧客への連絡 <span className="text-red-400 font-medium">必須</span></li>
+                <li>→ 加入意思と希望プランを確認してから登録</li>
+                <li className="text-slate-500 text-xs mt-1">※ STEP 2（顧客連絡）へ進む</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* STEP 2 無償保守のみ */}
+        <div className="mb-5 pl-4 border-l-2 border-purple-700">
+          <p className="text-xs font-bold text-purple-400 uppercase tracking-wide mb-3">STEP 2 ── 顧客へ連絡（無償保守のみ）</p>
+          <div className="space-y-2 text-sm text-slate-300">
+            <div className="flex gap-3 items-start">
+              <span className="text-purple-400 font-bold min-w-[24px]">①</span>
+              <div>
+                <p>MailDealer or Zoom Phone で顧客へ連絡</p>
+                <p className="text-xs text-slate-500 mt-0.5">「無償保証期間が〇月〇日に終了します。有償保守への移行についてご案内いたします」</p>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="text-purple-400 font-bold min-w-[24px]">②</span>
+              <div>
+                <p>希望プランの確認（下記料金表を参考に案内）</p>
+                <p className="text-xs text-slate-500 mt-0.5">コールセンターのみ ¥28,800 / オンサイト込 ¥57,600 / 全部入り ¥81,600</p>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="text-purple-400 font-bold min-w-[24px]">③</span>
+              <div>
+                <p>見積書PDFを添付してメール送付</p>
+                <p className="text-xs text-slate-500 mt-0.5">↓ 下のメールテンプレートを使用</p>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="text-purple-400 font-bold min-w-[24px]">④</span>
+              <p>顧客の意思確認が取れたら「📞 連絡済みにする」ボタンを押す</p>
+            </div>
+          </div>
+        </div>
+
+        {/* STEP 3 システム登録 */}
+        <div className="mb-5 pl-4 border-l-2 border-blue-700">
+          <p className="text-xs font-bold text-blue-400 uppercase tracking-wide mb-3">STEP 3 ── 保守システムで更新登録</p>
+          <div className="space-y-2 text-sm text-slate-300">
+            {[
+              { n:'①', t:'PayCube保守システムにログイン', s:'https://dist.paycube-service.com/paycube/index.php (ID/PW: devicee)' },
+              { n:'②', t:'「保守期限」から対象の設置先名をクリック' },
+              { n:'③', t:'「登録」ボタン → 保守サービス内容をプルダウンで選択' },
+              { n:'④', t:'「登録」ボタンで完了' },
+            ].map(r => (
+              <div key={r.n} className="flex gap-3 items-start">
+                <span className="text-blue-400 font-bold min-w-[24px]">{r.n}</span>
+                <div>
+                  <p>{r.t}</p>
+                  {r.s && <p className="text-xs text-slate-500 mt-0.5">{r.s}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* STEP 4 完了処理 */}
+        <div className="mb-5 pl-4 border-l-2 border-orange-700">
+          <p className="text-xs font-bold text-orange-400 uppercase tracking-wide mb-3">STEP 4 ── 完了処理（必須）</p>
+          <div className="space-y-2 text-sm text-slate-300">
+            <div className="flex gap-3 items-start">
+              <span className="text-orange-400 font-bold min-w-[24px]">①</span>
+              <div>
+                <p>進捗管理シートの <span className="font-bold text-white">K列まで</span> 入力する</p>
+                <a href="https://docs.google.com/spreadsheets/d/107wEIMY-wiIcPg0K_cDfyVGajKoFmluto8wJdSbqeOg/edit?gid=849544635#gid=849544635" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline">→ 進捗管理シートを開く</a>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="text-orange-400 font-bold min-w-[24px]">②</span>
+              <p>野田さんへエスカレーション連絡</p>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="text-orange-400 font-bold min-w-[24px]">③</span>
+              <p>このページで「✅ 更新完了」ボタンを押してステータスを更新</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 例外フロー */}
+        <div className="p-4 bg-red-950/50 border border-red-700 rounded-xl">
+          <p className="font-bold text-red-300 mb-2">🔴 例外ケース → 吉井さんへ即エスカレーション</p>
+          <ul className="text-sm text-slate-300 space-y-1">
+            <li>• 保守期間が <span className="text-red-400 font-medium">すでに切れている</span> 状態での再加入依頼（システム登録不可）</li>
+            <li>• 途中解約・別プランへの切り替え希望</li>
+            <li>• 上記2ケースは自己判断せず必ず吉井さんへ連絡すること</li>
+          </ul>
+        </div>
+      </div>
+
       {/* 保守プラン料金表 */}
       <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
         <h3 className="font-bold text-white mb-1">💴 保守プラン料金表</h3>
