@@ -324,14 +324,99 @@ export default function PayCubePage() {
         ))}
       </div>
 
-      {/* 操作ガイド */}
+      {/* ログイン情報 */}
       <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
-        <h3 className="font-bold text-white mb-3">📖 対応ガイド</h3>
-        <div className="space-y-2 text-sm text-slate-300">
-          <p>🔴 <strong className="text-red-300">緊急（2週間以内）</strong>：即座に顧客へ連絡 → 保守システムで更新登録 → 進捗シートK列入力 → 野田さんへ連絡</p>
-          <p>🟠 <strong className="text-orange-300">要対応（1ヶ月以内）</strong>：顧客へ連絡開始。無償保守は加入意思・希望プランを確認してから登録</p>
-          <p>🟡 <strong className="text-yellow-300">注意（2ヶ月以内）</strong>：準備開始。有償保守は同プランで延長、無償保守は顧客確認が必要</p>
-          <p>⚠️ 期限切れ後の<strong>再加入はシステム登録不可</strong> → 吉井さんへエスカレーション</p>
+        <h3 className="font-bold text-white mb-3">🔐 保守システム ログイン情報</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+          <div className="bg-slate-700/50 rounded-lg px-4 py-3">
+            <p className="text-slate-400 text-xs mb-1">URL</p>
+            <a href="https://dist.paycube-service.com/paycube/index.php" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline break-all">https://dist.paycube-service.com/paycube/index.php</a>
+          </div>
+          <div className="bg-slate-700/50 rounded-lg px-4 py-3">
+            <p className="text-slate-400 text-xs mb-1">ログインID</p>
+            <p className="text-white font-mono font-bold text-lg">devicee</p>
+          </div>
+          <div className="bg-slate-700/50 rounded-lg px-4 py-3">
+            <p className="text-slate-400 text-xs mb-1">パスワード</p>
+            <p className="text-white font-mono font-bold text-lg">devicee</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 保守更新フロー */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="p-5 bg-slate-800 border border-blue-800 rounded-xl">
+          <h3 className="font-bold text-white mb-3">🔄 保守更新フロー</h3>
+          <ol className="space-y-2 text-sm text-slate-300">
+            {[
+              'ログイン後、画面下部「保守期限」セクションを確認',
+              '「今月」「来月」「再来月」の3タブを全部チェック（漏れ防止）',
+              '設置先名（青文字リンク）をクリック',
+              '右側「登録」ボタンをクリック',
+              '「保守サービス内容」プルダウンでプランを選択',
+              '「登録」ボタンで完了',
+              '進捗管理シートのK列まで入力',
+              '野田さんへ連絡',
+            ].map((step, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="text-blue-400 font-bold min-w-[20px]">{i + 1}.</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-4 space-y-2">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">プラン別対応</p>
+            <div className="flex gap-2 text-xs">
+              <span className="px-2 py-1 bg-green-900 text-green-200 rounded">有償保守</span>
+              <span className="text-slate-400">顧客連絡不要 → 同プランで期間延長</span>
+            </div>
+            <div className="flex gap-2 text-xs">
+              <span className="px-2 py-1 bg-purple-900 text-purple-200 rounded">無償保守</span>
+              <span className="text-slate-400">顧客連絡必須 → 加入意思・希望プランを確認してから登録</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-5 bg-slate-800 border border-green-800 rounded-xl">
+          <h3 className="font-bold text-white mb-3">➕ 新規登録フロー</h3>
+          <ol className="space-y-2 text-sm text-slate-300">
+            {[
+              'メニューから「新規登録」を選択',
+              '不明な項目は進捗管理シートを参照して補完',
+              '必須項目を入力（赤マーク付き）',
+              '「保守申請に進む」をクリック',
+              '無償保守はそのまま「申請」ボタンで完了',
+              '進捗管理シートK列まで入力',
+              '野田さんへ連絡',
+            ].map((step, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="text-green-400 font-bold min-w-[20px]">{i + 1}.</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-4 p-3 bg-yellow-900/40 border border-yellow-700 rounded-lg text-xs text-yellow-200">
+            ⚠️ シリアルNo.不明の場合は <span className="font-mono font-bold">999999999</span>（9桁）を入力
+          </div>
+        </div>
+      </div>
+
+      {/* エスカレーション */}
+      <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
+        <h3 className="font-bold text-white mb-3">🚨 エスカレーション基準</h3>
+        <div className="space-y-2 text-sm">
+          <div className="flex items-start gap-3 p-3 bg-red-950/50 border border-red-800 rounded-lg">
+            <span>🔴</span>
+            <div><p className="text-red-300 font-medium">保守期間が切れた状態での再加入</p><p className="text-slate-400 text-xs mt-0.5">システム登録不可 → 直ちに吉井さんへエスカレーション</p></div>
+          </div>
+          <div className="flex items-start gap-3 p-3 bg-yellow-950/50 border border-yellow-800 rounded-lg">
+            <span>🟡</span>
+            <div><p className="text-yellow-300 font-medium">保守の途中解約・別プランへの切り替え</p><p className="text-slate-400 text-xs mt-0.5">自己判断せず → 吉井さんへエスカレーション</p></div>
+          </div>
+          <div className="flex items-start gap-3 p-3 bg-green-950/50 border border-green-800 rounded-lg">
+            <span>✅</span>
+            <div><p className="text-green-300 font-medium">通常の更新・新規登録</p><p className="text-slate-400 text-xs mt-0.5">進捗管理シート記入 → 野田さんへ連絡</p></div>
+          </div>
         </div>
       </div>
     </div>
