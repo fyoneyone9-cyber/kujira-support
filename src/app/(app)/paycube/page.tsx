@@ -419,6 +419,88 @@ export default function PayCubePage() {
           </div>
         </div>
       </div>
+      {/* 顧客送付メールテンプレート */}
+      <MailTemplate />
+    </div>
+  )
+}
+
+function MailTemplate() {
+  const [copied, setCopied] = useState(false)
+  const [company, setCompany] = useState('')
+  const [contact, setContact] = useState('')
+  const [myName, setMyName] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [deadline, setDeadline] = useState('')
+
+  const body = `【${company || '会社名または物件名'}】
+【${contact || 'ご担当者名'}】様
+
+いつも大変お世話になっております。
+株式会社デバイスエージェンシーの${myName || '【自分の名前】'}でございます。
+
+標記の件につきまして、ご連絡申し上げます。
+現在ご利用いただいております現金精算機「PayCube」につきましては、無償保証期間が${endDate || '【YYYY年M月D日】'}をもって終了いたします。
+これに伴い、${startDate || '【YYYY年M月D日】'}より有償保守サービスへの移行となります。
+つきましては、有償保守サービスに関するお見積書を添付のとおり送付いたしますので、ご確認のほどお願い申し上げます。
+なお、近日中にクラウドサインよりお申込書をお送りいたしますので、併せて${deadline || '【YYYY年M月D日】'}までにご対応賜りますようお願い申し上げます。
+
+何卒よろしくお願い申し上げます。
+
+${myName || '【署名】'}
+株式会社デバイスエージェンシー`
+
+  const copy = () => {
+    navigator.clipboard.writeText(body)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-bold text-white">📧 顧客送付メールテンプレート</h3>
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <span>件名：</span>
+          <span className="text-slate-300 font-medium">現金精算機PayCube 有償保守サービスのお見積書送付の件</span>
+        </div>
+      </div>
+
+      {/* 入力フォーム */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+        {[
+          { key: 'company',   label: '会社名/物件名', val: company,   set: setCompany,   placeholder: '例：株式会社〇〇ホテル' },
+          { key: 'contact',   label: 'ご担当者名',   val: contact,   set: setContact,   placeholder: '例：山田' },
+          { key: 'myName',    label: '自分の名前',   val: myName,    set: setMyName,    placeholder: '例：米山' },
+          { key: 'endDate',   label: '無償保証終了日', val: endDate,  set: setEndDate,   placeholder: '例：2026年9月30日' },
+          { key: 'startDate', label: '有償保守開始日', val: startDate,set: setStartDate, placeholder: '例：2026年10月1日' },
+          { key: 'deadline',  label: '申込期限',     val: deadline,  set: setDeadline,  placeholder: '例：2026年9月20日' },
+        ].map(({ key, label, val, set, placeholder }) => (
+          <div key={key}>
+            <label className="text-xs text-slate-400 mb-1 block">{label}</label>
+            <input
+              type="text"
+              value={val}
+              placeholder={placeholder}
+              onChange={e => set(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* プレビュー */}
+      <div className="relative">
+        <pre className="w-full p-4 bg-slate-900 border border-slate-600 rounded-lg text-sm text-slate-200 whitespace-pre-wrap font-sans leading-relaxed">{body}</pre>
+        <button
+          onClick={copy}
+          className={`absolute top-3 right-3 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-slate-600 hover:bg-slate-500 text-white'}`}
+        >
+          {copied ? '✅ コピー済み' : '📋 コピー'}
+        </button>
+      </div>
+      <p className="text-xs text-slate-500 mt-2">※ 添付ファイル：御見積書PDF（別途作成）／ 内容は自由にアレンジ可</p>
     </div>
   )
 }
