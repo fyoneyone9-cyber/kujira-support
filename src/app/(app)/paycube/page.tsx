@@ -51,6 +51,41 @@ const statusLabel: Record<string, string> = {
   needs_review: '🔍 要確認',
 }
 
+function exportCSV(contracts: Contract[], filter: string) {
+  const headers = ['設置先名', '管理番号', '保守内容', '保守種別', '開始日', '終了日', '残日数', 'ステータス', '連絡済日', '更新完了日', '備考']
+  const statusLabel: Record<string, string> = {
+    active: '未対応', alerted: 'アラート済', contacted: '連絡済',
+    renewed: '更新完了', expired: '期限切れ', needs_review: '要確認',
+  }
+  const rows = contracts.map(c => {
+    const days = Math.ceil((new Date(c.end_date).getTime() - new Date().getTime()) / 86400000)
+    return [
+      c.client_name,
+      c.management_no,
+      c.plan_name,
+      c.plan_type === 'free' ? '無償保守' : '有償保守',
+      c.start_date,
+      c.end_date,
+      String(days),
+      statusLabel[c.status] || c.status,
+      c.contacted_at ? new Date(c.contacted_at).toLocaleDateString('ja-JP') : '',
+      c.renewed_at ? new Date(c.renewed_at).toLocaleDateString('ja-JP') : '',
+      c.notes,
+    ].map(v => `"${(v || '').replace(/"/g, '""')}"`)
+  })
+  const bom = '\uFEFF'
+  const csv = bom + [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  const label = filter === 'alert' ? 'アラート対象' : filter === 'review' ? '要確認物件' : '全件'
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  a.href = url
+  a.download = `paycube_${label}_${date}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function PayCubePage() {
   const [contracts, setContracts] = useState<Contract[]>([])
   const [loading, setLoading] = useState(true)
@@ -241,6 +276,12 @@ export default function PayCubePage() {
             }}
           />
         </label>
+        <button
+          onClick={() => exportCSV(contracts, filter)}
+          className="px-4 py-2 rounded-lg text-sm font-medium bg-teal-700 text-white hover:bg-teal-600 transition-colors"
+        >
+          📤 CSVエクスポート
+        </button>
         <button
           onClick={() => setShowAdd(!showAdd)}
           className="px-4 py-2 rounded-lg text-sm font-medium bg-green-700 text-white hover:bg-green-600 transition-colors"
