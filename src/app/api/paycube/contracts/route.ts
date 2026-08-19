@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
     .from('paycube_contracts')
     .select('*')
     .neq('status', 'expired')
+    .neq('status', 'renewed')
     .order('end_date', { ascending: true })
 
   if (mode === 'alert') {
