@@ -8,8 +8,13 @@ export async function POST(request: Request) {
     const { content } = await request.json()
     if (!content) return NextResponse.json({ error: 'content required' }, { status: 400 })
 
+    const today = new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' })
+
     const prompt = `あなたは日報作成アシスタントです。
 以下のSlackのやりとりや業務メモから、「米山 文貴（SPT_米山 文貴 / あなた）」が行った業務のみを抽出して、日報用の【業務内容】セクションを作成してください。
+
+本日の日付: ${today}
+**本日（${today}）の内容のみを対象にしてください。それ以前の日付の発言・業務は除外してください。**
 
 ---
 ${content.slice(0, 8000)}
