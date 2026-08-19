@@ -113,10 +113,10 @@ export default function AiSummaryPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          📧 AI要約
+          🤖 メール・Slack AI要約 ＋ 迷惑電話AI判定
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          顧客メールをペーストしてAIが内容を整理します（第一弾：メール要約）
+          メール・Slackの内容をAIで要約／電話番号の迷惑判定
         </p>
       </div>
 
