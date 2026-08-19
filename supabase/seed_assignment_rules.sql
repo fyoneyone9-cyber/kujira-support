@@ -209,7 +209,7 @@ insert into assignment_rules (keyword, assignee, assignee_email, action, notes, 
 ('WOB昭和町のガス点検立ち合い依頼', '周知', null, 'LINE[デバイス×AFP]にて周知報告', null, 5),
 ('タドコロアヤ送付NG', '注意', null, '送付停止リスト確認', 'https://docs.google.com/spreadsheets/d/15lAM15ovCRXRSzsURguhrx0ylmKfBztyVAwwdQe5WoY/', 5),
 ('ワンコネクトの若林様宛て', 'メールを受けた人が対応', null, '対応', '若林塑宇太様 <souta3010@yahoo.co.jp> 元払い・着払い確認等', 3),
-('橋本さん宛のMD', null, null, '九地良へ移動', null, 3);
+('橋本さん宛のMD', 'OP', null, '九地良へ移動', null, 3);
 
 -- 確認
 select assignee, count(*) as 件数 from assignment_rules group by assignee order by 件数 desc;

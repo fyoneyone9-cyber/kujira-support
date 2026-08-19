@@ -14,6 +14,16 @@ export default async function DashboardPage() {
       </div>
 
 
+      {/* 勤怠管理 目立つボタン */}
+      <div className="mb-6">
+        <a href="https://attendance-app-prod-716327310989.asia-northeast1.run.app/login" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-3 px-6 py-4 bg-green-700 hover:bg-green-600 border border-green-500 rounded-2xl transition-colors group w-full sm:w-auto inline-flex">
+          <span className="text-2xl">🕐</span>
+          <span className="text-base font-bold text-white">勤怠管理システム</span>
+          <span className="ml-auto text-green-300 text-sm">↗</span>
+        </a>
+      </div>
+
       {/* Quick links */}
       <div className="flex flex-wrap gap-3 mb-6">
         <a href="https://personal-support-mocha.vercel.app/dashboard" target="_blank" rel="noopener noreferrer"
@@ -26,12 +36,6 @@ export default async function DashboardPage() {
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-500 rounded-xl transition-colors group">
           <span className="text-lg">📞</span>
           <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">テレアポ</span>
-          <span className="text-slate-500 text-xs">↗</span>
-        </a>
-        <a href="https://attendance-app-prod-716327310989.asia-northeast1.run.app/login" target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-green-500 rounded-xl transition-colors group">
-          <span className="text-lg">🕐</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">勤怠管理</span>
           <span className="text-slate-500 text-xs">↗</span>
         </a>
         <a href="https://app.slack.com/client/TB82LHSPM/CB82LJ1B5" target="_blank" rel="noopener noreferrer"
