@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { companyContext } from '@/lib/company'
+import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -115,11 +116,30 @@ async function duckduckgoSearch(query: string): Promise<string> {
   } catch { return '' }
 }
 
+const CACHE_TTL_HOURS = 24
+
 export async function POST(request: Request) {
   const { input } = await request.json()
   if (!input?.trim()) return NextResponse.json({ error: 'input required' }, { status: 400 })
 
   const hotelName = input.trim()
+
+  // キャッシュ確認
+  const supabase = createClient()
+  const { data: cached } = await supabase
+    .from('hotel_analyze_cache')
+    .select('result, created_at')
+    .eq('hotel_name', hotelName)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (cached) {
+    const ageHours = (Date.now() - new Date(cached.created_at).getTime()) / 3600000
+    if (ageHours < CACHE_TTL_HOURS) {
+      return NextResponse.json({ ok: true, cached: true, ...cached.result })
+    }
+  }
 
   // Step1: 3段階フォールバックで口コミ・施設情報を収集
   let reviewInfo = ''
@@ -184,7 +204,13 @@ ${companyContext()}
     if (!data.opening && (data.steps as Record<string, string>)?.step1) {
       data.opening = (data.steps as Record<string, string>).step1
     }
-    return NextResponse.json({ ok: true, ...data })
+    // キャッシュ保存（upsert）
+    await supabase.from('hotel_analyze_cache').upsert({
+      hotel_name: hotelName,
+      result: data,
+      created_at: new Date().toISOString(),
+    }, { onConflict: 'hotel_name' })
+    return NextResponse.json({ ok: true, cached: false, ...data })
   } catch (e) {
     console.error('hotel-analyze error:', e)
     return NextResponse.json({ error: `AI分析に失敗しました: ${e instanceof Error ? e.message : String(e)}` }, { status: 500 })
