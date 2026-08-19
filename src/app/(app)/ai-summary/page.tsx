@@ -6,25 +6,33 @@ function renderMarkdown(text: string) {
   const lines = text.split('\n')
   const elements: React.ReactNode[] = []
   let key = 0
+  let inSpamSection = false
 
   for (const line of lines) {
     if (line.startsWith('## ')) {
+      inSpamSection = line.includes('迷惑') || line.includes('スパム')
+      const isSpam = inSpamSection
       elements.push(
-        <h2 key={key++} className="text-base font-bold text-white mt-5 mb-2 flex items-center gap-2">
+        <h2 key={key++} className={`text-base font-bold mt-5 mb-2 flex items-center gap-2 ${isSpam ? 'text-yellow-400' : 'text-white'}`}>
           {line.replace('## ', '')}
         </h2>
       )
     } else if (line.startsWith('- ')) {
+      const content = line.replace('- ', '')
+      const isWarning = content.includes('⚠️') || content.includes('迷惑') || content.includes('スパム') || content.includes('詐欺') || content.includes('フィッシング')
+      const isOk = content.includes('✅')
       elements.push(
-        <li key={key++} className="text-slate-300 text-sm ml-4 list-disc leading-relaxed">
-          {line.replace('- ', '')}
+        <li key={key++} className={`text-sm ml-4 list-disc leading-relaxed ${isWarning ? 'text-yellow-300 font-medium' : isOk ? 'text-green-300' : 'text-slate-300'}`}>
+          {content}
         </li>
       )
     } else if (line.trim() === '') {
       elements.push(<div key={key++} className="h-1" />)
     } else {
+      const isWarning = line.includes('⚠️') || (inSpamSection && line.includes('可能性'))
+      const isOk = line.includes('✅') && inSpamSection
       elements.push(
-        <p key={key++} className="text-slate-300 text-sm leading-relaxed">
+        <p key={key++} className={`text-sm leading-relaxed ${isWarning ? 'text-yellow-300 font-medium' : isOk ? 'text-green-300 font-medium' : 'text-slate-300'}`}>
           {line}
         </p>
       )
