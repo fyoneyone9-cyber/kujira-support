@@ -88,6 +88,13 @@ export default function BreakTimer() {
   const pct = remaining !== null ? Math.min(100, (remaining / 3600) * 100) : 0
   const isWarning = remaining !== null && remaining <= 300 // 5分以内
 
+  // 残り5分ちょうどでタブを開く
+  useEffect(() => {
+    if (remaining === 300 && active) {
+      window.open('https://attendance-app-prod-716327310989.asia-northeast1.run.app/attendance', '_blank')
+    }
+  }, [remaining, active])
+
   return (
     <div className={`bg-slate-800 rounded-2xl border p-5 mb-6 transition-colors ${
       ended ? 'border-red-500 animate-pulse' : isWarning && active ? 'border-yellow-500' : 'border-slate-700'
