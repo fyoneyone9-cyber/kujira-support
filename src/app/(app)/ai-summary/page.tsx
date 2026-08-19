@@ -48,6 +48,33 @@ export default function AiSummaryPage() {
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
 
+  // 電話番号判定
+  const [phone, setPhone] = useState('')
+  const [phoneResult, setPhoneResult] = useState<{ verdict: string; reason: string; recommend: string } | null>(null)
+  const [phoneLoading, setPhoneLoading] = useState(false)
+  const [phoneError, setPhoneError] = useState('')
+
+  const handlePhoneCheck = async () => {
+    if (!phone.trim()) return
+    setPhoneLoading(true)
+    setPhoneResult(null)
+    setPhoneError('')
+    try {
+      const res = await fetch('/api/ai/phone-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phone.trim() }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setPhoneResult(data)
+    } catch (e) {
+      setPhoneError(e instanceof Error ? e.message : 'エラーが発生しました')
+    } finally {
+      setPhoneLoading(false)
+    }
+  }
+
   const handleSummarize = async () => {
     if (!emailText.trim()) return
     setLoading(true)
@@ -91,6 +118,49 @@ export default function AiSummaryPage() {
         <p className="text-slate-400 text-sm mt-1">
           顧客メールをペーストしてAIが内容を整理します（第一弾：メール要約）
         </p>
+      </div>
+
+      {/* 電話番号判定 */}
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 mb-6">
+        <label className="block text-sm font-medium text-slate-300 mb-3">☎️ 電話番号 迷惑判定</label>
+        <div className="flex gap-2">
+          <input
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handlePhoneCheck()}
+            placeholder="例: 0120-000-000 / 03-1234-5678"
+            className="flex-1 px-4 py-2.5 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 text-sm"
+          />
+          <button
+            onClick={handlePhoneCheck}
+            disabled={!phone.trim() || phoneLoading}
+            className="px-5 py-2.5 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors whitespace-nowrap"
+          >
+            {phoneLoading ? '判定中...' : '🔍 判定'}
+          </button>
+        </div>
+
+        {phoneError && (
+          <p className="text-red-400 text-sm mt-3">⚠️ {phoneError}</p>
+        )}
+
+        {phoneResult && (
+          <div className={`mt-4 rounded-xl p-4 border ${
+            phoneResult.verdict.includes('迷惑') || phoneResult.verdict.includes('注意')
+              ? 'bg-yellow-900/20 border-yellow-700/50'
+              : phoneResult.verdict.includes('詐欺') || phoneResult.verdict.includes('危険')
+              ? 'bg-red-900/20 border-red-700/50'
+              : 'bg-green-900/20 border-green-700/50'
+          }`}>
+            <p className={`text-base font-bold mb-2 ${
+              phoneResult.verdict.includes('迷惑') || phoneResult.verdict.includes('注意') ? 'text-yellow-400'
+              : phoneResult.verdict.includes('詐欺') || phoneResult.verdict.includes('危険') ? 'text-red-400'
+              : 'text-green-400'
+            }`}>{phoneResult.verdict}</p>
+            <p className="text-slate-300 text-sm mb-1"><span className="text-slate-500">根拠：</span>{phoneResult.reason}</p>
+            <p className="text-slate-300 text-sm"><span className="text-slate-500">推奨：</span>{phoneResult.recommend}</p>
+          </div>
+        )}
       </div>
 
       {/* Input */}
