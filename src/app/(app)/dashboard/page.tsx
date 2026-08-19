@@ -116,6 +116,12 @@ export default async function DashboardPage() {
           <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">トラブルシューティング</span>
           <span className="text-slate-500 text-xs">↗</span>
         </a>
+        <a href="https://docs.google.com/spreadsheets/d/1Da59fLXoe2YW8WjI3YAKLMiXUU0xZquB0cSreRsPZGQ/edit?gid=1606037974#gid=1606037974" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-teal-400 rounded-xl transition-colors group">
+          <span className="text-lg">📦</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">【管理】スマート宅配ボックス</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
       </div>
 
       {/* Quick Links */}
