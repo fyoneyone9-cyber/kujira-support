@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import PayCubeAlertBanner from '@/components/PayCubeAlertBanner'
+import BreakTimer from '@/components/BreakTimer'
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -13,6 +14,8 @@ export default async function DashboardPage() {
         <p className="text-slate-400 text-sm mt-1">ようこそ、{user?.email}</p>
       </div>
 
+
+      <BreakTimer />
 
       {/* 勤怠管理 目立つボタン */}
       <div className="mb-6">
