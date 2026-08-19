@@ -70,15 +70,15 @@ export async function POST(req: NextRequest) {
 
     let best: Record<string, unknown> | null = null
 
-    for (const [si, ei, ni] of YEAR_BLOCKS) {
+    // 最新年（データが入っている最後の年）を使う → 逆順ループで最初に見つかったものを採用
+    for (const [si, ei, ni] of [...YEAR_BLOCKS].reverse()) {
       const s = parseDate(getCol(row, si))
       const e = parseDate(getCol(row, ei))
       const plan = getCol(row, ni)
       if (!e || !plan || plan === '保守無し') continue
-      if (e >= today) {
-        best = { start_date: s, end_date: e, plan_name: plan, plan_type: 'paid' }
-        break
-      }
+      // end_dateが未来 or 過去どちらでもデータがあれば最新年として採用
+      best = { start_date: s, end_date: e, plan_name: plan, plan_type: 'paid' }
+      break
     }
 
     if (!best) {
