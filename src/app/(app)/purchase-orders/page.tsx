@@ -69,9 +69,13 @@ export default function PurchaseOrdersPage() {
 
   const fetchOrders = async () => {
     setLoading(true)
-    const res = await fetch('/api/purchase-orders')
-    const data = await res.json()
-    setOrders(data)
+    try {
+      const res = await fetch('/api/purchase-orders')
+      const data = await res.json()
+      setOrders(Array.isArray(data) ? data : [])
+    } catch {
+      setOrders([])
+    }
     setLoading(false)
   }
 
