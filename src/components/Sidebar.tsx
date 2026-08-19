@@ -16,6 +16,7 @@ const navItems = [
   { href: '/automations', label: '自動化', icon: '⚡' },
   { href: '/mail-templates', label: 'メールテンプレート', icon: '📧' },
   { href: '/purchase-orders', label: '発注書', icon: '📋' },
+  { href: '/p400-orders', label: 'P400注文書', icon: '💳' },
   { href: '/assignment', label: '引き当てシート', icon: '📬' },
   { href: '/tasks', label: 'タスク', icon: '✅' },
   { href: '/admin', label: 'メンバー管理', icon: '👥' },
