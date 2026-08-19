@@ -122,14 +122,14 @@ export default function WorkTimer() {
             {dayLabel}曜 退勤済み
           </span>
         </div>
-        <p className="text-slate-400 text-sm mt-3">お疲れ様でした！ゆっくり休んでください 🎉</p>
-        <div className="mt-3">
-          <p className="text-slate-500 text-xs mb-1">次の勤務（{nextLabel} 9:00）まで</p>
-          <p className="text-2xl font-mono font-bold text-slate-300">{fmt(nextWorkSecs)}</p>
+        <p className="text-slate-300 text-base mt-3">お疲れ様でした！ゆっくり休んでください 🎉</p>
+        <div className="mt-4">
+          <p className="text-slate-400 text-sm mb-1">次の勤務（{nextLabel} 9:00）まで</p>
+          <p className="text-4xl font-mono font-bold text-white">{fmt(nextWorkSecs)}</p>
         </div>
         <button
           onClick={handleReset}
-          className="mt-3 text-xs text-slate-500 hover:text-slate-300 underline transition-colors"
+          className="mt-4 text-sm text-slate-500 hover:text-slate-300 underline transition-colors"
         >
           取り消す
         </button>
