@@ -40,7 +40,7 @@ export default async function DashboardPage() {
           <span className="text-sm font-bold text-white">くじらCRM</span>
         </a>
         <a href="https://mail.google.com/mail/u/0/#inbox" target="_blank" rel="noopener noreferrer"
-          className="flex flex-col items-center gap-1.5 px-4 py-4 bg-red-700 hover:bg-red-600 border border-red-500 rounded-2xl transition-colors group">
+          className="flex flex-col items-center gap-1.5 px-4 py-4 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-2xl transition-colors group">
           <span className="text-2xl">📧</span>
           <span className="text-sm font-bold text-white">Gmail</span>
         </a>
