@@ -110,6 +110,12 @@ export default async function DashboardPage() {
           <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">カードキー物件一覧</span>
           <span className="text-slate-500 text-xs">↗</span>
         </a>
+        <a href="https://kujira-device-agency.notion.site/2164918ccaa6802fa6fccae9c06eda4c" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-yellow-400 rounded-xl transition-colors group">
+          <span className="text-lg">🔧</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">トラブルシューティング</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
       </div>
 
       {/* Quick Links */}
