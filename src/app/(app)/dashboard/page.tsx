@@ -18,7 +18,7 @@ export default async function DashboardPage() {
       <BreakTimer />
 
       {/* 主要システム 目立つボタン群 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-6">
         <a href="https://attendance-app-prod-716327310989.asia-northeast1.run.app/login" target="_blank" rel="noopener noreferrer"
           className="flex flex-col items-center gap-1.5 px-4 py-4 bg-green-700 hover:bg-green-600 border border-green-500 rounded-2xl transition-colors group">
           <span className="text-2xl">🕐</span>
@@ -38,6 +38,11 @@ export default async function DashboardPage() {
           className="flex flex-col items-center gap-1.5 px-4 py-4 bg-cyan-700 hover:bg-cyan-600 border border-cyan-500 rounded-2xl transition-colors group">
           <span className="text-2xl">🐋</span>
           <span className="text-sm font-bold text-white">くじらCRM</span>
+        </a>
+        <a href="https://mail.google.com/mail/u/0/#inbox" target="_blank" rel="noopener noreferrer"
+          className="flex flex-col items-center gap-1.5 px-4 py-4 bg-red-700 hover:bg-red-600 border border-red-500 rounded-2xl transition-colors group">
+          <span className="text-2xl">📧</span>
+          <span className="text-sm font-bold text-white">Gmail</span>
         </a>
       </div>
 
