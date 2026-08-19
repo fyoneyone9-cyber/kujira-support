@@ -15,6 +15,7 @@ const navItems = [
   { href: '/teleapo', label: 'テレアポ', icon: '📞' },
   { href: '/automations', label: '自動化', icon: '⚡' },
   { href: '/mail-templates', label: 'メールテンプレート', icon: '📧' },
+  { href: '/assignment', label: '引き当てシート', icon: '📬' },
   { href: '/tasks', label: 'タスク', icon: '✅' },
   { href: '/admin', label: 'メンバー管理', icon: '👥' },
 ]
