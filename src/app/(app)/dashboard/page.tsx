@@ -174,8 +174,8 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5">
           {[
             { label: 'Notion', url: 'https://app.notion.com/native/p/07554695c69f4f8c98f1b9a3db86c19a?deepLinkOpenNewTab=true', icon: '📝' },
-            { label: 'スプレッドシート①', url: 'https://docs.google.com/spreadsheets/d/1MITcOZmpGeYc3MDTTby0bXVgFh8tlbQM1ev_mC1oVCo/edit?gid=0#gid=0', icon: '📊' },
-            { label: 'スプレッドシート②', url: 'https://docs.google.com/spreadsheets/d/12xTmKKgeOKViRqf7SuLEBql0z30CczTNjVrghzkeL8I/edit?gid=1831569695#gid=1831569695', icon: '📊' },
+            { label: '【管理】玄関集合機', url: 'https://docs.google.com/spreadsheets/d/1MITcOZmpGeYc3MDTTby0bXVgFh8tlbQM1ev_mC1oVCo/edit?gid=0#gid=0', icon: '📊' },
+            { label: '【管理】くじらICカード', url: 'https://docs.google.com/spreadsheets/d/12xTmKKgeOKViRqf7SuLEBql0z30CczTNjVrghzkeL8I/edit?gid=1831569695#gid=1831569695', icon: '📊' },
             { label: '玄関集合機システム ログイン', url: 'https://sys.smart-interphone.kujira-realestatetech.co.jp/login', icon: '🔐' },
             { label: '施設一覧', url: 'https://sys.smart-interphone.kujira-realestatetech.co.jp/facilities', icon: '🏢' },
             { label: 'ランダム', url: 'https://www.luft.co.jp/cgi/randam.php', icon: '🎲' },
