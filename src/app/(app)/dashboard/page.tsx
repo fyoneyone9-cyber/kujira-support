@@ -17,13 +17,27 @@ export default async function DashboardPage() {
 
       <BreakTimer />
 
-      {/* 勤怠管理 目立つボタン */}
-      <div className="mb-6">
+      {/* 主要システム 目立つボタン群 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <a href="https://attendance-app-prod-716327310989.asia-northeast1.run.app/login" target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-3 px-6 py-4 bg-green-700 hover:bg-green-600 border border-green-500 rounded-2xl transition-colors group w-full sm:w-auto inline-flex">
+          className="flex flex-col items-center gap-1.5 px-4 py-4 bg-green-700 hover:bg-green-600 border border-green-500 rounded-2xl transition-colors group">
           <span className="text-2xl">🕐</span>
-          <span className="text-base font-bold text-white">勤怠管理システム</span>
-          <span className="ml-auto text-green-300 text-sm">↗</span>
+          <span className="text-sm font-bold text-white">勤怠管理</span>
+        </a>
+        <a href="https://mdjack.maildealer.jp/index.php" target="_blank" rel="noopener noreferrer"
+          className="flex flex-col items-center gap-1.5 px-4 py-4 bg-blue-700 hover:bg-blue-600 border border-blue-500 rounded-2xl transition-colors group">
+          <span className="text-2xl">📨</span>
+          <span className="text-sm font-bold text-white">MailDealer</span>
+        </a>
+        <a href="https://movfax.lcloud.jp/" target="_blank" rel="noopener noreferrer"
+          className="flex flex-col items-center gap-1.5 px-4 py-4 bg-slate-600 hover:bg-slate-500 border border-slate-500 rounded-2xl transition-colors group">
+          <span className="text-2xl">📠</span>
+          <span className="text-sm font-bold text-white">MOVfax</span>
+        </a>
+        <a href="https://d1zlma8f7wwwsg.cloudfront.net/login" target="_blank" rel="noopener noreferrer"
+          className="flex flex-col items-center gap-1.5 px-4 py-4 bg-cyan-700 hover:bg-cyan-600 border border-cyan-500 rounded-2xl transition-colors group">
+          <span className="text-2xl">🐋</span>
+          <span className="text-sm font-bold text-white">くじらCRM</span>
         </a>
       </div>
 
