@@ -2,7 +2,27 @@
 
 import { useEffect, useState } from 'react'
 
+const ATTENDANCE_URL = 'https://attendance-app-prod-716327310989.asia-northeast1.run.app/attendance'
+
+// 毎日8:55に勤怠ページを自動オープン
+function useDailyAlarm() {
+  useEffect(() => {
+    const check = () => {
+      const now = new Date()
+      const key = `dailyAlarm_${now.toDateString()}`
+      if (now.getHours() === 8 && now.getMinutes() === 55 && !sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1')
+        window.open(ATTENDANCE_URL, '_blank')
+      }
+    }
+    check()
+    const id = setInterval(check, 30000) // 30秒ごとにチェック
+    return () => clearInterval(id)
+  }, [])
+}
+
 export default function BreakTimer() {
+  useDailyAlarm()
   const [startTime, setStartTime] = useState('')
   const [remaining, setRemaining] = useState<number | null>(null) // seconds
   const [active, setActive] = useState(false)
@@ -91,7 +111,7 @@ export default function BreakTimer() {
   // 残り5分ちょうどでタブを開く
   useEffect(() => {
     if (remaining === 300 && active) {
-      window.open('https://attendance-app-prod-716327310989.asia-northeast1.run.app/attendance', '_blank')
+      window.open(ATTENDANCE_URL, '_blank')
     }
   }, [remaining, active])
 
