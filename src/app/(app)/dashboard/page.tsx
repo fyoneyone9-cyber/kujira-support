@@ -104,6 +104,12 @@ export default async function DashboardPage() {
           <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Genspark</span>
           <span className="text-slate-500 text-xs">↗</span>
         </a>
+        <a href="https://docs.google.com/spreadsheets/d/146Tv1ZzNAH3qqjb4WdVZCxdZI4edQ0U5pr3UrYZdiXU/edit?gid=33099426#gid=33099426" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-green-400 rounded-xl transition-colors group">
+          <span className="text-lg">🗝️</span>
+          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">カードキー物件一覧</span>
+          <span className="text-slate-500 text-xs">↗</span>
+        </a>
       </div>
 
       {/* Quick Links */}
