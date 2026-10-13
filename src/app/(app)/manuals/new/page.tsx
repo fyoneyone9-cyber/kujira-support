@@ -43,7 +43,7 @@ export default function NewManualPage() {
     setLoading(true)
     setError('')
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     const { data, error } = await supabase.from('manuals').insert({

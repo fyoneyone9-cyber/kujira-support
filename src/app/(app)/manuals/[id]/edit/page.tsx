@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -15,7 +15,7 @@ export default function EditManualPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     const fetchManual = async () => {
-      const supabase = createClient()
+      const supabase = await createClient()
       const { data } = await supabase
         .from('manuals')
         .select('*')
@@ -36,7 +36,7 @@ export default function EditManualPage({ params }: { params: { id: string } }) {
     setLoading(true)
     setError('')
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { error } = await supabase
       .from('manuals')
       .update({
@@ -58,7 +58,7 @@ export default function EditManualPage({ params }: { params: { id: string } }) {
 
   const handleDelete = async () => {
     if (!confirm('このマニュアルを削除しますか？')) return
-    const supabase = createClient()
+    const supabase = await createClient()
     await supabase.from('manuals').delete().eq('id', params.id)
     router.push('/manuals')
   }

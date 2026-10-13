@@ -6,7 +6,7 @@ export default async function ManualsPage({
 }: {
   searchParams: { q?: string; category?: string }
 }) {
-  const supabase = createClient()
+  const supabase = await createClient()
   let query = supabase
     .from('manuals')
     .select('id, title, category, created_at, updated_at')

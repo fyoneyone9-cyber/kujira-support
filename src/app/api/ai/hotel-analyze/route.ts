@@ -125,7 +125,7 @@ export async function POST(request: Request) {
   const hotelName = input.trim()
 
   // キャッシュ確認
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: cached } = await supabase
     .from('hotel_analyze_cache')
     .select('result, created_at')

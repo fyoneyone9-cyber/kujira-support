@@ -5,7 +5,7 @@ export const runtime = 'nodejs'
 
 // GET: 一覧取得（アラート対象も含む）
 export async function GET(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { searchParams } = new URL(req.url)
   const mode = searchParams.get('mode') // 'alert' = 2ヶ月以内のみ
 
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
 // POST: 新規登録
 export async function POST(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const body = await req.json()
   const { data, error } = await supabase
     .from('paycube_contracts')
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
 // PATCH: ステータス更新
 export async function PATCH(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const body = await req.json()
   const { id, ...updates } = body
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })

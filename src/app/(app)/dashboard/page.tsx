@@ -1,14 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
-import PayCubeAlertBanner from '@/components/PayCubeAlertBanner'
+﻿import PayCubeAlertBanner from '@/components/PayCubeAlertBanner'
+import DeliveryAlertBanner from '@/components/DeliveryAlertBanner'
 import BreakTimer from '@/components/BreakTimer'
 import WorkTimer from '@/components/WorkTimer'
+import BackupButton from '@/components/BackupButton'
 
 export default async function DashboardPage() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = { email: 'local@localhost' }
 
   return (
     <div>
+      <DeliveryAlertBanner />
       <PayCubeAlertBanner />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">ダッシュボード</h1>
@@ -18,6 +19,7 @@ export default async function DashboardPage() {
 
       <WorkTimer />
       <BreakTimer />
+      <BackupButton />
 
       {/* 主要システム 目立つボタン群 */}
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-6">
@@ -248,3 +250,4 @@ export default async function DashboardPage() {
     </div>
   )
 }
+

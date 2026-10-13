@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   const tokens = await tokenRes.json()
   if (!tokens.access_token) return NextResponse.redirect('/tasks?error=token_failed')
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect('/login')
 

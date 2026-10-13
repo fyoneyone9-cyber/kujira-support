@@ -8,7 +8,10 @@ import { useRouter } from 'next/navigation'
 const navItems = [
   { href: '/dashboard', label: 'ダッシュボード', icon: '🏠' },
   { href: '/paycube', label: 'PayCube保守', icon: '🔔', alert: true },
+  { href: '/delivery', label: 'IoT製品納品アラート', icon: '📦', alert: true },
   { href: '/ai-summary', label: 'AI要約＋迷惑判定', icon: '🤖' },
+  { href: '/troubleshooting', label: 'トラブルシューティング', icon: '🔧' },
+  { href: '/keybox', label: 'キーボックス管理', icon: '🗝️' },
   { href: '/manuals', label: 'マニュアル', icon: '📋' },
   { href: '/nippou', label: '日報作成', icon: '📝' },
   { href: '/teleapo', label: 'テレアポ', icon: '📞' },
