@@ -198,15 +198,70 @@ def post_check(target_file, verbose=True):
         if verbose: print("[post_check] ✅ 全チェックPASS → 納品OK")
     return issues
 
+# ── 自己改善ロジック ──────────────────────────────────────────
+
+SELF_LOG = os.path.join(os.path.dirname(__file__), "self_check_log.jsonl")
+
+def log_result(cmd, issues, elapsed_sec):
+    """実行結果をJSONLに記録。自己改善の材料にする。"""
+    import datetime
+    entry = {
+        "ts":      datetime.datetime.now().isoformat(),
+        "cmd":     cmd,
+        "issues":  issues,
+        "elapsed": round(elapsed_sec, 1),
+        "passed":  len(issues) == 0,
+    }
+    with open(SELF_LOG, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+def self_improve():
+    """
+    self_check_log.jsonlを分析して繰り返しパターンを検出し改善提案を出す。
+    同じissueが3回以上出ていたら「根本対処が不十分」と判断。
+    """
+    if not os.path.exists(SELF_LOG):
+        print("[self_improve] ログなし（初回）")
+        return
+
+    from collections import Counter
+    counter = Counter()
+    total = 0
+    with open(SELF_LOG, encoding="utf-8") as f:
+        for line in f:
+            try:
+                e = json.loads(line)
+                total += 1
+                for issue in e.get("issues", []):
+                    # issueの先頭タグ部分をキーに
+                    key = issue.split("]")[0] + "]" if "]" in issue else issue[:40]
+                    counter[key] += 1
+            except: pass
+
+    print(f"[self_improve] 実行履歴 {total}件")
+    repeat = [(k, v) for k, v in counter.items() if v >= 3]
+    if repeat:
+        print("⚠️ 繰り返し検出（根本対処が不十分の可能性）:")
+        for k, v in sorted(repeat, key=lambda x: -x[1]):
+            print(f"  {v}回: {k}")
+    else:
+        print("[self_improve] 繰り返しパターンなし ✅")
+
 # ── メイン ────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "post"
+    t0 = time.time()
     if cmd == "server":
-        server_ensure()
+        issues = server_ensure()
     elif cmd == "vae":
-        vae_check()
+        issues = vae_check()
     elif cmd == "pre":
-        pre_check(API_SERVER)
+        issues = pre_check(API_SERVER)
+    elif cmd == "improve":
+        self_improve(); sys.exit(0)
     else:  # post
-        post_check(API_SERVER)
+        issues = post_check(API_SERVER)
+    elapsed = time.time() - t0
+    log_result(cmd, issues, elapsed)
+    sys.exit(0 if not issues else 1)
