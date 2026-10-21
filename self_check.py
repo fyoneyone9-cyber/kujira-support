@@ -208,6 +208,16 @@ def agent_sanity_check():
                 print(f"  {_l}")
         print("  → logcheck未実行なら今すぐ: python self_check.py logcheck")
         print("=" * 60)
+
+    # [SCOPE_GUARD_V1] 指示外キャラIDを変更していないかチェック
+    # SCOPE_TARGET に指示されたキャラIDのみ記録。それ以外の変更はNG
+    import os as _sg_os
+    _scope_log = r"C:\GensparkClaw\kujira-support\scope_target.txt"
+    if _sg_os.path.exists(_scope_log):
+        with open(_scope_log, encoding="utf-8") as _sf:
+            _targets = [l.strip() for l in _sf.readlines() if l.strip()]
+        print(f"[SCOPE_GUARD_V1] 指示対象キャラID: {_targets}")
+        print("  指示外のキャラID変更は禁止。scope_target.txtを確認すること")
     import urllib.request as _ur, json as _lj, os, datetime
     warnings = []
 
