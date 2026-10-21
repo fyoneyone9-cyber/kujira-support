@@ -185,6 +185,29 @@ def brief(verbose=True):
 
 def agent_sanity_check():
     """[AGENT_SANITY_V1] preコマンド実行時に毎回強制実行。口約束をコードで強制する恒久対策。"""
+    # [MEMORY_READ_V1] セッション開始時にMEMORY.mdを読まないと先に進めない恒久対策
+    # AGENTS.mdの指示をコードで強制する
+    import os
+    memory_path = r"C:\Users\fyone\AppData\Roaming\Genspark Claw\users\ab54bf68-d5d4-409b-83d4-8b036308c046\workspace\MEMORY.md"
+    if os.path.exists(memory_path):
+        with open(memory_path, encoding="utf-8", errors="replace") as _mf:
+            _mem = _mf.read()
+        # 必須ルールを強制表示（毎回）
+        print("=" * 60)
+        print("[MEMORY_READ_V1] 必須ルール確認:")
+        # ミス恒久対策ログを抽出して表示
+        _idx = _mem.find("ミス恒久対策ログ")
+        if _idx >= 0:
+            _section = _mem[_idx:_idx+800]
+            for _l in _section.splitlines()[:15]:
+                print(f"  {_l}")
+        # 画質問題報告時の必須手順
+        _idx2 = _mem.find("画質・生成不良")
+        if _idx2 >= 0:
+            for _l in _mem[_idx2:_idx2+300].splitlines()[:6]:
+                print(f"  {_l}")
+        print("  → logcheck未実行なら今すぐ: python self_check.py logcheck")
+        print("=" * 60)
     import urllib.request as _ur, json as _lj, os, datetime
     warnings = []
 
@@ -649,6 +672,24 @@ if __name__ == "__main__":
     else:  # post
         agent_sanity_check()
         issues = post_check(API_SERVER)
+        # [POST_LOGCHECK_V1] post後に自動でlogcheckを実行（口約束をコードで強制）
+        import urllib.request as _ur2, json as _lj2
+        print("\n[POST_LOGCHECK_V1] --- post後自動logcheck ---")
+        try:
+            with _ur2.urlopen("http://127.0.0.1:3002/api/last-prompt", timeout=5) as _r2:
+                _d2 = _lj2.loads(_r2.read())
+            _pos2 = _d2.get("positive_prompt","")
+            _cid2 = _d2.get("dbg_char_template_id","") or "未記録"
+            print(f"  キャラID: {_cid2}")
+            print(f"  positive先頭: {_pos2[:120]}")
+            _diags2 = _d2.get("diagnostics") or []
+            for _dg2 in _diags2:
+                if "CHAR_PROMPT_MISSING" in str(_dg2) or "🚨" in str(_dg2):
+                    print(f"  🚨 {_dg2}")
+                    issues.append(f"[POST_LOGCHECK] {_dg2}")
+        except Exception as _ple:
+            print(f"  API未応答: {_ple}")
+        print("[POST_LOGCHECK_V1] --- 完了 ---\n")
     elapsed = time.time() - t0
     log_result(cmd, issues, elapsed)
     sys.exit(0 if not issues else 1)
