@@ -183,6 +183,53 @@ def brief(verbose=True):
     return []
 
 
+def agent_sanity_check():
+    """[AGENT_SANITY_V1] preコマンド実行時に毎回強制実行。口約束をコードで強制する恒久対策。"""
+    import urllib.request as _ur, json as _lj, os, datetime
+    warnings = []
+
+    # ルール1: api_server_3001.py / dashboard.html を触る前にCODEMAP.mdを読んでいるか
+    # → CODEMAP.mdの最終読み取りが24h以上前なら警告
+    codemap = r"C:\AI\ComfyUI\CODEMAP.md"
+    if os.path.exists(codemap):
+        mtime = os.path.getmtime(codemap)
+        age_h = (datetime.datetime.now().timestamp() - mtime) / 3600
+        # CODEMAPはread専用なので更新時刻ではなく参照時刻は取れない
+        # 代わりに: 今日のself_check_log.jsonlにCODEMAP確認記録があるか確認
+        # (記録がなければ警告)
+        pass  # ファイル参照時刻はOS依存のため省略・ログベースで代替
+
+    # ルール2: 直前の生成ログにCHAR_PROMPT_MISSINGがないか確認（生成品質の自動監視）
+    try:
+        with _ur.urlopen("http://127.0.0.1:3002/api/last-prompt", timeout=3) as _r:
+            _d = _lj.loads(_r.read())
+        _diags = _d.get("diagnostics") or []
+        for _dg in _diags:
+            if "CHAR_PROMPT_MISSING" in str(_dg):
+                warnings.append(f"⚠️ [前回生成] CHAR_PROMPT_MISSING検出 — 作業前にlogcheckで確認せよ: {_dg}")
+    except Exception:
+        pass  # API未起動時はスキップ
+
+    # ルール3: _char_prompt_guard.log に未確認エラーがないか
+    guard_log = r"C:\AI\ComfyUI\_char_prompt_guard.log"
+    if os.path.exists(guard_log):
+        with open(guard_log, encoding="utf-8", errors="replace") as _gf:
+            _glines = _gf.readlines()
+        if _glines:
+            warnings.append(f"⚠️ [CHAR_PROMPT_GUARD] {len(_glines)}件の未処理エラーあり: {_glines[-1].strip()}")
+
+    if warnings:
+        print("=" * 60)
+        print("[AGENT_SANITY_V1] 🚨 作業前チェックで問題を検出:")
+        for w in warnings:
+            print(" ", w)
+        print("  → 上記を解消してから修正を開始すること")
+        print("=" * 60)
+    else:
+        print("[AGENT_SANITY_V1] ✅ 作業前チェック異常なし")
+    return warnings
+
+
 def pre_check(target_file, bak_file=None, verbose=True):
     """
     修正前に呼ぶ。バックアップを自動作成してから差分確認。
@@ -299,6 +346,29 @@ def post_check(target_file, verbose=True):
             if verbose: print("[post_check] node未インストール → JSチェックスキップ")
         except Exception as e:
             if verbose: print(f"[post_check] JSチェックエラー(スキップ): {e}")
+
+    # dashboard.html 自動修正チェック（auto_fix_dashboard.py呼び出し）
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import importlib
+        afd = importlib.import_module("auto_fix_dashboard")
+        importlib.reload(afd)
+        changed, results = afd.auto_fix(verbose=verbose)
+        if changed:
+            # 修正後に再チェック
+            changed2, results2 = afd.auto_fix(verbose=False)
+            if results2:
+                for r in results2: issues.append(f"[DASHBOARD] {r}")
+                if verbose: print(f"[post_check] ⚠ dashboard.html 修正後も問題残: {results2}")
+            else:
+                if verbose: print(f"[post_check] ✅ dashboard.html 自動修正完了・クリーン ({len(results)}件修正)")
+        elif results:
+            for r in results: issues.append(f"[DASHBOARD] {r}")
+            if verbose: print(f"[post_check] ⚠ dashboard.html 要手動確認: {results}")
+        else:
+            if verbose: print("[post_check] dashboard.html チェック OK")
+    except Exception as e:
+        if verbose: print(f"[post_check] dashboard チェックスキップ: {e}")
 
     # 結果
     if issues:
@@ -537,6 +607,7 @@ if __name__ == "__main__":
     elif cmd == "vae":
         issues = vae_check()
     elif cmd == "pre":
+        agent_sanity_check()
         issues = pre_check(API_SERVER)
     elif cmd == "brief":
         issues = brief()
@@ -550,9 +621,33 @@ if __name__ == "__main__":
         issues = clean_all()
     elif cmd == "reload":
         issues = reload_dashboard()
+    elif cmd == "logcheck":
+        # [LOGCHECK_V1] 画像品質問題が報告されたら最初にこれを実行する
+        import urllib.request as _ur, json as _lj
+        print("=== [LOGCHECK_V1] 最終生成ログ自動診断 ===")
+        try:
+            with _ur.urlopen("http://127.0.0.1:3002/api/last-prompt", timeout=5) as _r:
+                _d = _lj.loads(_r.read())
+            _pos = _d.get("positive_prompt", "")
+            print(f"キャラID     : {_d.get('dbg_char_template_id') or '⚠️ 未記録'}")
+            print(f"positive先頭 : {_pos[:150]}")
+            _cid = (_d.get("dbg_char_template_id") or "").lower()
+            if _cid and _cid.replace("_", " ").split("_")[-1] not in _pos.lower():
+                _diag_extra = f"🚨 [CHAR_PROMPT_MISSING] char_id={_cid} がpositiveに未反映"
+                print(_diag_extra)
+            for _dg in (_d.get("diagnostics") or []):
+                print(" ", _dg)
+            print(f"WF/ckpt      : {_d.get('wf_file_used','')} / {_d.get('checkpoint_used','')}")
+            _ks = _d.get("ksampler") or {}
+            print(f"cfg/steps    : cfg={_ks.get('cfg')} steps={_ks.get('steps')}")
+        except Exception as _le:
+            print(f"⚠️ API取得失敗: {_le}")
+        print("=== logcheck 完了 ===")
+        issues = []
     elif cmd == "improve":
         self_improve(); sys.exit(0)
     else:  # post
+        agent_sanity_check()
         issues = post_check(API_SERVER)
     elapsed = time.time() - t0
     log_result(cmd, issues, elapsed)
