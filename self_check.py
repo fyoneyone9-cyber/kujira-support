@@ -202,6 +202,27 @@ def post_check(target_file, verbose=True):
 
 SELF_LOG = os.path.join(os.path.dirname(__file__), "self_check_log.jsonl")
 
+def reload_dashboard():
+    """ダッシュボードブラウザウィンドウにCtrl+Shift+Rを送信してハードリロード。"""
+    try:
+        import subprocess
+        script = (
+            'Add-Type -AssemblyName System.Windows.Forms;'
+            '$w = New-Object -ComObject WScript.Shell;'
+            '$p = Get-Process | Where-Object { $_.MainWindowTitle -match "3002|dashboard|ComfyUI|manga" } | Select-Object -First 1;'
+            'if ($p) { $w.AppActivate($p.Id); Start-Sleep -Milliseconds 500; $w.SendKeys("^+r"); Write-Host "OK:$($p.MainWindowTitle)" } else { Write-Host "NG:not found" }'
+        )
+        r = subprocess.run(["powershell", "-Command", script], capture_output=True, text=True, timeout=10)
+        out = r.stdout.strip()
+        if "OK:" in out:
+            print(f"[reload_dashboard] ✅ {out}")
+            return []
+        else:
+            print(f"[reload_dashboard] ❌ {out}")
+            return [f"reload failed: {out}"]
+    except Exception as e:
+        return [f"reload error: {e}"]
+
 def log_result(cmd, issues, elapsed_sec):
     """実行結果をJSONLに記録。自己改善の材料にする。"""
     import datetime
@@ -258,6 +279,8 @@ if __name__ == "__main__":
         issues = vae_check()
     elif cmd == "pre":
         issues = pre_check(API_SERVER)
+    elif cmd == "reload":
+        issues = reload_dashboard()
     elif cmd == "improve":
         self_improve(); sys.exit(0)
     else:  # post
