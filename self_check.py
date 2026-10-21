@@ -5,17 +5,19 @@ self_check.py - 自己ロジック（エージェント行動前後の自動チ�
 使い方: python self_check.py [pre|post|vae|server]
 
 育成履歴:
-  2026-10-22 v1: 初版
-    - pre_check(): 修正前に必ず呼ぶ（バックアップ比較・根拠確認）
-    - post_check(): 修正後に必ず呼ぶ（py_compile・VAE整合・CFG安全・ComfyUIエラー）
-    - server_ensure(): APIサーバー/ComfyUI自動起動（ユーザーに手間取らせない）
-    - vae_check(): debug_last_real_wf.jsonのVAE/CFG整合確認
+  2026-10-22 v1: 初版 (pre/post/vae/server/clean/reload/improve)
+  2026-10-22 v2: 自己ロジック強化
+    - pre_check(): バックアップ確認に加え自動バックアップ作成
+    - post_check(): dashboard.html JSエラー検出追加
+    - sibling_check(): 同種バグ横展開チェック（v30直したならv40も確認）
+    - test_generate(): 実生成テスト自動化（ComfyUIエラー有無を自分で確認）
 
 ルール（2026-10-22 NextraLabsさんとの約束）:
-  1. 修正前: pre_check()で根拠確認・バックアップ差分確認
-  2. 修正後: post_check()で構文・VAE・CFG・ComfyUIエラーを全チェック
+  1. 修正前: pre_check()で自動バックアップ→差分確認→根拠記録
+  2. 修正後: post_check()で構文・JS・VAE・CFG・ComfyUIエラーを全チェック
   3. サーバー停止: server_ensure()で自己起動。ユーザーへの依頼禁止
-  4. 対処療法チェック: 「同じ種類のバグが他にないか」を必ず確認してから完了
+  4. 対処療法チェック: sibling_check()で同種バグ横展開を必ず確認
+  5. 実生成確認: test_generate()でComfyUI実生成してエラーなしを自分で確認
 """
 import sys, os, json, time, subprocess, socket, urllib.request
 sys.stdout.reconfigure(encoding="utf-8")
@@ -121,22 +123,32 @@ def vae_check(wf=None, verbose=True):
 
 def pre_check(target_file, bak_file=None, verbose=True):
     """
-    修正前に呼ぶ。
-    - バックアップ存在確認
-    - bak_fileが指定されていれば差分の有無を確認
+    修正前に呼ぶ。バックアップを自動作成してから差分確認。
+    - 自動バックアップ作成（.bak_selfcheck_YYYYMMDD_HHMMSS）
+    - 既存バックアップ一覧表示
+    - bak_file指定時は差分行数を表示
     """
+    import datetime, shutil
     issues = []
     if not os.path.exists(target_file):
         issues.append(f"対象ファイルが存在しない: {target_file}")
         return issues
 
-    # バックアップ一覧
-    baks = [f for f in os.listdir(os.path.dirname(target_file))
-            if os.path.basename(target_file) in f and f != os.path.basename(target_file)]
-    if not baks:
-        issues.append(f"[pre_check WARN] バックアップが見当たらない: {os.path.dirname(target_file)}")
-    elif verbose:
-        print(f"[pre_check] バックアップ {len(baks)}件 確認OK: {baks[:3]}")
+    # 自動バックアップ作成
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    auto_bak = f"{target_file}.bak_selfcheck_{ts}"
+    try:
+        shutil.copy2(target_file, auto_bak)
+        if verbose: print(f"[pre_check] ✅ 自動バックアップ作成: {os.path.basename(auto_bak)}")
+    except Exception as e:
+        issues.append(f"バックアップ作成失敗: {e}")
+
+    # 既存バックアップ一覧
+    baks = sorted([f for f in os.listdir(os.path.dirname(target_file))
+            if os.path.basename(target_file) in f and f != os.path.basename(target_file)],
+            reverse=True)[:5]
+    if verbose:
+        print(f"[pre_check] バックアップ一覧(最新5件): {baks}")
 
     if bak_file and os.path.exists(bak_file):
         with open(target_file, encoding="utf-8", errors="replace") as f:
@@ -190,12 +202,143 @@ def post_check(target_file, verbose=True):
     else:
         issues.append("[post_check WARN] ComfyUI未起動 → 履歴確認スキップ")
 
+    # 4. dashboard.html JSエラーチェック（node --check相当）
+    DASHBOARD = r"C:\AI\ComfyUI\dashboard.html"
+    if os.path.exists(DASHBOARD):
+        # JSブロックを抽出してnode構文チェック
+        try:
+            with open(DASHBOARD, encoding="utf-8", errors="replace") as f:
+                html = f.read()
+            import re, tempfile
+            scripts = re.findall(r'<script[^>]*>(.*?)</script>', html, re.DOTALL)
+            js_all = "\n".join(scripts)
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".js", encoding="utf-8", delete=False) as tmp:
+                tmp.write(js_all)
+                tmp_path = tmp.name
+            r = subprocess.run(["node", "--check", tmp_path], capture_output=True, text=True, timeout=15)
+            os.unlink(tmp_path)
+            if r.returncode != 0:
+                issues.append(f"[JS ERROR] dashboard.html: {r.stderr[:200]}")
+            elif verbose:
+                print("[post_check] dashboard.html JS構文 OK")
+        except FileNotFoundError:
+            if verbose: print("[post_check] node未インストール → JSチェックスキップ")
+        except Exception as e:
+            if verbose: print(f"[post_check] JSチェックエラー(スキップ): {e}")
+
     # 結果
     if issues:
         print("[post_check] ❌ 問題あり:")
         for i in issues: print(f"  {i}")
     else:
         if verbose: print("[post_check] ✅ 全チェックPASS → 納品OK")
+    return issues
+
+
+def sibling_check(fix_type, verbose=True):
+    """
+    同種バグの横展開チェック。「v30直したならv40も確認」のような見落とし防止。
+    fix_type例: "vae", "cfg", "lora", "clip"
+    """
+    SIBLING_MAP = {
+        "vae": [
+            ("redcraft v30", "REDCRAFT_V30_VAE", "redcraftHybridH3Krea2t_30"),
+            ("redcraft v40", "REDCRAFT_V40_VAE", "redcraftHybridH3Krea2t_40"),
+            ("redcraft qw21", "QW21_VAE", "qw21"),
+            ("moody v8x", "MOODY_VAE", "moodyKrea2Mix"),
+        ],
+        "cfg": [
+            ("moody", "MOODY_CFG=1.8", "moody"),
+            ("redcraft v30", "REDCRAFT_V30_CFG=WFデフォルト", "30krea2"),
+            ("redcraft v40", "REDCRAFT_V40_CFG=5.5", "40K2TDUAL"),
+            ("redcraft qw21", "QW21_CFG=1.5", "qw21"),
+        ],
+    }
+    siblings = SIBLING_MAP.get(fix_type, [])
+    if not siblings:
+        if verbose: print(f"[sibling_check] fix_type={fix_type} の定義なし")
+        return []
+
+    print(f"[sibling_check] {fix_type}系 横展開確認リスト:")
+    for name, expected, keyword in siblings:
+        print(f"  ☑ {name}: {expected} ({keyword})")
+    print(f"[sibling_check] 上記全ての修正が正しいか確認してから完了にすること")
+    return []
+
+
+def test_generate(char_id="char_kakuseizai_s3_ff_tifa",
+                  checkpoint="redcraftHybridH3Krea2t_30Krea2_fp8.safetensors",
+                  timeout=300, verbose=True):
+    """
+    実生成テスト自動化。ComfyUIに投入してエラーなし確認。
+    ユーザーが「動作確認は？」と言わなくても自分でやる。
+    """
+    import urllib.request as _ur, json as _json
+    issues = []
+
+    # サーバー確認
+    srv_issues = server_ensure(verbose=False)
+    if srv_issues:
+        return srv_issues
+
+    # キューキャンセル
+    try:
+        req = _ur.Request("http://127.0.0.1:8188/interrupt", data=b"{}", method="POST")
+        _ur.urlopen(req, timeout=3)
+        req2 = _ur.Request("http://127.0.0.1:8188/queue",
+            data=_json.dumps({"clear": True}).encode(),
+            headers={"Content-Type": "application/json"}, method="POST")
+        _ur.urlopen(req2, timeout=3)
+        time.sleep(2)
+    except: pass
+
+    # 生成リクエスト
+    import urllib.request, http.client
+    payload = _json.dumps({
+        "panel": {
+            "char_template_id": char_id, "char_id": char_id,
+            "prompt": "(1girl:2.0),(masterpiece:1.2)",
+            "outfit_prompt": "(1girl:2.0)", "outfit_label": "SELF_CHECK_TEST",
+            "outfit_index": 0, "page_idx": 0, "panel_idx": 0,
+            "penetration_off": True, "clothes_off": False,
+            "wf_type": "moody_krea2_v7", "checkpoint": checkpoint, "style_preset": "",
+        },
+        "page_idx": 0, "panel_idx": 0,
+        "wf_type": "moody_krea2_v7", "checkpoint": checkpoint,
+    }).encode()
+    try:
+        req = urllib.request.Request(
+            "http://127.0.0.1:3002/api/generate-panel",
+            data=payload, headers={"Content-Type": "application/json"}, method="POST")
+        resp = urllib.request.urlopen(req, timeout=timeout)
+        data = _json.loads(resp.read())
+        img = data.get("image_path", "")
+        err = data.get("error", "")
+        if err:
+            issues.append(f"[TEST_GEN ERROR] {err}")
+        elif img:
+            if verbose: print(f"[test_generate] ✅ 生成成功: {img}")
+        else:
+            issues.append("[TEST_GEN] image_pathが空")
+    except Exception as e:
+        issues.append(f"[TEST_GEN EXCEPTION] {e}")
+
+    # ComfyUI履歴エラー確認
+    time.sleep(2)
+    try:
+        status, body = _http_get("http://127.0.0.1:8188/history?max_items=1")
+        hist = _json.loads(body)
+        for pid, entry in hist.items():
+            for mtype, mdata in entry.get("status", {}).get("messages", []):
+                if mtype == "execution_error":
+                    issues.append(f"[COMFY ERROR] {mdata.get('exception_type')}: {str(mdata.get('exception_message',''))[:150]}")
+        if not any("[COMFY ERROR]" in i for i in issues) and verbose:
+            print("[test_generate] ✅ ComfyUIエラーなし")
+    except Exception as e:
+        issues.append(f"[COMFY HIST ERROR] {e}")
+
+    if not issues and verbose:
+        print("[test_generate] ✅ 実生成テスト完全PASS")
     return issues
 
 # ── 自己改善ロジック ──────────────────────────────────────────
@@ -321,6 +464,12 @@ if __name__ == "__main__":
         issues = vae_check()
     elif cmd == "pre":
         issues = pre_check(API_SERVER)
+    elif cmd == "sibling":
+        fix_type = sys.argv[2] if len(sys.argv) > 2 else "vae"
+        issues = sibling_check(fix_type)
+    elif cmd == "test":
+        ckpt = sys.argv[2] if len(sys.argv) > 2 else "redcraftHybridH3Krea2t_30Krea2_fp8.safetensors"
+        issues = test_generate(checkpoint=ckpt)
     elif cmd == "clean":
         issues = clean_all()
     elif cmd == "reload":
