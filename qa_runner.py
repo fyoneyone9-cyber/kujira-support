@@ -18,6 +18,12 @@ qa_runner.py - 漫画ダッシュボード動作確認システム
       api/test-prompt（プロンプト生成のみ、ComfyUI未投入）で代替する
     - wait_comfy_queue_empty() を先頭に追加（実生成モード時）
     - Fix: qa_runner実行がダッシュボードの通常生成を汚染していた問題を解消
+  2026-10-22 v5:
+    - tifa_redcraft30追加: redcraft 30(cfg=1.0設計)でCFG誤上書きを検出するテスト
+      [KSAMPLER_NON_QW21_FIX_V3]で直したミスの再発防止。
+      expect_cfg=1.0でWFデフォルトが保持されているか確認する
+    - check_wf_static()にKrea2 CFG安全チェック追加:
+      cfg>2.0のとき自動警告（赤ストライプ崩壊の予兆検出）
 """
 import sys, io, json, time, requests, pathlib, socket
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -36,6 +42,14 @@ DEFAULT_REQ = {
 REDCRAFT_REQ = {
     "wf_type":      "moody_krea2_v7",
     "checkpoint":   "redcraftHybridH3Krea2t_40K2TDUAL_3196558.safetensors",
+    "style_preset": "",
+}
+
+# redcraft 30: WFデフォルトcfg=1.0/steps=8が保持されているか確認用
+# [KSAMPLER_NON_QW21_FIX_V3] 再発防止テスト
+REDCRAFT30_REQ = {
+    "wf_type":      "moody_krea2_v7",
+    "checkpoint":   "redcraftHybridH3Krea2t_30Krea2_fp8.safetensors",
     "style_preset": "",
 }
 
@@ -69,6 +83,21 @@ CHARS = {
         ),
         "check_tags":     ["aerith", "final fantasy", "ff7"],
         "forbidden_loras":["aerith"],
+    },
+    "tifa_redcraft30": {
+        # [KSAMPLER_NON_QW21_FIX_V3 再発防止] redcraft 30はcfg=1.0/steps=8(WFデフォルト)
+        # KSAMPLER_NON_QW21がredcraftに誤CFG上書きしていないかを確認する
+        "char_id": "char_kakuseizai_s3_ff_tifa",
+        "prompt": (
+            "(solo:2.2),(1girl:2.2),(only one person:2.0),"
+            "(Tifa Lockhart:1.9),(Final Fantasy VII:1.8),(ff7:1.8),"
+            "20 years old,long black hair,red eyes"
+        ),
+        "check_tags":     ["tifa", "ff7"],
+        "forbidden_loras":["tifa"],
+        "expect_cfg":     1.0,
+        "expect_steps":   8,
+        "req_override":   REDCRAFT30_REQ,
     },
     "tifa": {
         "char_id": "char_kakuseizai_s3_ff_tifa",
@@ -214,6 +243,13 @@ def check_wf_static():
                 is_sdxl_vae = "sdxl" in vae.lower()
                 if is_krea2 and is_sdxl_vae:
                     issues.append(f"Krea2 UNET + SDXL VAE({vae}) 16ch/4ch不一致")
+        # [KSAMPLER_NON_QW21_FIX_V3 再発防止] Krea2でcfg>2.0は赤ストライプ崩壊の予兆
+        is_krea2_model = any(k in unet_name for k in ("krea","moody","redcraft","qwen"))
+        for n in wf.values():
+            if isinstance(n, dict) and n.get("class_type") == "KSampler":
+                cfg = n.get("inputs",{}).get("cfg", 0)
+                if is_krea2_model and cfg > 2.0:
+                    issues.append(f"[警告] Krea2でcfg={cfg} >2.0 (赤ストライプ崩壊の可能性)")
         return (False, "; ".join(issues)) if issues else (True, f"WF OK (nodes={len(wf)})")
     except Exception as e:
         return False, str(e)
