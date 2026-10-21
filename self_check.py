@@ -121,6 +121,61 @@ def vae_check(wf=None, verbose=True):
 
 # ── 修正前チェック ─────────────────────────────────────────────
 
+def brief(verbose=True):
+    """
+    セッション開始時に必ず呼ぶ。重要知識・過去の失敗・現在の状態を自己確認する。
+    これを呼ばずに作業を始めない。
+    """
+    import datetime
+    lines = []
+    lines.append("=" * 55)
+    lines.append("  SELF BRIEF - セッション開始チェック")
+    lines.append("=" * 55)
+
+    # 1. サーバー状態
+    api_ok   = _tcp_ok(API_PORT)
+    comfy_ok = _tcp_ok(COMFY_PORT)
+    lines.append(f"[状態] API={('UP' if api_ok else '❌DOWN')} ComfyUI={('UP' if comfy_ok else '❌DOWN')}")
+
+    # 2. 絶対ルール確認
+    lines.append("[絶対ルール]")
+    lines.append("  ・修正前: pre_check()で自動バックアップ+根拠入力必須")
+    lines.append("  ・修正後: post_check()→全チェックPASSが完了条件")
+    lines.append("  ・Krea2系VAE=qwen_image_vae(16ch) / SDXL=sdxl_vae_fp16fix(4ch)")
+    lines.append("  ・Krea2 cfg>2.0 → 赤ストライプ崩壊リスク")
+    lines.append("  ・moody cfg=1.8厳守 / redcraft30 WFデフォルト(cfg=1.0)不干渉")
+    lines.append("  ・根拠なし修正禁止 / 対処療法禁止(sibling_check必須)")
+    lines.append("  ・サーバー停止=自己起動 / キャッシュ=自己クリア")
+
+    # 3. 直近の失敗パターン（self_check_log.jsonlから）
+    if os.path.exists(SELF_LOG):
+        from collections import Counter
+        counter = Counter()
+        with open(SELF_LOG, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    e = json.loads(line)
+                    for issue in e.get("issues", []):
+                        key = issue.split("]")[0] + "]" if "]" in issue else issue[:40]
+                        counter[key] += 1
+                except: pass
+        top = counter.most_common(3)
+        if top:
+            lines.append("[過去の失敗TOP3]")
+            for k, v in top:
+                lines.append(f"  {v}回: {k}")
+
+    lines.append("=" * 55)
+    print("\n".join(lines))
+
+    # サーバーが落ちていれば即起動
+    if not api_ok or not comfy_ok:
+        print("[brief] サーバー停止検知 → 自動起動")
+        server_ensure()
+
+    return []
+
+
 def pre_check(target_file, bak_file=None, verbose=True):
     """
     修正前に呼ぶ。バックアップを自動作成してから差分確認。
@@ -133,6 +188,18 @@ def pre_check(target_file, bak_file=None, verbose=True):
     if not os.path.exists(target_file):
         issues.append(f"対象ファイルが存在しない: {target_file}")
         return issues
+
+    # 根拠入力ゲート（憶測修正防止）
+    # 引数で渡す場合: pre_check(file, reason="ログL9219にsdxl確認")
+    # コマンドライン: python self_check.py pre "根拠テキスト"
+    reason = bak_file if bak_file and not os.path.exists(bak_file) else None
+    if reason is None and len(sys.argv) > 2 and not os.path.exists(sys.argv[2]):
+        reason = sys.argv[2]
+    if reason:
+        print(f"[pre_check] 根拠: {reason}")
+        log_result("pre_reason", [f"根拠: {reason}"], 0)
+    else:
+        if verbose: print("[pre_check] ⚠️ 根拠未記録。修正前に根拠を確認すること")
 
     # 自動バックアップ作成
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -464,6 +531,8 @@ if __name__ == "__main__":
         issues = vae_check()
     elif cmd == "pre":
         issues = pre_check(API_SERVER)
+    elif cmd == "brief":
+        issues = brief()
     elif cmd == "sibling":
         fix_type = sys.argv[2] if len(sys.argv) > 2 else "vae"
         issues = sibling_check(fix_type)
