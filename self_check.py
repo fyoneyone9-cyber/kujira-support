@@ -690,6 +690,58 @@ if __name__ == "__main__":
         except Exception as _ple:
             print(f"  API未応答: {_ple}")
         print("[POST_LOGCHECK_V1] --- 完了 ---\n")
+
+        # [POST_EVIDENCE_V1] 実生成してキャラ名がpositiveに入っているか強制確認
+        # コード修正後に必ず実行。PassしないとNGと判断する。
+        print("\n[POST_EVIDENCE_V1] --- ティファ/エアリス実生成エビデンス確認 ---")
+        import time as _evt
+        _evidence_chars = [
+            ("char_kaizo_nichijou3_tifa", "tifa lockhart", "Tifa Lockhart, Final Fantasy VII, long black hair"),
+            ("char_kaizo_nichijou3_aerith", "aerith gainsborough", "Aerith Gainsborough, Final Fantasy VII, long brown hair"),
+        ]
+        _evidence_ng = []
+        for _ecid, _ekey, _eprompt in _evidence_chars:
+            # ロック解除待ち＋生成
+            _ebody = __import__("json").dumps({
+                "char_template_id": _ecid,
+                "outfit_index": 0,
+                "panel": {"char_template_id": _ecid, "prompt": _eprompt},
+                "page_idx": 0, "panel_idx": 0
+            }).encode()
+            _ok = False
+            for _et in range(12):
+                _evt.sleep(5)
+                try:
+                    _ereq = _ur2.Request("http://127.0.0.1:3002/api/generate-panel",
+                        data=_ebody, headers={"Content-Type":"application/json"}, method="POST")
+                    with _ur2.urlopen(_ereq, timeout=120) as _er:
+                        _ok = True
+                    break
+                except Exception as _ee:
+                    if "409" in str(_ee):
+                        print(f"  [{_ecid}] ロック中... {(_et+1)*5}s")
+                    else:
+                        print(f"  [{_ecid}] 生成エラー: {_ee}"); break
+            _evt.sleep(3)
+            try:
+                with _ur2.urlopen("http://127.0.0.1:3002/api/last-prompt", timeout=5) as _elr:
+                    _ed = _lj2.loads(_elr.read())
+                _epos = _ed.get("positive_prompt","")
+                _ecid_got = _ed.get("dbg_char_template_id","未記録")
+                _pass = _ekey in _epos.lower() and _ecid_got == _ecid
+                _status = "✅ PASS" if _pass else "❌ FAIL"
+                print(f"  {_status} [{_ecid}] キャラ名含む: {_ekey in _epos.lower()}, ID一致: {_ecid_got == _ecid}")
+                if not _pass:
+                    _evidence_ng.append(f"[EVIDENCE_FAIL] {_ecid}: キャラ名未反映")
+                    issues.append(f"[EVIDENCE_FAIL] {_ecid}: positiveにキャラ名なし")
+            except Exception as _ele:
+                print(f"  [{_ecid}] last-prompt失敗: {_ele}")
+                _evidence_ng.append(f"[EVIDENCE_ERROR] {_ecid}")
+        if _evidence_ng:
+            print("  🚨 エビデンスNG — 未解決の問題あり。納品禁止。")
+        else:
+            print("  🎉 全キャラエビデンス確認完了 — 納品OK")
+        print("[POST_EVIDENCE_V1] --- 完了 ---\n")
     elapsed = time.time() - t0
     log_result(cmd, issues, elapsed)
     sys.exit(0 if not issues else 1)
