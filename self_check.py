@@ -202,6 +202,48 @@ def post_check(target_file, verbose=True):
 
 SELF_LOG = os.path.join(os.path.dirname(__file__), "self_check_log.jsonl")
 
+def clean_all():
+    """
+    キャッシュ・旧ログを全クリア。
+    「キャッシュのせい」「前のログのせい」をユーザーに押し付けない。
+    1. ComfyUI履歴クリア (POST /history {clear:true})
+    2. debug_last_real_wf.json リセット
+    3. ブラウザCtrl+Shift+Rハードリロード
+    """
+    import urllib.request, json as _json
+    issues = []
+
+    # 1. ComfyUI履歴クリア
+    try:
+        req = urllib.request.Request(
+            "http://127.0.0.1:8188/history",
+            data=_json.dumps({"clear": True}).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        urllib.request.urlopen(req, timeout=5)
+        print("[clean_all] ✅ ComfyUI履歴クリア完了")
+    except Exception as e:
+        issues.append(f"ComfyUI履歴クリア失敗: {e}")
+        print(f"[clean_all] ❌ ComfyUI履歴クリア失敗: {e}")
+
+    # 2. debug_last_real_wf.json リセット
+    try:
+        if os.path.exists(WF_DBG):
+            with open(WF_DBG, "w", encoding="utf-8") as f:
+                f.write("{}")
+            print("[clean_all] ✅ debug_last_real_wf.json リセット")
+    except Exception as e:
+        issues.append(f"WFログリセット失敗: {e}")
+
+    # 3. ブラウザハードリロード
+    r_issues = reload_dashboard()
+    issues.extend(r_issues)
+
+    if not issues:
+        print("[clean_all] ✅ 全クリア完了 → クリーンな状態で確認可能")
+    return issues
+
 def reload_dashboard():
     """ダッシュボードブラウザウィンドウにCtrl+Shift+Rを送信してハードリロード。"""
     try:
@@ -279,6 +321,8 @@ if __name__ == "__main__":
         issues = vae_check()
     elif cmd == "pre":
         issues = pre_check(API_SERVER)
+    elif cmd == "clean":
+        issues = clean_all()
     elif cmd == "reload":
         issues = reload_dashboard()
     elif cmd == "improve":
