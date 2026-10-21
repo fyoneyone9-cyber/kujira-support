@@ -168,6 +168,13 @@ def brief(verbose=True):
     lines.append("=" * 55)
     print("\n".join(lines))
 
+    # AGENT_RULES.mdを自動表示（アカウント跨ぎで知識を共有）
+    RULES = r"C:\AI\ComfyUI\AGENT_RULES.md"
+    if os.path.exists(RULES):
+        print(f"\n[brief] AGENT_RULES.md 確認済み: {RULES}")
+    else:
+        print(f"[brief] ⚠️ AGENT_RULES.md が見つからない: {RULES}")
+
     # サーバーが落ちていれば即起動
     if not api_ok or not comfy_ok:
         print("[brief] サーバー停止検知 → 自動起動")
