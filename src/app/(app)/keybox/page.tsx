@@ -5,18 +5,18 @@ import { useState, useEffect } from 'react'
 // 進行中案件タスク（初期データ：カーステーション星光）
 type CaseTask = { id: number; task: string; who: string; via: string; done: boolean; memo: string }
 type ActiveCase = { name: string; tasks: CaseTask[] }
-const TASKS_STORAGE_KEY = 'keybox_active_cases_v1'
+const TASKS_STORAGE_KEY = 'keybox_active_cases_v2'
 const DEFAULT_CASES: ActiveCase[] = [
   {
-    name: 'カーステーション星光（THE ART MEIBOKU・別府市）KBL16×1台 納品希望12/24',
+    name: 'カーステーション星光（THE ART MEIBOKU・別府市）16Pカスタム×1台 納品希望12/24【大同設計流用で進行】',
     tasks: [
-      { id: 1, task: '寸法確認（転倒防止込みD600mmで正か）＋発注金額確認', who: '今津さん', via: 'Slack', done: false, memo: '単体発注赤字見込み→同時発注可否も確認' },
-      { id: 2, task: '状況報告（図面了承済・置台は先方製作・請求金額10万円確認済）', who: '橋本さん', via: 'Slack', done: false, memo: '請求金額は申込書で判明済み' },
-      { id: 3, task: '粗利計算（請求10万円−発注金額）', who: '自分', via: 'このページ', done: false, memo: '試算: 発注約136,267円→▲36,267円赤字' },
-      { id: 4, task: '社長承認メール送信', who: '田中社長', via: 'メール', done: false, memo: '請求/発注/粗利3点セット必須。赤字なら理由と対策明記' },
-      { id: 5, task: '正式発注依頼', who: '今津さん', via: 'Slack', done: false, memo: '社長承認後。一斉発注から外れ後追い' },
+      { id: 1, task: '寸法・発注金額の確認', who: '今津さん', via: 'Slack', done: true, memo: '回答済: 既存規格なし・大同向け図面流用は自社責任。金額は過去実績引用' },
+      { id: 2, task: '大同設計のまま発注進行の報告＋赤字見込み共有', who: '橋本さん', via: 'Slack', done: false, memo: '図面了承済み・納期12/24優先。寸法適合は自社責任である旨明記' },
+      { id: 3, task: '粗利計算（確定）', who: '自分', via: 'このページ', done: false, memo: '$610×157+輸送費≈136,267円 / 請求10万円 → ▲36,267円赤字。JITBOX大分実額要確認' },
+      { id: 4, task: '社長承認メール送信', who: '田中社長', via: 'メール', done: false, memo: '赤字＋旧図面流用の経緯を明記' },
+      { id: 5, task: '正式発注依頼', who: '今津さん', via: 'Slack', done: false, memo: '社長承認メール転送で発注。フロー外のため最低限対応になる旨承知' },
       { id: 6, task: '手配完了連絡', who: '池島様（星光）', via: 'メール', done: false, memo: '発注後に連絡でOK' },
-      { id: 7, task: '発注フローをNotionマニュアル化', who: '自分', via: 'Notion', done: false, memo: '社長指摘: 3点セット必須ルールを記録' },
+      { id: 7, task: '発注フロー10ステップのNotionマニュアル化', who: '自分', via: 'Notion', done: false, memo: '優先度UP。今津さんフロー③〜⑥（イラスト依頼・合意メール残し）必載' },
     ],
   },
 ]
