@@ -553,6 +553,33 @@ export default function DeliveryPage() {
     } finally {
       setUpdating(null)
     }
+
+    // [SIBLING_SYNC_V2 2026-10-30] patch()経由の保存でもURL・メモを兄弟連動
+    const PATCH_SIBLING_KEYS = new Set([
+      'slack_url', 'hubspot_url', 'process_sheet_url', 'hearing_sheet_url',
+      'dashboard_memo',
+    ])
+    const sibUpdates: Record<string, unknown> = {}
+    for (const k of Object.keys(updates)) {
+      if (PATCH_SIBLING_KEYS.has(k)) sibUpdates[k] = updates[k]
+    }
+    if (Object.keys(sibUpdates).length > 0) {
+      const me = items.find(x => x.id === id)
+      if (me) {
+        const sibs = items.filter(x => x.id !== id && !x.locked &&
+          x.client_name === me.client_name &&
+          (x.install_address || '') === (me.install_address || ''))
+        if (sibs.length) {
+          setItems(prev => prev.map(x => sibs.some(sx => sx.id === x.id) ? { ...x, ...sibUpdates } : x))
+          await Promise.all(sibs.map(sx => fetch('/api/delivery/items', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: sx.id, ...sibUpdates })
+          }).catch(() => {})))
+          console.info('[SIBLING_SYNC_V2] patch %o を同一現場の%d件へ同期', Object.keys(sibUpdates), sibs.length)
+        }
+      }
+    }
   }
 
   // [SIBLING_SYNC_V1 2026-10-29] 同一現場(会社名+設置先住所)で共有すべき項目。
@@ -1163,7 +1190,7 @@ export default function DeliveryPage() {
                   {siblingsOf(it).length > 0 && (
                     <p className="text-xs text-amber-300/90 mt-0.5">
                       🔗 同じ現場にあと{siblingsOf(it).length}件
-                      <span className="text-amber-200/60 ml-1">（機材ステータス・発注日・入金状況は連動します）</span>
+                      <span className="text-amber-200/60 ml-1">（機材ステータス・発注日・入金状況・リンク・メモは連動します）</span>
                     </p>
                   )}
                   {it.install_address && <p className="text-slate-400 text-sm">設置先: {it.install_address}</p>}
