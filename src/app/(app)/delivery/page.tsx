@@ -252,8 +252,8 @@ function PaymentSection({ it, patch, saveTodoKey }: PaymentSectionProps) {
         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeColor}`}>{payStatus}</span>
         {/* 入金確認の有無を大きく表示 */}
         {confirmed
-          ? <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-green-600 text-white">✅ 入金確認済み</span>
-          : <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-amber-600 text-white">⚠️ 入金未確認</span>}
+          ? <span className="text-sm px-3 py-1 rounded-full font-black bg-green-600 text-white ring-2 ring-green-400">✅ 入金確認済み</span>
+          : <span className="text-sm px-3 py-1 rounded-full font-black bg-amber-600 text-white ring-2 ring-amber-400 animate-pulse">⚠️ 入金未確認</span>}
         {/* PayCube・キーボックス手配可否（入金確認が前提） */}
         {hasPaycube && (confirmed
           ? <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-blue-700 text-blue-100">{payFirstLabel}手配OK</span>
@@ -1112,15 +1112,15 @@ export default function DeliveryPage() {
                   const ps = (it.dashboard_todos?.['payment_status'] as string) || ''
                   const confirmed = ps === '入金確認済み' || ps === '入金不要（無償）'
                   return confirmed
-                    ? <div className="bg-green-800/60 border border-green-500 rounded-lg px-4 py-2 flex items-center gap-2">
-                        <span className="text-xl">✅</span>
-                        <span className="text-green-200 font-bold text-base">入金確認済み</span>
+                    ? <div className="bg-green-700/80 border-2 border-green-400 rounded-xl px-5 py-3 flex items-center gap-3 shadow-lg shadow-green-900/50">
+                        <span className="text-3xl">✅</span>
+                        <span className="text-green-100 font-black text-xl tracking-wide">入金確認済み</span>
                       </div>
-                    : <div className="bg-amber-900/60 border border-amber-500 rounded-lg px-4 py-2 flex items-center gap-2 cursor-pointer hover:bg-amber-900/80 transition-colors"
+                    : <div className="bg-amber-800/80 border-2 border-amber-400 rounded-xl px-5 py-3 flex items-center gap-3 cursor-pointer hover:bg-amber-700/80 transition-colors shadow-lg shadow-amber-900/50 animate-pulse"
                         onClick={() => jumpToSection(paySec)}>
-                        <span className="text-xl">💰</span>
-                        <span className="text-amber-200 font-bold text-base">入金未確認</span>
-                        <span className="text-amber-300/60 text-xs ml-1">タップで入金管理へ ↗</span>
+                        <span className="text-3xl">💰</span>
+                        <span className="text-amber-100 font-black text-xl tracking-wide">入金未確認</span>
+                        <span className="text-amber-300/80 text-sm ml-2 font-bold">タップで入金管理へ ↗</span>
                       </div>
                 })()}
 
