@@ -1,0 +1,17 @@
+﻿extracted sheets: 14
+  PMS                rows=31
+  PayPay豎ｺ貂・          rows=6
+  繧ｷ繝ｪ繝ｳ繝繝ｼ骭             rows=8
+  繧ｹ繝槭・繧ｫ繝ｼ繝画ｱｺ貂・          rows=3
+  繧ｹ繝槭・繝医Ο繝・け竭           rows=6
+  繧ｹ繝槭・繝医Ο繝・け竭｡           rows=39
+  繝輔Ο繝ｳ繝医メ繧ｧ繝・け繧､繝ｳ         rows=7
+  繝励Μ繝ｳ繧ｿ               rows=16
+  繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ           rows=23
+  莠句燕繝√ぉ繝・け繧､繝ｳ           rows=10
+  蠢・育｢ｺ隱坂蔵              rows=31
+  蠢・育｢ｺ隱坂贈              rows=56
+  蠢・育｢ｺ隱坂造              rows=105
+  遶ｯ譛ｫ繧ｫ繝ｼ繝画ｱｺ貂・           rows=4
+
+wrote src/lib/hearingSheetDefs.ts

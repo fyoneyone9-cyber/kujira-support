@@ -1,0 +1,7 @@
+﻿client_name: string
+product_name: string
+contact_name: string
+contact_tel1: string
+contact_tel2: string
+worker_contacts?: { name?: string; tel?: string; email?: string }[] | null
+assignee_name?: string | null

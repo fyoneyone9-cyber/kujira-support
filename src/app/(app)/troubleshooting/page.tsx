@@ -32,11 +32,11 @@ export default async function TroubleshootingPage({
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-white">🔧 トラブルシューティング</h1>
-          <p className="text-slate-400 text-sm mt-1">機器・システムの障害対応手順</p>
+          <p className="text-slate-400 text-base mt-1">機器・システムの障害対応手順</p>
         </div>
         <Link
           href="/manuals/new"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-base font-medium rounded-xl transition-colors"
         >
           ✚ 新規作成
         </Link>
@@ -50,11 +50,11 @@ export default async function TroubleshootingPage({
             name="q"
             defaultValue={params.q}
             placeholder="キーワードで検索..."
-            className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none focus:border-blue-500"
+            className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-slate-400 text-base focus:outline-none focus:border-blue-500"
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-xl border border-slate-600 transition-colors"
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-base rounded-xl border border-slate-600 transition-colors"
           >
             検索
           </button>
@@ -85,7 +85,7 @@ export default async function TroubleshootingPage({
         <div className="text-center py-16 text-slate-500">
           <p className="text-4xl mb-4">🔧</p>
           <p>トラブルシューティング手順がまだありません</p>
-          <Link href="/manuals/new" className="mt-4 inline-block text-blue-400 hover:text-blue-300 text-sm">
+          <Link href="/manuals/new" className="mt-4 inline-block text-blue-400 hover:text-blue-300 text-base">
             最初の手順を作成する →
           </Link>
         </div>
@@ -99,8 +99,8 @@ export default async function TroubleshootingPage({
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-medium text-sm mb-1">{item.title}</h3>
-                  <div className="flex items-center gap-3 text-xs text-slate-500">
+                  <h3 className="text-white font-medium text-base mb-1">{item.title}</h3>
+                  <div className="flex items-center gap-3 text-sm text-slate-500">
                     {item.category && (
                       <span className="px-2 py-0.5 bg-orange-900/40 text-orange-300 rounded-full border border-orange-800/40">
                         {item.category}
@@ -109,7 +109,7 @@ export default async function TroubleshootingPage({
                     <span>更新: {new Date(item.updated_at).toLocaleDateString('ja-JP')}</span>
                   </div>
                 </div>
-                <span className="text-slate-500 text-sm flex-shrink-0">→</span>
+                <span className="text-slate-500 text-base flex-shrink-0">→</span>
               </div>
             </Link>
           ))}

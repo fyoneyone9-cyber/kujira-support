@@ -1,0 +1,2 @@
+﻿GAS: paypay / roomtablet 繧貞ｾｩ豢ｻ・亥・12繧ｭ繝ｼ・・
+page.tsx: roomtablet / paypay 繧貞ｾｩ豢ｻ

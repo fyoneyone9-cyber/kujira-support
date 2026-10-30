@@ -1,0 +1,29 @@
+﻿=== 譬ｪ蠑丈ｼ夂､ｾ繝薙ず繝ｧ繝ｳ ===
+逕ｳ霎ｼ譖ｸ縺ｮ讖滓攝(app_equips):
+   {"surface":2,"kiosk":2,"passport":2,"smartlock":1,"pms":1,"printer":1,"qr":1,"hub":1,"paycube":1,"p400":1}
+CSV縺ｮequipment:
+   PMS = suitebook
+   繧ｹ繝槭・繝医Ο繝・け = EPIC
+   繝代せ繝昴・繝医Μ繝ｼ繝繝ｼ = 1
+   Surface逕ｨ繧ｹ繧ｿ繝ｳ繝・= 1
+
+=== 縲瑚ｨｭ螳壹ｒ繧ｳ繝斐・縲阪′遨阪・繧ｭ繝ｼ ===
+const equips: string[] = []
+                                      if (hasPms2) equips.push('pms')
+                                      if (hasLock2) equips.push('smartlock')
+                                      if (hasCard) equips.push('cardkey')
+                                      if (hasCyli) equips.push('cylinder')
+                                      if (hasPaycube) equips.push('cash')
+                                      if (hasP400) equips.push('p400')
+                                      // [HEARING_GAS_V10 2026-10-29] 縺薙・3縺､縺ｯ讖滓攝讒区・縺九ｉ蛻､譁ｭ縺ｧ縺阪↑縺・・縺ｧ蟶ｸ縺ｫON縲・
+                                      //   荳崎ｦ√↑繧峨ム繧､繧｢繝ｭ繧ｰ蛛ｴ縺ｧ螟悶☆驕狗畑・郁ｶｳ繧翫↑縺・ｈ繧贋ｽ吝・縺ｪ譁ｹ縺悟ｮ牙・・・
+                                      if (hasTablet) equips.push('roomtablet')
+                                      equips.push('sumaho')
+                                      equips.push('paypay')
+                                      // [V19] 蟾･莠九す繝ｼ繝医・蛻､譁ｭ譚先侭縺檎┌縺・・縺ｧ蟶ｸ縺ｫON縺ｫ縺励※縺翫￥
+                                      equips.push('koji')
+                                      // [HEARING_GAS_V11 2026-10-29] 繝励Μ繝ｳ繧ｿ縺ｯ縲後ち繝悶Ξ繝・ヨ莉･螟悶阪↑繧碓N縲・
+                                      //   繝√ぉ繝・け繧､繝ｳ遶ｯ譛ｫ縺後ち繝悶Ξ繝・ヨ縺縺ｨ繝励Μ繝ｳ繧ｿ繧呈磁邯壹〒縺阪↑縺・◆繧√・
+                                      //   窶ｻ繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ縺ｯ螳｢螳､逕ｨ縺ｪ縺ｮ縺ｧ遶ｯ譛ｫ遞ｮ蛻･縺ｨ縺ｯ辟｡髢｢菫・竊・髯､螟悶＠縺ｦ蛻､螳壹☆繧・
+                                      //   Surface / KIOSK 縺ｯ繝励Μ繝ｳ繧ｿ謗･邯壼庄縺ｪ縺ｮ縺ｧ縲√ち繝悶Ξ繝・ヨ隱槭′縺ゅ▲縺ｦ繧０N蜆ｪ蜈医・
+                                      const hasSurfaceOrKiosk = equipItems.some(e =

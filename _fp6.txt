@@ -1,0 +1,16 @@
+﻿python.exe : C:\GensparkClaw\kujira-support\_fix_parse_v6.py:7: SyntaxWarning: invalid escape sequence '\d'
+発生場所 行:1 文字:36
++ ... ra-support; & "C:\Users\fyone\anaconda3\python.exe" -X utf8 _fix_pars ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\GensparkClaw...e sequence '\d':String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  filter 縺ｧ `/^[\d\-+() ]+$/` 繧剃ｽｿ縺｣縺ｦ縺・ｋ縺溘ａ "090-5903-1838" 縺ｯ髯､螟悶＆繧後ｋ縺後・
+  /竭螂醍ｴ・・錐/                -> /螂醍ｴ・・錐/                 (1邂・園)
+  /竭｡菴乗園/                  -> /^.{0,2}菴乗園$/           (1邂・園)
+  /竭｢騾｣邨｡蜈・                 -> /^.{0,2}騾｣邨｡蜈・/          (4邂・園)
+  /竭｣諡・ｽ楢・ｰ丞錐/               -> /諡・ｽ楢・ｰ丞錐/                (3邂・園)
+  /竭､隲区ｱよ嶌騾∽ｻ伜・/              -> /隲区ｱよ嶌騾∽ｻ伜・/               (1邂・園)
+  /竭･險ｭ鄂ｮ蜈域命險ｭ蜷咲ｧｰ/             -> /險ｭ鄂ｮ蜈域命險ｭ蜷咲ｧｰ/              (1邂・園)
+  /險ｭ鄂ｮ蜈域命險ｭ菴乗園/              -> /險ｭ鄂ｮ蜈域命險ｭ菴乗園/              (1邂・園)
+patched OK

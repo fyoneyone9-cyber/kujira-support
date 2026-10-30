@@ -1,0 +1,88 @@
+﻿  84| 
+  85|     // [HEARING_XLSX_V3 2026-10-29] 髮帛ｽ｢縺ｯ A1:K1 遲峨ｒ邨仙粋縺励※1縺､縺ｮ隕句・縺励↓縺励※縺・ｋ縲・
+  86|     //   CSV蛹悶☆繧九→邨仙粋諠・ｱ縺悟､ｱ繧上ｌ蜈ｨ繧ｻ繝ｫ縺ｫ蜷後§譁・ｭ怜・縺瑚､・｣ｽ縺輔ｌ繧九◆繧√・
+  87|     //   騾｣邯壹☆繧句酔荳譁・ｭ怜・縺ｯ蜈磯ｭ縺縺第ｮ九＠縺ｦ邨仙粋縺礼峩縺吶・
+  88|     const merges: [number, number, number][] = []   // [陦・ 髢句ｧ句・, 邨ゆｺ・・]
+  89|     def.forEach((row, ri) => {
+  90|       const vals = row.map(c => {
+  91|         const hit = Object.keys(prefill).find(k => c.includes(k))
+  92|         if (c === '笆｡' && hit) return prefill[hit] === 'TRUE' ? '笨・ : '笆｡'
+  93|         return c
+  94|       })
+  95|       // 騾｣邯壹☆繧句酔荳譁・ｭ怜・繧堤糞繧・育ｵ仙粋蟇ｾ雎｡縺ｨ縺励※險倬鹸・・
+  96|       let i = 0
+  97|       while (i < vals.length) {
+  98|         const v = vals[i]
+  99|         if (v) {
+ 100|           let j = i
+ 101|           while (j + 1 < vals.length && vals[j + 1] === v) j++
+ 102|           if (j > i) {
+ 103|             for (let k = i + 1; k <= j; k++) vals[k] = ''
+ 104|             merges.push([ri + 1, i + 1, j + 1])
+ 105|           }
+ 106|           i = j + 1
+ 107|         } else {
+ 108|           i++
+ 109|         }
+ 110|       }
+ 111|       const r = ws.addRow(vals)
+ 112|       r.alignment = { wrapText: true, vertical: 'middle' }
+ 113| 
+ 114|       // [HEARING_XLSX_V4] 1陦後↓B蛻励→D蛻励・荳｡譁ｹ縺ｸ繝・く繧ｹ繝医′縺ゅｋ蝣ｴ蜷医′縺ゅｋ縲・
+ 115|       //   萓・ B蛻・縲娯ｻ蜿ｳ縺ｮ雉ｪ蝠上↓繧ゅ＃蝗樒ｭ斐￥縺縺輔＞縲・豕ｨ險・ / D蛻・縲檎樟驥第髪謇輔＞繧貞ｰ主・縺励∪縺吶°・溘・險ｭ蝠・
+ 116|       //   譛蛻昴・繝・く繧ｹ繝亥・縺九ｉ邨仙粋縺吶ｋ縺ｨ D蛻励・險ｭ蝠上′豸医∴繧九◆繧√・
+ 117|       //   縲取怙蠕後・繝・く繧ｹ繝亥・縲上ｒ險ｭ蝠乗悽菴薙→縺ｿ縺ｪ縺励※縲√◎縺薙°繧牙屓遲疲ｬ・焔蜑阪∪縺ｧ邨仙粋縺吶ｋ縲・
+ 118|       const textCols: number[] = []
+ 119|       for (let c = 0; c < Math.min(vals.length, ANS); c++) {
+ 120|         if (vals[c] && vals[c] !== '笆｡') textCols.push(c)
+ 121|       }
+ 122|       const firstText = textCols.length ? textCols[textCols.length - 1] : -1
+ 123|       // 蟾ｦ蛛ｴ縺ｫ豕ｨ險倥′縺ゅｋ蝣ｴ蜷医・謚倥ｊ霑斐＠縺ｦ陦ｨ遉ｺ縺ｧ縺阪ｋ繧医≧蟷・ｒ遒ｺ菫・
+ 124|       if (textCols.length > 1) {
+ 125|         const noteCol = textCols[0]
+ 126|         const nc = r.getCell(noteCol + 1)
+ 127|         nc.alignment = { wrapText: true, vertical: 'middle' }
+ 128|         nc.font = { size: 9, color: { argb: 'FF777777' } }
+ 129|         try { ws.mergeCells(r.number, noteCol + 1, r.number, firstText) } catch { /* noop */ }
+ 130|       }
+ 131|       if (firstText >= 0) {
+ 132|         try { ws.mergeCells(r.number, firstText + 1, r.number, ANS) } catch { /* 譌｢縺ｫ邨仙粋貂医∩ */ }
+ 133|         const cell = r.getCell(firstText + 1)
+ 134|         cell.alignment = { wrapText: true, vertical: 'middle' }
+ 135|         const v = String(vals[firstText])
+ 136|         if (ri === 0) {
+ 137|           cell.font = { bold: true, size: 13 }
+ 138|         } else if (/^\s*\d+\.\s/.test(v)) {
+ 139|           // 螟ｧ隕句・縺・
+ 140|           cell.font = { bold: true, size: 11 }
+ 141|           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCE6F1' } }
+ 142|         } else if (v.startsWith('窶ｻ') || v.startsWith('繝ｻ') || v.startsWith('AdvaNceD')) {
+ 143|           // 隱ｬ譏取枚
+ 144|           cell.font = { size: 9, color: { argb: 'FF555555' } }
+ 145|         }
+ 146|         // 陦後・鬮倥＆繧呈枚蟄玲焚縺九ｉ謗ｨ螳・
+ 147|         const len = v.length
+ 148|         r.height = Math.min(120, Math.max(20, Math.ceil(len / 60) * 16 + 6))
+ 149|       }
+ 150| 
+ 151|       // 蝗樒ｭ疲ｬ・
+ 152|       r.eachCell({ includeEmpty: false }, (cell) => {
+ 153|         const v = String(cell.value ?? '')
+ 154|         if (v === '笆｡' || v === '笨・) {
+ 155|           cell.fill = YELLOW
+ 156|           cell.alignment = { horizontal: 'center', vertical: 'middle' }
+ 157|           cell.font = { bold: true, size: 12 }
+ 158|           cell.border = {
+ 159|             top: { style: 'thin' }, bottom: { style: 'thin' },
+ 160|             left: { style: 'thin' }, right: { style: 'thin' },
+ 161|           }
+ 162|         }
+ 163|       })
+ 164|     })
+ 165|     // 險倬鹸縺励◆遽・峇繧貞ｮ滄圀縺ｫ邨仙粋縺吶ｋ
+ 166|     for (const [row, c1, c2] of merges) {
+ 167|       try { ws.mergeCells(row, c1, row, c2) } catch { /* 譌｢縺ｫ邨仙粋貂医∩縺ｪ繧臥┌隕・*/ }
+ 168|     }
+ 169|     ws.views = [{ state: 'frozen', ySplit: 1 }]
+ 170|   }
+ 171| 

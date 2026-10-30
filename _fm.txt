@@ -1,0 +1,10 @@
+﻿  blockRows(/諡・ｽ楢・ｰ丞錐/)                       1邂・園
+  blockValues(/螂醍ｴ・・錐/)                      1邂・園
+  blockValues(/^.{0,2}菴乗園$/)                1邂・園
+  blockValues(/隲区ｱよ嶌騾∽ｻ伜・/)                    1邂・園
+  blockValues(/險ｭ鄂ｮ蜈域命險ｭ蜷咲ｧｰ/)                   1邂・園
+  blockValues(/險ｭ鄂ｮ蜈域命險ｭ菴乗園/)                   1邂・園
+  labeledValue(/諡・ｽ楢・ｰ丞錐/                     2邂・園
+  labeledValue(/^.{0,2}騾｣邨｡蜈・/               4邂・園
+  blockRows(/邏榊刀蟶梧悍譌･/)                       1邂・園
+patched OK

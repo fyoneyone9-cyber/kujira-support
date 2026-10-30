@@ -1,0 +1,65 @@
+﻿ 1280|                   const hearingSkip = it.dashboard_todos?.['hearing_sheet_url_skip']
+ 1281| 
+ 1282|                   // 讖滓攝縺九ｉ蠢・ｦ√↑繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医ｒ蛻､螳・
+ 1283|                   const equip = it.equipment || []
+ 1284|                   const LOCK_PAT2  = /繧ｹ繝槭・繝医Ο繝・け|smart.?lock|remotelock|ttlock|epic|bitlock|qrio|akerun|igloohome|lock/i
+ 1285|                   const CARD_PAT   = /繧ｫ繝ｼ繝峨く繝ｼ|card.?key/i
+ 1286|                   const CYLI_PAT   = /繧ｷ繝ｪ繝ｳ繝繝ｼ|cylinder/i
+ 1287|                   const PMS_PAT2   = /pms|airhost|suitebook|temairazu|innkeeper|staypro|螳ｿ豕掛繝帙ユ繝ｫ邂｡逅・i
+ 1288|                   const TABLET_PAT = /繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ|room.?tablet/i
+ 1289|                   const PRINTER_PAT= /繝励Μ繝ｳ繧ｿ|printer/i
+ 1290|                   const hasLock2   = equip.some(e => LOCK_PAT2.test(e.name || '') || LOCK_PAT2.test(e.value || ''))
+ 1291|                   const hasCard    = equip.some(e => CARD_PAT.test(e.name || '')  || CARD_PAT.test(e.value || ''))
+ 1292|                   const hasCyli    = equip.some(e => CYLI_PAT.test(e.name || '')  || CYLI_PAT.test(e.value || ''))
+ 1293|                   const hasPms2    = equip.some(e => PMS_PAT2.test(e.name || '')  || PMS_PAT2.test(e.value || ''))
+ 1294|                   const hasP400    = equip.some(e => /p400/i.test(e.name || '')   || /p400/i.test(e.value || ''))
+ 1295|                   const hasPaycube = equip.some(e => /paycube|pay.?cube/i.test(e.name || '') || /paycube|pay.?cube/i.test(e.value || ''))
+ 1296|                   const hasPaypay  = equip.some(e => /paypay|pay.?pay/i.test(e.name || '')  || /paypay|pay.?pay/i.test(e.value || ''))
+ 1297|                   const hasTablet  = equip.some(e => TABLET_PAT.test(e.name || '') || TABLET_PAT.test(e.value || ''))
+ 1298|                   const hasPrinter = equip.some(e => PRINTER_PAT.test(e.name || '') || PRINTER_PAT.test(e.value || ''))
+ 1299| 
+ 1300|                   const TMPL = 'https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit'
+ 1301|                   const hearingSheets: { label: string; reason: string }[] = [
+ 1302|                     { label: '蠢・育｢ｺ隱坂蔵',       reason: '蜈ｨ迚ｩ莉ｶ蠢・・ },
+ 1303|                     { label: '蠢・育｢ｺ隱坂贈',       reason: '蜈ｨ迚ｩ莉ｶ蠢・茨ｼ亥渕譛ｬ諠・ｱ・・ },
+ 1304|                     { label: '蠢・育｢ｺ隱坂造',       reason: '蜈ｨ迚ｩ莉ｶ蠢・茨ｼ磯Κ螻区ュ蝣ｱ・・ },
+ 1305|                     ...(hasPms2    ? [{ label: 'PMS',              reason: 'PMS騾｣謳ｺ縺ゅｊ' }] : []),
+ 1306|                     ...(hasLock2   ? [{ label: '繧ｹ繝槭・繝医Ο繝・け竭', reason: '繧ｹ繝槭・繝医Ο繝・け縺ゅｊ' },
+ 1307|                                      { label: '繧ｹ繝槭・繝医Ο繝・け竭｡', reason: '繧ｹ繝槭・繝医Ο繝・け縺ゅｊ' },
+ 1308|                                      { label: '繧ｹ繝槭・繝医Ο繝・け竭｢', reason: '繧ｹ繝槭・繝医Ο繝・け縺ゅｊ' }] : []),
+ 1309|                     ...(hasCard    ? [{ label: '繧ｫ繝ｼ繝峨く繝ｼ',       reason: '繧ｫ繝ｼ繝峨く繝ｼ縺ゅｊ' }] : []),
+ 1310|                     ...(hasCyli    ? [{ label: '繧ｷ繝ｪ繝ｳ繝繝ｼ骭',     reason: '繧ｷ繝ｪ繝ｳ繝繝ｼ骭縺ゅｊ' }] : []),
+ 1311|                     ...(hasP400    ? [{ label: '遶ｯ譛ｫ繧ｫ繝ｼ繝画ｱｺ貂・,   reason: 'P400縺ゅｊ' }] : []),
+ 1312|                     ...(hasPaycube ? [{ label: '迴ｾ驥第ｱｺ貂・,         reason: 'PayCube縺ゅｊ' }] : []),
+ 1313|                     ...(hasPaypay  ? [{ label: '繧ｹ繝槭・繧ｫ繝ｼ繝画ｱｺ貂・, reason: 'PayPay縺ゅｊ' }] : []),
+ 1314|                     ...(hasTablet  ? [{ label: '繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ', reason: '繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ縺ゅｊ' }] : []),
+ 1315|                     ...(hasPrinter ? [{ label: '繝励Μ繝ｳ繧ｿ',         reason: '繝励Μ繝ｳ繧ｿ縺ゅｊ' }] : []),
+ 1316|                     { label: '莠句燕繝√ぉ繝・け繧､繝ｳ', reason: '蜈ｨ迚ｩ莉ｶ謗ｨ螂ｨ' },
+ 1317|                     ...(true       ? [{ label: '繝輔Ο繝ｳ繝医メ繧ｧ繝・け繧､繝ｳ', reason: '譛我ｺｺ蟇ｾ蠢懊′縺ゅｋ蝣ｴ蜷・ }] : []),
+ 1318|                   ]
+ 1319| 
+ 1320|                   // 譌｢遏･諠・ｱ・医き繝ｼ繝峨↓蜈･蜉帶ｸ医∩縺ｮ諠・ｱ・・
+ 1321|                   const knownInfo: { label: string; value: string }[] = [
+ 1322|                     { label: '莨夂､ｾ蜷・,     value: it.client_name || '' },
+ 1323|                     { label: '菴乗園',       value: it.install_address || '' },
+ 1324|                     { label: '諡・ｽ楢・,     value: it.contact_name || '' },
+ 1325|                     { label: '陬ｽ蜩・,       value: equip.map(e => [e.name, e.value].filter(Boolean).join(' ')).join('縲・) },
+ 1326|                     { label: 'P400謨ｰ',     value: hasP400 ? (equip.find(e => /p400/i.test(e.name || ''))?.value || '荳肴・') : '' },
+ 1327|                     { label: 'PayCube謨ｰ',  value: hasPaycube ? (equip.find(e => /paycube/i.test(e.name || ''))?.value || '荳肴・') : '' },
+ 1328|                   ].filter(i => i.value)
+ 1329| 
+ 1330|                   return (
+ 1331|                     <div id={`integ-sec-${it.id}`} className="rounded-lg border border-purple-800/40 bg-purple-950/20 border-l-4 border-l-purple-500 p-3 space-y-2 transition-all">
+ 1332|                       <p className="text-purple-300 font-bold text-sm">迫 繧ｷ繧ｹ繝・Β騾｣謳ｺ迥ｶ豕・/p>
+ 1333|                       {pmsEquip  && <IntegRow label={joinLabel(pmsEquip)}  field="pms_linked"       val={it.pms_linked ?? null} />}
+ 1334|                       {lockEquip && <IntegRow label={joinLabel(lockEquip)} field="smartlock_linked" val={it.smartlock_linked ?? null} />}
+ 1335| 
+ 1336|                       {/* 繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医リ繝難ｼ域釜繧翫◆縺溘∩・・*/}
+ 1337|                       <div className={`rounded-lg border ${hearingUrl ? 'border-purple-800' : 'border-slate-600'}`}>
+ 1338|                         <div
+ 1339|                           role="button"
+ 1340|                           onClick={() => toggleSection(`hearing_${it.id}`)}
+ 1341|                           className={`flex items-center gap-2 px-3 py-2 cursor-pointer rounded-lg ${hearingUrl ? 'bg-purple-950/40 hover:bg-purple-950/60' : 'bg-slate-800/50 hover:bg-slate-800'}`}
+ 1342|                         >
+ 1343|                           <span className="text-sm text-slate-300 font-bold">搭 繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝・/span>
+ 1344|                           {hearingUrl

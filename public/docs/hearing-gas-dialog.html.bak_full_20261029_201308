@@ -1,0 +1,127 @@
+<!--
+  ヒアリングシート コピー作成ダイアログ
+  --------------------------------------------------
+  Apps Script のファイル名を「dialog」にして貼り付けてください。
+  （Apps Script エディタ左の「＋」→ HTML → 名前を dialog にする）
+
+  [V2 2026-10-29] 案件情報を貼り付けると機材チェックが自動で入るようにした。
+                  ダッシュボードの「📋 設定をコピー」で得た文字列を貼るだけ。
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+ body{font-family:"Helvetica Neue",Arial,"Hiragino Sans","Meiryo",sans-serif;font-size:14px;padding:14px;color:#222}
+ h3{margin:0 0 10px;font-size:16px}
+ label{display:block;margin:7px 0 2px;font-weight:bold;font-size:13px;color:#555}
+ input[type=text],textarea{width:100%;padding:7px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;font-size:13px}
+ textarea{height:54px;font-family:monospace;font-size:11px}
+ .chk{display:flex;align-items:center;gap:7px;padding:4px 0}
+ .chk label{margin:0;font-weight:normal;font-size:14px}
+ .box{border:1px solid #ddd;border-radius:6px;padding:9px;margin-top:9px;max-height:230px;overflow:auto}
+ button{margin-top:12px;width:100%;padding:11px;background:#0b8043;color:#fff;border:0;border-radius:5px;font-weight:bold;font-size:15px;cursor:pointer}
+ button:disabled{background:#999}
+ #paste{background:#1a73e8;margin-top:6px;padding:8px;font-size:13px}
+ #msg{margin-top:10px;font-size:13px;line-height:1.6}
+ a{color:#1a73e8}
+ .hint{font-size:12px;color:#888;margin-top:3px}
+</style>
+</head>
+<body>
+<h3>必要シートだけコピー作成</h3>
+
+<label>① ダッシュボードの「📋 設定をコピー」した内容を貼り付け</label>
+<textarea id="json" placeholder='ここに貼り付けると、下の項目が自動で埋まります'></textarea>
+<button id="paste" onclick="applyJson()">⬇ 貼り付けた内容を反映</button>
+<div class="hint">※ 手入力したい場合はこの欄を空のまま、下を直接入力してください</div>
+
+<label>会社名</label>
+<input type="text" id="client" placeholder="株式会社ビジョン">
+<label>物件名・住所</label>
+<input type="text" id="property" placeholder="〒656-2401 兵庫県淡路市岩屋2604">
+<label>ご担当者</label>
+<input type="text" id="contact" placeholder="石川様">
+<label>電話番号</label>
+<input type="text" id="tel" placeholder="0799-00-0000">
+
+<div class="box">
+  <div style="font-weight:bold;font-size:13px;margin-bottom:5px">導入する機材（チェックしたシートを残します）</div>
+  <div class="chk"><input type="checkbox" id="pms"><label for="pms">PMS</label></div>
+  <div class="chk"><input type="checkbox" id="smartlock"><label for="smartlock">スマートロック（①②）</label></div>
+  <div class="chk"><input type="checkbox" id="cardkey"><label for="cardkey">カードキー</label></div>
+  <div class="chk"><input type="checkbox" id="cylinder"><label for="cylinder">シリンダー錠</label></div>
+  <div class="chk"><input type="checkbox" id="cash"><label for="cash">現金決済</label></div>
+  <div class="chk"><input type="checkbox" id="p400"><label for="p400">端末カード決済（P400）</label></div>
+  <div class="chk"><input type="checkbox" id="sumaho"><label for="sumaho">スマホカード決済</label></div>
+  <div class="chk"><input type="checkbox" id="paypay"><label for="paypay">PayPay決済</label></div>
+  <div class="chk"><input type="checkbox" id="printer"><label for="printer">プリンタ</label></div>
+  <div class="chk"><input type="checkbox" id="roomtablet"><label for="roomtablet">ルームタブレット</label></div>
+  <div class="chk"><input type="checkbox" id="precheckin" checked><label for="precheckin">事前チェックイン</label></div>
+  <div class="chk"><input type="checkbox" id="frontci"><label for="frontci">フロントチェックイン</label></div>
+  <div class="hint">※ 必須確認①②③は常に残ります</div>
+</div>
+
+<button id="go" onclick="run()">コピーを作成</button>
+<div id="msg"></div>
+
+<script>
+var KEYS = ['pms','smartlock','cardkey','cylinder','cash','p400','sumaho','paypay','printer','roomtablet','precheckin','frontci'];
+
+/** ダッシュボードからコピーしたJSONを反映する */
+function applyJson(){
+  var raw = document.getElementById('json').value.trim();
+  if(!raw){ alert('貼り付け欄が空です'); return; }
+  var d;
+  try { d = JSON.parse(raw); }
+  catch(e){ alert('形式が正しくありません。ダッシュボードの「📋 設定をコピー」で取得した内容を貼り付けてください'); return; }
+
+  if(d.client)   document.getElementById('client').value = d.client;
+  if(d.property) document.getElementById('property').value = d.property;
+  if(d.contact)  document.getElementById('contact').value = d.contact;
+  if(d.tel)      document.getElementById('tel').value = d.tel;
+
+  var on = [];
+  KEYS.forEach(function(k){
+    var v = !!(d.equips && d.equips.indexOf(k) >= 0);
+    document.getElementById(k).checked = v;
+    if(v) on.push(k);
+  });
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#0b8043">✅ 反映しました</b>（機材 ' + on.length + '件にチェック）';
+}
+
+function run(){
+  var btn = document.getElementById('go');
+  btn.disabled = true; btn.textContent = '作成中…';
+  document.getElementById('msg').innerHTML = '';
+  var equips = KEYS.filter(function(k){ return document.getElementById(k).checked; });
+  google.script.run
+    .withSuccessHandler(done)
+    .withFailureHandler(fail)
+    .createCopy({
+      client:   document.getElementById('client').value,
+      property: document.getElementById('property').value,
+      contact:  document.getElementById('contact').value,
+      tel:      document.getElementById('tel').value,
+      equips:   equips
+    });
+}
+function done(r){
+  var btn = document.getElementById('go');
+  btn.disabled = false; btn.textContent = 'コピーを作成';
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#0b8043">✅ 作成しました</b><br>' +
+    '残したシート: ' + r.kept.length + '枚<br>' +
+    '削除したシート: ' + r.removed.length + '枚<br>' +
+    '<a href="' + r.url + '" target="_blank">▶ 作成したスプレッドシートを開く</a>';
+}
+function fail(e){
+  var btn = document.getElementById('go');
+  btn.disabled = false; btn.textContent = 'コピーを作成';
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#c00">❌ 失敗: ' + e.message + '</b>';
+}
+</script>
+</body>
+</html>

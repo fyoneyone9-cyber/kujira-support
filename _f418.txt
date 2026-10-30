@@ -1,0 +1,5 @@
+﻿=== 謠冗判縺ｫ逶ｴ邨舌＠縺昴≧縺ｪ邂・園・・SX縺ｮ { } 蜀・ｼ・==
+  762| [window.] <button onClick={() => window.location.reload()} className="px-3 py-1 text-sm font-bold rounded-lg bg-slate-700 hover:bg-slate-500 text-whit
+ 1042| [window.] <button onClick={() => { if (window.confirm('縲檎ｴ榊刀螳御ｺ・阪ｒ隗｣髯､縺励※騾ｲ陦御ｸｭ縺ｫ謌ｻ縺励∪縺吶°・・)) patch(it.id, { status: 'active', acknowledged_at: null }) }}
+
+=== useState 縺ｮ蛻晄悄蛟､縺ｫ蜊ｱ髯ｺ縺ｪ蛟､・・SR縺ｨCSR縺ｧ螟峨ｏ繧具ｼ・==

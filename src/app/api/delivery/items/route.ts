@@ -15,7 +15,9 @@ export async function GET(req: NextRequest) {
     .order('delivery_due_date', { ascending: true })
 
   if (mode === 'alert') {
-    query = query.eq('status', 'active')
+    query = query
+      .neq('status', 'done')
+      .not('missing_in_last_import', 'eq', true)
   }
 
   const { data, error } = await query

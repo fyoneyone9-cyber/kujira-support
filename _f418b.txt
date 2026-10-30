@@ -1,0 +1,23 @@
+﻿=== 譎ょ綾縺九ｉ邂怜・縺輔ｌ繧句､画焚 ===
+  L1254  today
+  L301   d
+  L485   now
+  L494   now2
+  L657   started
+  L1248  days21
+  L1934  today2
+
+=== 謠冗判縺ｫ菴ｿ繧上ｌ縺ｦ縺・ｋ邂・園 ===
+L302   [d] if (d < 0) return <span className="text-xs text-red-400 font-bold animate-pulse">{-d}譌･雜・℃!</span>
+L303   [d] if (d <= 5) return <span className="text-xs text-orange-400 font-bold">谿宮d}譌･</span>
+L1266  [today] title={`縲・{today} ${q}縲阪ｒ霑ｽ險倭}>+{q}</button>
+L1301  [days21] {val === null && warn && <span className="text-xs text-orange-300 animate-pulse font-bold">笞・・谿宮days21}譌･ 窶・騾｣謳ｺ險ｭ螳壹ｒ諤･縺・〒縺上□縺輔＞</span>}
+L1303  [days21] {val === null && days21 !== null && days21 > 30 && <span className="text-xs text-slate-500">谿宮days21}譌･・・0譌･蜑阪°繧峨い繝ｩ繝ｼ繝茨ｼ・/span>}
+
+=== daysUntil / level 遲峨・險育ｮ鈴未謨ｰ ===
+L62    const days = daysLeft(dueDate)
+L142   const wDays = Math.ceil((new Date(wDeadline).getTime() - today.getTime()) / 86400000)
+L489   const diff = (new Date(i.delivery_due_date).getTime() - now) / (1000 * 60 * 60 * 24)
+L499   const dueDiff = i.delivery_due_date ? Math.ceil((new Date(i.delivery_due_date).getTime() - now2) / 86400000) : null
+L504   const wDiff = Math.ceil((new Date(i.work_date).getTime() - now2) / 86400000)
+L1248  const days21 = it.delivery_due_date ? Math.ceil((new Date(it.delivery_due_date).getTime() - new Date().setHours(0,0,0,0)) / 864000

@@ -1,0 +1,40 @@
+-- [MANUAL_EQUIP_STATUS_V1 2026-10-29]
+-- 症状: CSVを再取込すると、ダッシュボードで手動設定した P400 / PayCube / VEGA3000 の
+--       手配状況が「未発注」に巻き戻る。
+--
+-- 原因: 012 の方針では
+--         ・CSV由来の列           = 毎回CSVで上書きする
+--         ・ダッシュボード専用の列 = importが一切触らない
+--       と分離していたが、011 で追加した p400_status / paycube_status / vega3000_status は
+--       「CSV由来の列」であるにもかかわらず、UI(delivery/page.tsx)がそこへ手動入力を
+--       書き込んでいた。import-csv は毎回この列をCSV値(空欄含む)で upsert するため、
+--       手動で押した「発注済み」等が空に潰されて「未発注」表示に戻っていた。
+--
+-- 対策: 手動入力の置き場所を専用カラムに分離する。
+--       表示は COALESCE(手動, CSV) 相当で「手動があれば手動を優先」。
+--       import は manual_* を一切触らないので再取込しても保持される。
+alter table delivery_items add column if not exists p400_status_manual text;
+alter table delivery_items add column if not exists paycube_status_manual text;
+alter table delivery_items add column if not exists vega3000_status_manual text;
+
+-- 既存データの救済:
+-- 現時点で p400_status 等に入っている値は「CSV値」と「手動で入れた値」が混在している。
+-- どちらか判別できないが、CSV再取込のたびに失われるのは手動値だけなので、
+-- 現在値を manual 側にもコピーしておけば、次回取込での消失を防げる(CSV値は上書きされ続ける)。
+update delivery_items
+   set p400_status_manual = p400_status
+ where p400_status is not null
+   and p400_status <> ''
+   and p400_status_manual is null;
+
+update delivery_items
+   set paycube_status_manual = paycube_status
+ where paycube_status is not null
+   and paycube_status <> ''
+   and paycube_status_manual is null;
+
+update delivery_items
+   set vega3000_status_manual = vega3000_status
+ where vega3000_status is not null
+   and vega3000_status <> ''
+   and vega3000_status_manual is null;

@@ -1,0 +1,18 @@
+﻿files: ['蟆主・謾ｯ謠ｴ・壹Γ繝ｼ繝ｫ繝・Φ繝励Ξ繝ｼ繝・- PayPay蛻ｩ逕ｨ逕ｳ隲・csv']
+enc: utf-8-sig
+rows=14 cols=12
+
+  1| A=逶ｮ谺｡縺ｸ謌ｻ繧・; J=PayPay諡・ｽ楢・; K=TO:螟ｩ譏取ｧ・; L=kenta.temmyo@paypay-corp.co.jp
+  2| A=菴ｿ逕ｨ逶ｮ逧・; B=PayPay遉ｾ縺ｸ蛻ｩ逕ｨ逕ｳ隲・; K=CC:荵・ｲ｡讒・; L=mao.hisaoka@paypay-corp.co.jp
+  3| A=騾∽ｿ｡蜈・; B=support@and-iot.jp
+  4| A=TO ; B=kenta.temmyo@paypay-corp.co.jp ; E=PayPay縺ｮ譁ｰ隕冗筏隲・蠕捺擂荵・ｲ｡讒倥↓繝｡繝ｼ繝ｫ縺励※縺・◆縺悟､ｩ譏取ｧ倥↓騾｣邨｡縺ｫ螟画峩縺ｨ縺ｪ繧翫∪縺励◆縲・
+  5| A=CC ; B=蟆主・謾ｯ謠ｴ繝｡繝ｳ繝舌・蜈ｨ蜩｡ ; D=shohei_noda@device-agency.co.jp
+  6| B=2024/9譛域凾轤ｹ ; D=humitaka_yoneyama@device-agency.co.jp
+  7| D=yoshie_kikuti@device-agency.co.jp
+  8| B=蝟ｶ讌ｭ諡・ｽ・; D=tadashi_hashimoto@kujira.co.jp
+  9| B=譁ｽ蟾･雋ｬ莉ｻ閠・; D=izuoka@kujira.co.jp
+ 10| B=PayPay諡・ｽ楢・; D=mao.hisaoka@paypay-corp.co.jp ; F=竊侵EW縲CC縺ｫPayPay諡・ｽ楢・ｹ・ｲ｡讒倥ｂ蜈･繧後※縺上□縺輔＞
+ 11| (遨ｺ陦・
+ 12| A=莉ｶ蜷・; B=PayPayAPI謗･邯壼ｯｾ雎｡蠎苓・霑ｽ蜉縺ｮ縺比ｾ晞ｼ・医せ繝槭・繝医メ繧ｧ繝・け繧､繝ｳ繧ｷ繧ｹ繝・Β・壹・・・ｼ・窶ｻ縲・・・ｼ晉黄莉ｶ蜷阪ｒ險伜・)
+ 13| A=蜀・ｮｹ ; B=PayPay譬ｪ蠑丈ｼ夂､ｾ 螟ｩ譏取ｧ禄n\n縺・▽繧ゅ♀荳冶ｩｱ縺ｫ縺ｪ縺｣縺ｦ縺翫ｊ縺ｾ縺吶・n譬ｪ蠑丈ｼ夂､ｾ繝・ヰ繧､繧ｹ繧ｨ繝ｼ繧ｸ繧ｧ繝ｳ繧ｷ繝ｼ縺ｮ笳鞘酪縺ｧ縺吶・n\n
+ 14| B=窶ｻ蜀・ｮｹ縺ｫ隱､繧翫↑縺代ｌ縺ｰ譁・ｫ縺ｯ縺碑・逕ｱ縺ｫ繧｢繝ｬ繝ｳ繧ｸ縺励※縺上□縺輔＞

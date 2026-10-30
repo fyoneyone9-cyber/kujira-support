@@ -1,0 +1,11 @@
+﻿python.exe : Traceback (most recent call last):
+発生場所 行:1 文字:36
++ ... ra-support; & "C:\Users\fyone\anaconda3\python.exe" -X utf8 _pp_not_n ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\GensparkClaw\kujira-support\_pp_not_needed.py", line 24, in <module>
+    assert s.count(OLD) == 1, "anchor1: %d" % s.count(OLD)
+           ^^^^^^^^^^^^^^^^^
+AssertionError: anchor1: 0

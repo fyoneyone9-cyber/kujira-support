@@ -1,0 +1,4 @@
+﻿backup: C:\GensparkClaw\kujira-support\public\docs\hearing-gas-dialog.html.bak_idfix_20261029_202641
+checkbox id renamed: 12
+patched OK
+驥崎､㌍d: 縺ｪ縺・竊・豁｣蟶ｸ

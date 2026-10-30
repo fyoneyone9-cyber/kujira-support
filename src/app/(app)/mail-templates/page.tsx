@@ -41,7 +41,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   return (
     <button
       onClick={handleCopy}
-      className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${
+      className={`px-3 py-1 text-sm rounded-lg font-medium transition-colors ${
         copied
           ? 'bg-green-600 text-white'
           : 'bg-slate-600 hover:bg-slate-500 text-slate-200'
@@ -72,7 +72,7 @@ function TemplateModal({ template, onClose }: { template: MailTemplate; onClose:
             </div>
             <h2 className="text-xl font-bold text-white">{template.name}</h2>
             {template.purpose && (
-              <p className="text-slate-400 text-sm mt-1">{template.purpose}</p>
+              <p className="text-slate-400 text-base mt-1">{template.purpose}</p>
             )}
           </div>
           <button
@@ -87,7 +87,7 @@ function TemplateModal({ template, onClose }: { template: MailTemplate; onClose:
         <div className="p-6 space-y-5">
           {/* 宛先情報 */}
           {(template.to_address || template.cc_address) && (
-            <div className="bg-slate-700/50 rounded-xl p-4 space-y-2 text-sm">
+            <div className="bg-slate-700/50 rounded-xl p-4 space-y-2 text-base">
               {template.to_address && (
                 <div className="flex gap-2">
                   <span className="text-slate-400 w-6 shrink-0">TO</span>
@@ -107,11 +107,11 @@ function TemplateModal({ template, onClose }: { template: MailTemplate; onClose:
           {template.subject && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">件名</p>
+                <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">件名</p>
                 <CopyButton text={template.subject} label="件名" />
               </div>
               <div className="bg-slate-700/50 rounded-xl px-4 py-3">
-                <p className="text-white text-sm">{template.subject}</p>
+                <p className="text-white text-base">{template.subject}</p>
               </div>
             </div>
           )}
@@ -120,11 +120,11 @@ function TemplateModal({ template, onClose }: { template: MailTemplate; onClose:
           {template.body && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">本文</p>
+                <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">本文</p>
                 <CopyButton text={template.body} label="本文" />
               </div>
               <div className="bg-slate-900 rounded-xl px-4 py-3 border border-slate-700">
-                <pre className="text-sm text-slate-200 whitespace-pre-wrap font-sans leading-relaxed">
+                <pre className="text-base text-slate-200 whitespace-pre-wrap font-sans leading-relaxed">
                   {template.body}
                 </pre>
               </div>
@@ -134,15 +134,15 @@ function TemplateModal({ template, onClose }: { template: MailTemplate; onClose:
           {/* 注意事項 */}
           {template.notes && (
             <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-xl px-4 py-3">
-              <p className="text-xs font-medium text-yellow-400 mb-1">⚠️ 注意事項</p>
-              <p className="text-yellow-200 text-sm whitespace-pre-wrap">{template.notes}</p>
+              <p className="text-sm font-medium text-yellow-400 mb-1">⚠️ 注意事項</p>
+              <p className="text-yellow-200 text-base whitespace-pre-wrap">{template.notes}</p>
             </div>
           )}
 
           {!template.subject && !template.body && (
             <div className="text-center py-8">
               <p className="text-4xl mb-2">📝</p>
-              <p className="text-slate-400 text-sm">本文は別途 Mail Dealer のテンプレートを参照してください</p>
+              <p className="text-slate-400 text-base">本文は別途 Mail Dealer のテンプレートを参照してください</p>
             </div>
           )}
         </div>
@@ -193,7 +193,7 @@ export default function MailTemplatesPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">📧 メールテンプレート</h1>
-        <p className="text-slate-400 text-sm mt-1">よく使うメールの定型文・テンプレート集</p>
+        <p className="text-slate-400 text-base mt-1">よく使うメールの定型文・テンプレート集</p>
       </div>
 
       {/* Search */}
@@ -202,7 +202,7 @@ export default function MailTemplatesPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="テンプレート名・用途・本文で検索..."
-          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
         />
       </div>
 
@@ -210,7 +210,7 @@ export default function MailTemplatesPage() {
       <div className="flex flex-wrap gap-2 mb-6">
         <button
           onClick={() => setSelectedCategory('all')}
-          className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-xl text-base font-medium transition-colors ${
             selectedCategory === 'all'
               ? 'bg-blue-600 text-white'
               : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
@@ -222,7 +222,7 @@ export default function MailTemplatesPage() {
           <button
             key={cat}
             onClick={() => setSelectedCategory(selectedCategory === cat ? 'all' : cat)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl text-base font-medium transition-colors ${
               selectedCategory === cat
                 ? 'bg-blue-600 text-white'
                 : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
@@ -245,7 +245,7 @@ export default function MailTemplatesPage() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="mt-3 text-sm text-blue-400 hover:text-blue-300"
+              className="mt-3 text-base text-blue-400 hover:text-blue-300"
             >
               検索をクリア
             </button>
@@ -259,7 +259,7 @@ export default function MailTemplatesPage() {
             if (!items || items.length === 0) return null
             return (
               <div key={cat}>
-                <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <h2 className="text-base font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                   <span>{CATEGORY_ICONS[cat] || '📧'}</span>
                   {cat}
                   <span className="text-slate-600 font-normal normal-case">({items.length}件)</span>
@@ -271,14 +271,14 @@ export default function MailTemplatesPage() {
                       onClick={() => setSelectedTemplate(t)}
                       className="text-left bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl p-4 transition-colors group"
                     >
-                      <p className="font-medium text-white group-hover:text-blue-300 transition-colors text-sm">
+                      <p className="font-medium text-white group-hover:text-blue-300 transition-colors text-base">
                         {t.name}
                       </p>
                       {t.purpose && (
-                        <p className="text-slate-500 text-xs mt-1 line-clamp-1">{t.purpose}</p>
+                        <p className="text-slate-500 text-sm mt-1 line-clamp-1">{t.purpose}</p>
                       )}
                       {t.subject && (
-                        <p className="text-slate-400 text-xs mt-2 line-clamp-1">
+                        <p className="text-slate-400 text-sm mt-2 line-clamp-1">
                           <span className="text-slate-600">件名：</span>{t.subject}
                         </p>
                       )}
@@ -293,7 +293,7 @@ export default function MailTemplatesPage() {
             const items = grouped[cat]
             return (
               <div key={cat}>
-                <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                <h2 className="text-base font-semibold text-slate-400 uppercase tracking-wider mb-3">
                   {CATEGORY_ICONS[cat] || '📧'} {cat}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -303,11 +303,11 @@ export default function MailTemplatesPage() {
                       onClick={() => setSelectedTemplate(t)}
                       className="text-left bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl p-4 transition-colors group"
                     >
-                      <p className="font-medium text-white group-hover:text-blue-300 transition-colors text-sm">
+                      <p className="font-medium text-white group-hover:text-blue-300 transition-colors text-base">
                         {t.name}
                       </p>
                       {t.purpose && (
-                        <p className="text-slate-500 text-xs mt-1 line-clamp-1">{t.purpose}</p>
+                        <p className="text-slate-500 text-sm mt-1 line-clamp-1">{t.purpose}</p>
                       )}
                     </button>
                   ))}
@@ -328,14 +328,14 @@ export default function MailTemplatesPage() {
               <div className="flex items-start gap-2">
                 <span className="text-lg shrink-0">{CATEGORY_ICONS[t.category] || '📧'}</span>
                 <div>
-                  <p className="font-medium text-white group-hover:text-blue-300 transition-colors text-sm">
+                  <p className="font-medium text-white group-hover:text-blue-300 transition-colors text-base">
                     {t.name}
                   </p>
-                  <span className="text-xs text-blue-400 bg-blue-400/10 px-1.5 py-0.5 rounded mt-1 inline-block">
+                  <span className="text-sm text-blue-400 bg-blue-400/10 px-1.5 py-0.5 rounded mt-1 inline-block">
                     {t.category}
                   </span>
                   {t.purpose && (
-                    <p className="text-slate-500 text-xs mt-1 line-clamp-1">{t.purpose}</p>
+                    <p className="text-slate-500 text-sm mt-1 line-clamp-1">{t.purpose}</p>
                   )}
                 </div>
               </div>

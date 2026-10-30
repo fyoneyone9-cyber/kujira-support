@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy": "powershell -ExecutionPolicy Bypass -File ./deploy.ps1",
+    "verify": "powershell -ExecutionPolicy Bypass -File ./verify-assets.ps1"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
@@ -25,7 +27,7 @@
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "^15.5.25",
-    "postcss": "^8",
+    "postcss": "^8.4.31",
     "tailwindcss": "^3.4.1",
     "typescript": "5.8.2"
   }

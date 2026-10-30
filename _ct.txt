@@ -1,0 +1,13 @@
+﻿莉ｶ謨ｰ: 400
+
+蜃ｺ迴ｾ蝗樊焚:
+  繧ｿ繝悶Ξ繝・ヨ        74
+  Surface      21
+  surface      15
+  繝励Μ繝ｳ繧ｿ         10
+  蜊謎ｸ・          1
+
+--- equipment 縺ｮ繧ｵ繝ｳ繝励Ν3莉ｶ ---
+ 譬ｪ蠑丈ｼ夂､ｾ繝薙ず繝ｧ繝ｳ: [{"name":"PMS","value":"suitebook"},{"name":"繧ｹ繝槭・繝医Ο繝・け","value":"EPIC"},{"name":"繝代せ繝昴・繝医Μ繝ｼ繝繝ｼ","value":"1"},{"name":"Surface逕ｨ繧ｹ繧ｿ繝ｳ繝・,"value":"1"}]
+ 譬ｪ蠑丈ｼ夂､ｾ繝｡繝ｼ繧ｫ繝ｼ繧ｺ: [{"name":"PayCube","value":"2"},{"name":"P400","value":"2"}]
+ 譬ｪ蠑丈ｼ夂､ｾ繝偵Ν繝医ャ繝励ヱ繝ｼ繝医リ繝ｼ繧ｺ: [{"name":"PMS","value":"Staysee"},{"name":"PayCube","value":"1"},{"name":"P400","value":"2"}]

@@ -1,0 +1,82 @@
+﻿function createCopy(p) {
+  var src = SpreadsheetApp.getActiveSpreadsheet();
+
+  // 谿九☆繧ｷ繝ｼ繝亥錐繧呈ｱｺ繧√ｋ
+  var keep = {};
+  ALWAYS.forEach(function (n) { keep[n] = true; });
+  (p.equips || []).forEach(function (k) {
+    (EQUIP_SHEETS[k] || []).forEach(function (n) { keep[n] = true; });
+  });
+
+  // 髮帛ｽ｢繧剃ｸｸ縺斐→繧ｳ繝斐・・域嶌蠑上・邨仙粋繝ｻ濶ｲ縺後◎縺ｮ縺ｾ縺ｾ谿九ｋ・・
+  var name = '繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝・' + (p.client || '') + '_' +
+    Utilities.formatDate(new Date(), 'JST', 'yyyyMMdd');
+  var copy = src.copy(name);
+
+  // 荳崎ｦ√す繝ｼ繝医ｒ蜑企勁
+  // [V15] deleteSheet() 繧・譫壹★縺､蜻ｼ縺ｶ縺ｨ蠕蠕ｩ縺悟､壹￥縺ｦ髱槫ｸｸ縺ｫ驕・＞・亥ｮ滓ｸｬ165遘抵ｼ峨・
+  //   Sheets API 縺ｮ batchUpdate 縺ｧ**1繝ｪ繧ｯ繧ｨ繧ｹ繝医↓縺ｾ縺ｨ繧√※**蜑企勁縺吶ｋ縲・
+  var removed = [];
+  var all = copy.getSheets();
+  var delIds = [];
+  for (var i = 0; i < all.length; i++) {
+    if (!keep[all[i].getName()]) {
+      delIds.push(all[i].getSheetId());
+      removed.push(all[i].getName());
+    }
+  }
+
+  if (delIds.length) {
+    var ok = false;
+    try {
+      var reqs = delIds.map(function (id) {
+        return { deleteSheet: { sheetId: id } };
+      });
+      var res = UrlFetchApp.fetch(
+        'https://sheets.googleapis.com/v4/spreadsheets/' + copy.getId() + ':batchUpdate',
+        {
+          method: 'post',
+          contentType: 'application/json',
+          headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+          payload: JSON.stringify({ requests: reqs }),
+          muteHttpExceptions: true
+        });
+      ok = (res.getResponseCode() === 200);
+      if (!ok) Logger.log('batchUpdate failed: ' + res.getContentText());
+    } catch (e) {
+      Logger.log('batchUpdate error: ' + e);
+    }
+
+    // 荳諡ｬ蜑企勁縺御ｽｿ縺医↑縺・腸蠅・〒縺ｯ蠕捺擂譁ｹ蠑上↓繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ
+    if (!ok) {
+      removed = [];
+      var again = copy.getSheets();
+      for (var j = 0; j < again.length; j++) {
+        if (!keep[again[j].getName()]) {
+          try { removed.push(again[j].getName()); copy.deleteSheet(again[j]); } catch (e2) {}
+        }
+      }
+    }
+  }
+
+  // 譯井ｻｶ諠・ｱ繧定・蜍募・蜉幢ｼ亥・繧ｷ繝ｼ繝茨ｼ・
+  var filled = 0;
+  try { filled = fillInfo(copy, p) || 0; } catch (e) {}
+
+  return {
+    url: copy.getUrl(),
+    name: name,
+    kept: Object.keys(keep).filter(function (n) {
+      return copy.getSheetByName(n) !== null;
+    }),
+    removed: removed,
+    filled: filled
+  };
+}
+
+/**
+ * 蛻・°縺｣縺ｦ縺・ｋ諠・ｱ繧貞・繧ｷ繝ｼ繝医↓譖ｸ縺崎ｾｼ繧縲・
+ * 縲碁・岼蜷阪ｒ蜷ｫ繧陦後阪ｒ謗｢縺励√◎縺ｮ陦後・蝗樒ｭ疲ｬ・↓蛟､繧貞・繧後ｋ縲・
+ * 譌｢縺ｫ蛟､縺後≠繧句ｴ蜷医・荳頑嶌縺阪＠縺ｪ縺・・
+ */
+

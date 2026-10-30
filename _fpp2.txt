@@ -1,0 +1,25 @@
+﻿ 1251| 逕ｻ髱｢驕ｷ遘ｻ蝗ｳ
+ 1252| https://drive.google.com/file/d/1D7rtpNwEgKuuOnB1-mjEirG-MPjsxAP9/view
+ 1253| 
+ 1254| 縺雁ｿ吶＠縺・ｸｭ諱舌ｌ蜈･繧翫∪縺吶′縲√ｈ繧阪＠縺上♀鬘倥＞縺励∪縺吶Ａ
+ 1255|                             const TO = 'kenta.temmyo@paypay-corp.co.jp'
+ 1256|                             // [PAYPAY_APPLY_V2 2026-10-29] CC縺ｯ縺薙・3莉ｶ縺ｮ縺ｿ・医Θ繝ｼ繧ｶ繝ｼ謖・ｮ夲ｼ・
+ 1257|                             const CC = ['mao.hisaoka@paypay-corp.co.jp',
+ 1258|                               'tadashi_hashimoto@kujira.co.jp',
+ 1259|                               'support@and-iot.jp'].join(',')
+ 1260|                             return (
+ 1261|                               <div className="mt-1.5 bg-rose-950/30 border border-rose-800/50 rounded px-2 py-1.5 spac
+ 1262|                                 <div className="flex items-center gap-1.5 flex-wrap">
+ 1263|                                   <span className="text-[11px] text-rose-300 font-bold">鐙 PayPay蛻ｩ逕ｨ逕ｳ隲・</span>
+ 1264|                                   <button onClick={() => {
+ 1265|                                     navigator.clipboard.writeText(PP_SUBJECT)
+ 1266|                                       .then(() => alert('笨・莉ｶ蜷阪ｒ繧ｳ繝斐・縺励∪縺励◆')).catch(() => alert('繧ｳ繝斐・螟ｱ謨・))
+ 1267|                                   }} className="text-[11px] px-2 py-0.5 rounded bg-slate-700 hover:bg-blue-700 text-sl
+ 1268|                                     搭 莉ｶ蜷・
+ 1269|                                   </button>
+ 1270|                                   <button onClick={() => {
+ 1271|                                     navigator.clipboard.writeText(PP_BODY)
+ 1272|                                       .then(() => alert('笨・譛ｬ譁・ｒ繧ｳ繝斐・縺励∪縺励◆・域｡井ｻｶ諠・ｱ繧貞ｷｮ縺苓ｾｼ縺ｿ貂医∩・・)).catch(() => alert('繧ｳ繝斐・螟ｱ謨・))
+ 1273|                                   }} className="text-[11px] px-2 py-0.5 rounded bg-blue-700 hover:bg-blue-600 text-whi
+ 1274|                                     搭 譛ｬ譁・
+ 1275|                                   </button>

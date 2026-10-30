@@ -1,0 +1,18 @@
+﻿sheets: 15
+  PMS                  rows=31   maxcol=15
+  PayPay豎ｺ貂・            rows=6    maxcol=11
+  繧ｫ繝ｼ繝峨く繝ｼ                rows=27   maxcol=15
+  繧ｷ繝ｪ繝ｳ繝繝ｼ骭               rows=8    maxcol=12
+  繧ｹ繝槭・繝医Ο繝・け竭             rows=6    maxcol=15
+  繝・う繝ｦ繝ｼ繧ｹ                rows=28   maxcol=11
+  繝励Μ繝ｳ繧ｿ                 rows=16   maxcol=15
+  繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ             rows=23   maxcol=15
+  莠句燕繝√ぉ繝・け繧､繝ｳ             rows=10   maxcol=15
+  蠢・育｢ｺ隱坂蔵                rows=31   maxcol=14
+  蠢・育｢ｺ隱坂贈                rows=56   maxcol=13
+  蠢・育｢ｺ隱坂造                rows=105  maxcol=11
+  迴ｾ驥第ｱｺ貂・                rows=4    maxcol=11
+  遶ｯ譛ｫ繧ｫ繝ｼ繝画ｱｺ貂・             rows=4    maxcol=11
+  陬懷勧驥・                 rows=3    maxcol=13
+
+wrote C:\GensparkClaw\kujira-support\src\lib\hearingSheetDefs.ts

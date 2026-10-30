@@ -1,0 +1,25 @@
+﻿function applyJson(){
+  var raw = document.getElementById('json').value.trim();
+  if(!raw){ alert('雋ｼ繧贋ｻ倥￠谺・′遨ｺ縺ｧ縺・); return; }
+  var d;
+  try { d = JSON.parse(raw); }
+  catch(e){ alert('蠖｢蠑上′豁｣縺励￥縺ゅｊ縺ｾ縺帙ｓ縲ゅム繝・す繝･繝懊・繝峨・縲交沒・險ｭ螳壹ｒ繧ｳ繝斐・縲阪〒蜿門ｾ励＠縺溷・螳ｹ繧定ｲｼ繧贋ｻ倥￠縺ｦ縺上□縺輔＞'); return; }
+
+  ['client','property','contact','tel','email','rooms','pms','cardkeyMaker','lockMaker']
+    .forEach(function(k){ if(d[k]) document.getElementById(k).value = d[k]; });
+
+  var on = [];
+  KEYS.forEach(function(k){
+    var v = !!(d.equips && d.equips.indexOf(k) >= 0);
+    document.getElementById(k).checked = v;
+    if(v) on.push(k);
+  });
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#0b8043">笨・蜿肴丐縺励∪縺励◆</b>・域ｩ滓攝 ' + on.length + '莉ｶ縺ｫ繝√ぉ繝・け・・;
+}
+
+function run(){
+  var btn = document.getElementById('go');
+  btn.disabled = true; btn.textContent = '菴懈・荳ｭ窶ｦ';
+  document.getElementById('msg').innerHTML = '';
+  var equips = KEYS.filter(function(k){ 

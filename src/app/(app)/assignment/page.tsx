@@ -60,31 +60,31 @@ function RuleModal({ rule, onClose }: { rule: AssignmentRule; onClose: () => voi
       >
         <div className="flex items-start justify-between p-6 border-b border-slate-700">
           <div>
-            {rule.priority >= 10 && <span className="text-red-400 text-xs font-bold mr-2">！重要</span>}
+            {rule.priority >= 10 && <span className="text-red-400 text-sm font-bold mr-2">！重要</span>}
             <h2 className="text-base font-bold text-white mt-1">{rule.keyword}</h2>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white ml-4 text-xl">✕</button>
         </div>
         <div className="p-6 space-y-4">
           <div>
-            <p className="text-xs text-slate-500 mb-1">担当者</p>
+            <p className="text-sm text-slate-500 mb-1">担当者</p>
             <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getAssigneeColor(rule.assignee)}`}>
               {rule.assignee}
             </span>
             {rule.assignee_email && (
-              <p className="text-slate-400 text-xs mt-1">{rule.assignee_email}</p>
+              <p className="text-slate-400 text-sm mt-1">{rule.assignee_email}</p>
             )}
           </div>
           {rule.action && (
             <div>
-              <p className="text-xs text-slate-500 mb-1">対応方法</p>
-              <p className="text-white text-sm bg-slate-700/50 rounded-xl px-4 py-3 whitespace-pre-wrap">{rule.action}</p>
+              <p className="text-sm text-slate-500 mb-1">対応方法</p>
+              <p className="text-white text-base bg-slate-700/50 rounded-xl px-4 py-3 whitespace-pre-wrap">{rule.action}</p>
             </div>
           )}
           {rule.notes && (
             <div>
-              <p className="text-xs text-slate-500 mb-1">備考・注意事項</p>
-              <p className="text-slate-300 text-sm bg-yellow-900/20 border border-yellow-700/30 rounded-xl px-4 py-3 whitespace-pre-wrap">{rule.notes}</p>
+              <p className="text-sm text-slate-500 mb-1">備考・注意事項</p>
+              <p className="text-slate-300 text-base bg-yellow-900/20 border border-yellow-700/30 rounded-xl px-4 py-3 whitespace-pre-wrap">{rule.notes}</p>
             </div>
           )}
         </div>
@@ -135,7 +135,7 @@ export default function AssignmentPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">📬 引き当てシート</h1>
-        <p className="text-slate-400 text-sm mt-1">メール・電話の担当者振り分けルール一覧</p>
+        <p className="text-slate-400 text-base mt-1">メール・電話の担当者振り分けルール一覧</p>
       </div>
 
       {/* Search */}
@@ -144,7 +144,7 @@ export default function AssignmentPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="キーワード・担当者・対応方法で検索..."
-          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
         />
       </div>
 
@@ -152,7 +152,7 @@ export default function AssignmentPage() {
       <div className="flex flex-wrap gap-2 mb-6">
         <button
           onClick={() => setSelectedAssignee('all')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
             selectedAssignee === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
           }`}
         >すべて</button>
@@ -160,7 +160,7 @@ export default function AssignmentPage() {
           <button
             key={a}
             onClick={() => setSelectedAssignee(selectedAssignee === a ? 'all' : a)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
               selectedAssignee === a ? 'bg-blue-600 text-white' : `${getAssigneeColor(a)} border border-transparent hover:opacity-80`
             }`}
           >{a}</button>
@@ -173,14 +173,14 @@ export default function AssignmentPage() {
         <div className="text-center py-16 bg-slate-800 rounded-2xl border border-slate-700">
           <p className="text-4xl mb-3">🔍</p>
           <p className="text-slate-400">該当するルールが見つかりません</p>
-          {searchQuery && <button onClick={() => setSearchQuery('')} className="mt-3 text-sm text-blue-400">検索をクリア</button>}
+          {searchQuery && <button onClick={() => setSearchQuery('')} className="mt-3 text-base text-blue-400">検索をクリア</button>}
         </div>
       ) : (
         <div className="space-y-8">
           {/* 重要 */}
           {important.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-red-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <h2 className="text-base font-semibold text-red-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                 ❗ 優先対応 <span className="text-slate-600 font-normal normal-case">({important.length}件)</span>
               </h2>
               <div className="space-y-2">
@@ -192,7 +192,7 @@ export default function AssignmentPage() {
           {/* 通常 */}
           {normal.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <h2 className="text-base font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                 📋 担当者振り分けルール <span className="text-slate-600 font-normal normal-case">({normal.length}件)</span>
               </h2>
               <div className="space-y-2">
@@ -204,7 +204,7 @@ export default function AssignmentPage() {
           {/* 対応完了系 */}
           {done.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <h2 className="text-base font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
                 ✅ 対応完了・スパム <span className="text-slate-600 font-normal normal-case">({done.length}件)</span>
               </h2>
               <div className="space-y-2">
@@ -233,15 +233,15 @@ function RuleRow({ rule, onClick }: { rule: AssignmentRule; onClick: () => void 
           : 'bg-slate-800 border-slate-700 hover:bg-slate-700'
       }`}
     >
-      {rule.priority >= 10 && <span className="text-red-400 text-xs font-bold shrink-0">！</span>}
-      <p className={`flex-1 text-sm ${isDone ? 'text-slate-500' : 'text-slate-200'} group-hover:text-white transition-colors line-clamp-1`}>
+      {rule.priority >= 10 && <span className="text-red-400 text-sm font-bold shrink-0">！</span>}
+      <p className={`flex-1 text-base ${isDone ? 'text-slate-500' : 'text-slate-200'} group-hover:text-white transition-colors line-clamp-1`}>
         {rule.keyword}
       </p>
       <span className={`shrink-0 text-xs px-2.5 py-1 rounded-full font-medium ${getAssigneeColor(rule.assignee)}`}>
         {rule.assignee.length > 15 ? rule.assignee.slice(0, 15) + '…' : rule.assignee}
       </span>
       {rule.action && (
-        <span className={`shrink-0 hidden md:inline text-xs px-2 py-0.5 rounded ${ACTION_COLOR[rule.action] || 'bg-blue-500/10 text-blue-300'}`}>
+        <span className={`shrink-0 hidden md:inline text-sm px-2 py-0.5 rounded ${ACTION_COLOR[rule.action] || 'bg-blue-500/10 text-blue-300'}`}>
           {rule.action.split('\n')[0].slice(0, 15)}{rule.action.length > 15 ? '…' : ''}
         </span>
       )}

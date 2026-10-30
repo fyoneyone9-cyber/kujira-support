@@ -1,0 +1,23 @@
+﻿node : <anonymous_script>:1378
+発生場所 行:1 文字:36
++ cd C:\GensparkClaw\kujira-support; node _test_delete.js 2>&1 | Out-Fi ...
++                                    ~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (<anonymous_script>:1378:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+// 蛹ｺ蛻・-> 縺薙・讖滓攝縺後≠繧句ｴ蜷医□縺第ｮ九☆
+^
+
+SyntaxError: Unexpected non-whitespace character after JSON at position 18316 (line 1378 column 1)
+    at JSON.parse (<anonymous>)
+    at Object.<anonymous> (C:\GensparkClaw\kujira-support\_test_delete.js:5:19)
+    at Module._compile (node:internal/modules/cjs/loader:1713:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1847:10)
+    at Module.load (node:internal/modules/cjs/loader:1448:32)
+    at Module._load (node:internal/modules/cjs/loader:1270:12)
+    at c._load (node:electron/js2c/node_init:2:18041)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:244:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:186:5)
+
+Node.js v22.22.1

@@ -1,0 +1,42 @@
+﻿=== API(dialog) (10578 bytes) ===
+   繝輔Ο繝ｳ繝医メ繧ｧ繝・け繧､繝ｳ             False
+   frontci                False
+   蝗ｺ螳壹メ繧ｧ繝・け繝懊ャ繧ｯ繧ｹ             False
+   PMS蜷榊・蜉帶ｬ・               False
+   getSheetNames          True
+   getVersion             True
+
+=== 髱咏噪(dialog) (10578 bytes) ===
+   繝輔Ο繝ｳ繝医メ繧ｧ繝・け繧､繝ｳ             False
+   frontci                False
+   蝗ｺ螳壹メ繧ｧ繝・け繝懊ャ繧ｯ繧ｹ             False
+   PMS蜷榊・蜉帶ｬ・               False
+   getSheetNames          True
+   getVersion             True
+
+=== public/docs 縺ｮ荳ｭ霄ｫ ===
+      10578  hearing-gas-dialog.html
+       8840  hearing-gas-dialog.html.bak_addr_20261029_220830
+       7786  hearing-gas-dialog.html.bak_defon_20261029_203102
+       6617  hearing-gas-dialog.html.bak_full_20261029_201308
+       7492  hearing-gas-dialog.html.bak_idfix_20261029_202641
+       9618  hearing-gas-dialog.html.bak_msg_20261029_205112
+      10030  hearing-gas-dialog.html.bak_nofront_20261029_211535
+       8056  hearing-gas-dialog.html.bak_prog_20261029_204059
+       9227  hearing-gas-dialog.html.bak_v22_20261029_222344
+       9626  hearing-gas.js
+       9177  hearing-gas.js.bak_enc_20261029_221845
+       4254  hearing-gas.js.bak_fillall_20261029_201153
+       7778  hearing-gas.js.bak_nofront_20261029_211535
+       6153  hearing-gas.js.bak_plan_20261029_201409
+       6124  hearing-gas.js.bak_speed_20261029_204124
+       6446  hearing-gas.js.bak_v13_20261029_205052
+       6924  hearing-gas.js.bak_v15_20261029_210122
+       8119  hearing-gas.js.bak_v15b_20261029_210147
+       7727  hearing-gas.js.bak_v17_20261029_213115
+       7727  hearing-gas.js.bak_v17b_20261029_213147
+       8802  hearing-gas.js.bak_v18_20261029_214124
+       8775  hearing-gas.js.bak_v19_20261029_214838
+       8863  hearing-gas.js.bak_v20_20261029_220803
+       9363  hearing-gas.js.bak_v22_20261029_222344
+    1196728  setup-guide.pdf

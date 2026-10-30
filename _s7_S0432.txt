@@ -1,0 +1,47 @@
+{
+ "items": [
+  {
+   "label": "🍼 S1-01 ある朝、彼女の言葉遣いが幼く戻っていた「ぱぱ、おはよ」【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),1girl greeting with babyish morning voice,(speech regressed overnight:1.6),(papa good morning in babyish lisping voice:1.5),(his frozen coffee cup midair:1.5),(morning kitchen light:1.3),(the first crack in normal:1.6)"
+  },
+  {
+   "label": "🍼 S1-02 スプーンを落とし「たべさせて」と口を開けて待つ【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),1girl opening mouth waiting to be fed,(dropped spoon on the table:1.5),(feed me demand with trusting eyes:1.6),(his hand hesitating with the spoon:1.5),(breakfast table:1.3),(helplessness offered without suspicion:1.6)"
+  },
+  {
+   "label": "🍼 S1-03 病院は原因不明、「甘えさせてあげてください」と医者【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),(doctor explaining regression to guardian:1.5),1girl hugging plush toy in clinic chair,(no medical cause found verdict:1.6),(just indulge her for now advice:1.5),(clinic consultation room:1.3),(official permission he never asked for:1.6)"
+  },
+  {
+   "label": "🍼 S1-04 帰り道、手を繋いでスキップ、周囲は微笑ましく見ている【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),1girl skipping while holding his hand,(onlookers smiling at sweet guardian:1.5),(nobody sees anything wrong:1.6),(his gaze lingering too long on her:1.5),(afternoon street:1.3),(perfect camouflage of innocence:1.6)"
+  },
+  {
+   "label": "🍼 S1-05 「ずっとそばにいて」と服の裾を離さない夜【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),1girl clinging to his shirt hem refusing to let go,(stay with me always plea:1.6),(bedtime refusal without him:1.5),(his throat going dry:1.5),(bedroom night lamp:1.3),(dependence handed to the wrong man:1.6)"
+  },
+  {
+   "label": "🍼 S1-06 気づけば彼は考えている、これは、何でもできるのでは【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),(man staring at sleeping girl from doorway:1.6),1girl asleep hugging his pillow,(i could do anything realization:1.6),(dark thought crossing a calm face:1.5),(hallway shadow at night:1.4),(the guardian's mask beginning to slip:1.6)"
+  },
+  {
+   "label": "🍼 S1-07 お風呂「ひとりで洗えない」と当然のように手を引く【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),1girl pulling his hand toward bathroom,(cannot wash alone declaration:1.6),(bath time assistance demanded:1.5),(steam curling from the doorway:1.4),(his step slower than it should be:1.5),(bathroom entrance:1.3),(duty and desire in the same hand:1.6)"
+  },
+  {
+   "label": "🍼 S1-08 泡越しに触れる背中、必要以上に丁寧な手つき【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),(soapy hands washing small back:1.6),1girl humming happily in bathtub,(strokes more careful than necessary:1.6),(foam sliding down wet skin:1.5),(his breath measured and quiet:1.5),(bathroom steam:1.3),(care curdling into something else:1.6)"
+  },
+  {
+   "label": "🍼 S1-09 体を拭く時間が日ごとに長くなる【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),(toweling off after bath:1.5),1girl standing arms up trusting completely,(drying ritual growing longer each night:1.6),(towel lingering at her waist:1.5),(mirror fogged over the scene:1.4),(bathroom night:1.3),(minutes stolen under the name of care:1.6)"
+  },
+  {
+   "label": "🍼 S1-10 着替え「ぱぱがやって」ボタンを留める指が震える【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),1girl holding out pajama shirt to him,(papa dress me request:1.6),(his fingers trembling on buttons:1.6),(bare shoulder in lamplight:1.5),(her oblivious cheerful chatter:1.5),(bedroom evening:1.3),(a line he keeps almost crossing:1.6)"
+  },
+  {
+   "label": "🍼 S1-11 添い寝が日課に、布団の中の距離がゼロになる【赤ちゃん返り】",
+   "value": "(cozy home interior:1.3),(private family space:1.2),(sharing futon as nightly routine:1.6),1girl nestled against his chest asleep,(zero distance under the blanket:1.6),(his arm unsure where to rest:1.5),(moonlight through curtains:1.4),(bedroom night:1.3),(warmth he has stopped resisting:1.6)"
+  },
+  {

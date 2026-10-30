@@ -1,0 +1,5 @@
+﻿backup: C:\GensparkClaw\kujira-support\src\app\(app)\delivery\page.tsx.bak_hopen_20261029_190340
+L1494 -> <span className="ml-auto text-slate-500 text-xs">{(openSections[`hearing_${it.id}`] ?? hearingDefaultOpen) ? '
+L1496 -> {(openSections[`hearing_${it.id}`] ?? hearingDefaultOpen) && <div className="px-3 pb-3 space-y-2">
+inserted default at L1405
+patched OK

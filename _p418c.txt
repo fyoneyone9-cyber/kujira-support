@@ -1,0 +1,4 @@
+﻿backup: C:\GensparkClaw\kujira-support\src\app\(app)\delivery\page.tsx.bak_418c_20261029_174032
+patched L1301: {mounted && val === null && warn && <span className="text-xs text-orange-300 animate-pulse font-bold">笞・・谿宮day
+patched L1303: {mounted && val === null && days21 !== null && days21 > 30 && <span className="text-xs text-slate-500">谿宮days2
+total patched: 2

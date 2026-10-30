@@ -1,0 +1,224 @@
+// [APPLICATION_PARSE_V2 2026-10-29]
+// 申込書(.xlsx)を読み取り、案件情報と機材構成を抽出する。
+//
+// 実物から確認した構造（「利用申込書」シート）:
+//   左ブロック = 契約者情報
+//     1〜6列   : 項目名（①契約者名 / ②住所 / ③連絡先 …）
+//     7列以降  : 値。ただし「TEL」「メールアドレス」のラベルが7〜13列に入り、
+//                実際の値は14列目から始まる。
+//   右ブロック = 費用明細
+//     40列 : 品名   55列 : 単価   64列 : 数量   71列 : 金額
+//
+// セルは横方向に結合されているため、同じ値が何十列も複製されている。
+// 「ラベル列の次に現れる、異なる値」を拾うのが基本方針。
+import { NextRequest, NextResponse } from 'next/server'
+import ExcelJS from 'exceljs'
+
+export const runtime = 'nodejs'
+
+const COL_NAME = 40   // 品名
+const COL_PRICE = 55  // 単価
+const COL_QTY = 64    // 数量
+
+function cellText(v: unknown): string {
+  if (v === null || v === undefined) return ''
+  if (typeof v === 'object') {
+    const o = v as Record<string, unknown>
+    if (Array.isArray(o.richText)) {
+      return (o.richText as { text?: string }[]).map(r => r.text || '').join('')
+    }
+    if (o.result !== undefined) return String(o.result)
+    if (o.text !== undefined) return String(o.text)
+    return ''
+  }
+  return String(v)
+}
+
+/** 品名 -> 機材キー */
+const EQUIP_RULES: { key: string; re: RegExp; label: string }[] = [
+  { key: 'paycube',    re: /Pay\s*Cube/i,               label: 'PayCube' },
+  { key: 'p400',       re: /Verifone|P400/i,            label: 'P400' },
+  { key: 'passport',   re: /パスポートリーダー/,          label: 'パスポートリーダー' },
+  { key: 'printer',    re: /プリンター|プリンタ/,         label: 'プリンタ' },
+  { key: 'surface',    re: /Surface|Windowsタブレット/i, label: 'Surface' },
+  { key: 'kiosk',      re: /KIOSK/i,                    label: 'KIOSK' },
+  { key: 'smartlock',  re: /スマートロック/,             label: 'スマートロック' },
+  { key: 'pms',        re: /PMS/i,                      label: 'PMS' },
+  { key: 'qr',         re: /QRコードリーダー/,           label: 'QRコードリーダー' },
+  { key: 'hub',        re: /HUB/i,                      label: 'HUB' },
+  { key: 'roomtablet', re: /ルームタブレット/,           label: 'ルームタブレット' },
+]
+
+export async function POST(req: NextRequest) {
+  const form = await req.formData().catch(() => null)
+  const file = form?.get('file')
+  if (!file || typeof file === 'string') {
+    return NextResponse.json({ error: 'file がありません' }, { status: 400 })
+  }
+
+  const wb = new ExcelJS.Workbook()
+  await wb.xlsx.load(await (file as File).arrayBuffer())
+  const ws = wb.worksheets.find(w => w.name.includes('申込')) || wb.worksheets[0]
+  if (!ws) return NextResponse.json({ error: 'シートが読めません' }, { status: 400 })
+
+  const grid: Record<number, Record<number, string>> = {}
+  ws.eachRow((row, ri) => {
+    grid[ri] = {}
+    row.eachCell({ includeEmpty: false }, (c, ci) => {
+      const t = cellText(c.value).trim()
+      if (t) grid[ri][ci] = t
+    })
+  })
+  const rowNums = Object.keys(grid).map(Number).sort((a, b) => a - b)
+
+  /** 1列目のラベルに一致する行の範囲を返す */
+  // [V5] ラベルは「④担当者氏名  および連絡先」のように空白/改行が入るので
+  //   空白を除いてから部分一致で判定する。
+  const blockRows = (labelRe: RegExp) =>
+    rowNums.filter(ri => labelRe.test((grid[ri][1] || '').replace(/[\s　]+/g, '')))
+
+  /**
+   * 指定ブロック内の「値」を集める。
+   * [V4] 列は 7〜36 に限定（37列以降は右ブロックの見出しが入る）。
+   *      ブロック全体で重複を除く（横方向の結合で同じ値が何十列も並ぶため）。
+   */
+  const blockValues = (labelRe: RegExp) => {
+    const out: string[] = []
+    const seen = new Set<string>()
+    for (const ri of blockRows(labelRe)) {
+      const r = grid[ri]
+      for (const cs of Object.keys(r).map(Number).sort((a, b) => a - b)) {
+        if (cs < 7 || cs > 36) continue
+        const v = r[cs]
+        if (!v || seen.has(v)) continue
+        seen.add(v)
+        if (/^(TEL|FAX|\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9|\u3012)$/.test(v)) continue
+        if (/^[●○・※]/.test(v)) continue        // 右ブロックの見出し
+        if (v.length < 2) continue
+        out.push(v)
+      }
+    }
+    return out
+  }
+
+  /** ブロック内で特定ラベルの右隣にある値 */
+  const labeledValue = (labelRe: RegExp, tag: RegExp) => {
+    for (const ri of blockRows(labelRe)) {
+      const r = grid[ri]
+      const cols = Object.keys(r).map(Number).sort((a, b) => a - b)
+      const li = cols.find(c => c <= 36 && tag.test(r[c]))
+      if (li === undefined) continue
+      const after = cols.filter(c => c > li && c <= 36)
+        .map(c => r[c]).filter(v => !tag.test(v))
+      if (after.length) return after[0]
+    }
+    return ''
+  }
+
+  const strip = (s: string) => s.replace(/[〒\s]+/g, ' ').trim()
+  const zipOf = (s: string) => (s.match(/(\d{3}-?\d{4})/) || [])[1] || ''
+  const noZip = (s: string) => strip(s).replace(/\d{3}-?\d{4}/, '').trim()
+
+  // --- 契約者情報 ---
+  const nameVals = blockValues(/\u5951\u7d04\u8005\u540d/)
+  // カナと漢字が両方入る。漢字（カナのみでないもの）を優先
+  const client = nameVals.find(v => !/^[ァ-ヶー\s　]+$/.test(v)) || nameVals[0] || ''
+  const clientKana = nameVals.find(v => /^[ァ-ヶー\s　]+$/.test(v)) || ''
+
+  const addrVals = blockValues(/^.{0,2}\u4f4f\u6240$/)
+  const clientAddress = addrVals.join(' ')   // 〒行と住所行が分かれているので連結
+
+  // [V7] 担当者ブロックは 7列目に「カナ → 漢字 → TEL → メール」の順で入る。
+  //   ブロック抽出の条件分岐で取りこぼしていたので、7列目を直接走査する。
+  const contactSeq: string[] = []
+  {
+    const seen = new Set<string>()
+    for (const ri of blockRows(/\u62c5\u5f53\u8005/)) {
+      const v = (grid[ri][7] || '').trim()
+      if (!v || seen.has(v)) continue
+      seen.add(v)
+      if (/^(TEL|FAX|\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9|\u3012)$/.test(v)) continue
+      if (/@/.test(v)) continue
+      if (/^[\d\-+()\s]+$/.test(v)) continue
+      contactSeq.push(v)
+    }
+  }
+  const isKana = (v: string) => /^[ァ-ヶー\s　]+$/.test(v)
+  const contact = contactSeq.find(v => !isKana(v)) || contactSeq[0] || ''
+  const contactKana = contactSeq.find(isKana) || ''
+
+  const billVals = blockValues(/\u8acb\u6c42\u66f8\u9001\u4ed8\u5148/)
+  const billingAddress = billVals.filter(v => !/[@]/.test(v) && !/^[\d-]+$/.test(v)).join(' ')
+
+  const facility = blockValues(/\u8a2d\u7f6e\u5148\u65bd\u8a2d\u540d\u79f0/)[0] || ''
+  const siteVals = blockValues(/\u8a2d\u7f6e\u5148\u65bd\u8a2d\u4f4f\u6240/)
+  const siteAddress = siteVals.join(' ')
+
+  // 電話・メール（担当者ブロック優先）
+  const tel = labeledValue(/\u62c5\u5f53\u8005/, /^TEL$/)
+    || labeledValue(/^.{0,2}\u9023\u7d61\u5148$/, /^TEL$/)
+  const email = labeledValue(/\u62c5\u5f53\u8005/, /^メールアドレス$/)
+    || labeledValue(/^.{0,2}\u9023\u7d61\u5148$/, /^メールアドレス$/)
+  const companyTel = labeledValue(/^.{0,2}\u9023\u7d61\u5148$/, /^TEL$/)
+  const companyEmail = labeledValue(/^.{0,2}\u9023\u7d61\u5148$/, /^メールアドレス$/)
+
+  // 納品希望日（年・月・日が別セル）
+  let due = ''
+  for (const ri of blockRows(/\u7d0d\u54c1\u5e0c\u671b\u65e5/)) {
+    const r = grid[ri]
+    const seq: string[] = []
+    const seen = new Set<string>()
+    for (const c of Object.keys(r).map(Number).sort((a, b) => a - b)) {
+      if (c > 36) continue                  // [V4] 費用明細を混ぜない
+      const v = r[c]
+      if (!v || seen.has(v)) continue
+      seen.add(v)
+      seq.push(v)
+    }
+    const nums = seq.filter(v => /^\d{1,4}$/.test(v))
+    if (nums.length >= 3) {
+      due = `${nums[0]}-${String(nums[1]).padStart(2, '0')}-${String(nums[2]).padStart(2, '0')}`
+      break
+    }
+  }
+
+  // --- 費用明細（列固定）---
+  const items: { name: string; price: number; qty: number }[] = []
+  for (const ri of rowNums) {
+    const r = grid[ri]
+    const name = r[COL_NAME]
+    if (!name) continue
+    if (/^(\u54c1\u540d|\u5c0f\u8a08|\u6d88\u8cbb\u7a0e|\u5408\u8a08|\u203b)/.test(name)) continue
+    const price = Number(String(r[COL_PRICE] ?? '').replace(/,/g, ''))
+    const qty = Number(String(r[COL_QTY] ?? '').replace(/,/g, ''))
+    if (!Number.isFinite(price) || !Number.isFinite(qty) || !qty) continue
+    items.push({ name, price, qty })
+  }
+
+  const equips: Record<string, number> = {}
+  for (const it of items) {
+    if (it.price < 0) continue          // 割引行は無視
+    for (const rule of EQUIP_RULES) {
+      if (rule.re.test(it.name)) {
+        equips[rule.key] = Math.max(equips[rule.key] || 0, it.qty)
+      }
+    }
+  }
+  const roomItem = items.find(x => /\u30eb\u30fc\u30e0\u5229\u7528\u6599/.test(x.name))
+  const rooms = roomItem ? String(roomItem.qty) : ''
+
+  return NextResponse.json({
+    client, clientKana,
+    clientAddress,
+    clientZip: zipOf(clientAddress),
+    contact, contactKana,
+    tel, email,
+    companyTel, companyEmail,
+    billingAddress,
+    facility,
+    siteAddress: noZip(siteAddress),
+    siteZip: zipOf(siteAddress),
+    due, rooms, equips,
+    items,
+  })
+}

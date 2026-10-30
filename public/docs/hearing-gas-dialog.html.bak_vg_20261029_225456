@@ -1,0 +1,282 @@
+<!--
+  ヒアリングシート コピー作成ダイアログ
+  --------------------------------------------------
+  Apps Script のファイル名を「dialog」にして貼り付けてください。
+  （Apps Script エディタ左の「＋」→ HTML → 名前を dialog にする）
+
+  [V17 2026-10-29]
+    シート名の完全一致で判定するとズレて削除漏れが出たため、
+    実際のタブ名を読み込んで一覧表示する方式に変更。
+    自動チェックは機材構成からキーワード照合で行う。
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+ body{font-family:"Helvetica Neue",Arial,"Hiragino Sans","Meiryo",sans-serif;font-size:14px;padding:14px;color:#222}
+ h3{margin:0 0 10px;font-size:16px}
+ label{display:block;margin:7px 0 2px;font-weight:bold;font-size:13px;color:#555}
+ input[type=text],textarea{width:100%;padding:7px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;font-size:13px}
+ textarea{height:54px;font-family:monospace;font-size:11px}
+ .chk{display:flex;align-items:center;gap:7px;padding:4px 0}
+ .chk label{margin:0;font-weight:normal;font-size:14px}
+ .chk .auto{font-size:11px;color:#0b8043}
+ .box{border:1px solid #ddd;border-radius:6px;padding:9px;margin-top:9px;max-height:240px;overflow:auto}
+ button{margin-top:12px;width:100%;padding:11px;background:#0b8043;color:#fff;border:0;border-radius:5px;font-weight:bold;font-size:15px;cursor:pointer}
+ button:disabled{background:#999}
+ #paste{background:#1a73e8;margin-top:6px;padding:8px;font-size:13px}
+ #msg{margin-top:10px;font-size:13px;line-height:1.6}
+ a{color:#1a73e8}
+ .hint{font-size:12px;color:#888;margin-top:3px}
+ .loading{color:#888;font-size:13px;padding:8px}
+</style>
+</head>
+<body>
+<h3>必要シートだけコピー作成 <span id="ver" style="font-size:11px;color:#888;font-weight:normal"></span></h3>
+<div id="diag" style="font-size:11px;background:#f5f5f5;border:1px solid #ddd;border-radius:4px;padding:6px;margin-bottom:8px;font-family:monospace;white-space:pre-wrap">診断中…</div>
+
+<label>① ダッシュボードの「📋 設定をコピー」した内容を貼り付け</label>
+<textarea id="json" placeholder="ここに貼り付けると、下の項目とタブのチェックが自動で入ります"></textarea>
+<button id="paste" onclick="applyJson()">⬇ 貼り付けた内容を反映</button>
+
+<label>会社名</label>
+<input type="text" id="client" placeholder="株式会社ビジョン">
+<label>施設名（物件名）</label>
+<input type="text" id="property" placeholder="ビジョングランピング淡路">
+<label>設置先住所</label>
+<input type="text" id="address" placeholder="〒656-2401 兵庫県淡路市岩屋2604">
+<label>ご担当者</label>
+<input type="text" id="contact" placeholder="石川様">
+<label>電話番号</label>
+<input type="text" id="tel" placeholder="0799-00-0000">
+<label>メールアドレス</label>
+<input type="text" id="email" placeholder="info@example.com">
+<label>客室数</label>
+<input type="text" id="rooms" placeholder="20">
+
+<div class="box">
+  <div style="font-weight:bold;font-size:13px;margin-bottom:5px">
+    残すタブ（このシートに実際にあるタブです）
+  </div>
+  <div id="tabs" class="loading">タブを読み込み中…</div>
+  <div class="hint">※ ①を貼り付けると機材構成から自動でチェックが入ります</div>
+</div>
+
+<button id="go" onclick="run()" disabled>コピーを作成</button>
+<div id="msg"></div>
+
+<script>
+// [V25 2026-10-29] 原因特定のための診断。各関数の結果を画面に出す。
+var diagLog = [];
+function diag(msg) {
+  diagLog.push(msg);
+  var el = document.getElementById('diag');
+  if (el) el.textContent = diagLog.join('\n');
+}
+diag('dialog 読込OK (V25)');
+
+// サーバー関数を1つずつ試して、どこで落ちるか突き止める
+function probe(name, fn, arg) {
+  var done = false;
+  setTimeout(function () {
+    if (!done) diag('  ' + name + ' : 応答なし（5秒）');
+  }, 5000);
+  try {
+    var runner = google.script.run
+      .withSuccessHandler(function (r) {
+        done = true;
+        diag('  ' + name + ' : OK ' + (Array.isArray(r) ? '(' + r.length + '件)' : String(r).slice(0, 40)));
+        if (fn) fn(r);
+      })
+      .withFailureHandler(function (e) {
+        done = true;
+        diag('  ' + name + ' : 失敗 -> ' + (e && e.message ? e.message : String(e)));
+      });
+    if (arg !== undefined) runner[name](arg); else runner[name]();
+  } catch (err) {
+    done = true;
+    diag('  ' + name + ' : 呼び出し例外 -> ' + err);
+  }
+}
+
+if (typeof google === 'undefined' || !google.script || !google.script.run) {
+  diag('❌ google.script.run が使えません（Apps Script外で開いています）');
+} else {
+  diag('google.script.run OK');
+}
+
+// [V22] コード側のバージョンを表示（新旧の貼り間違いを一目で判別する）
+probe('getVersion', function (v) {
+  document.getElementById('ver').textContent = '[' + v + ']';
+});
+
+var SHEETS = [];      // 実タブ名
+var LAST_EQUIPS = []; // 直近の機材フラグ
+
+/** [V22] 応答が無いまま止まる事故を防ぐため、10秒でタイムアウト案内を出す */
+var loaded = false;
+setTimeout(function () {
+  if (loaded) return;
+  // [V24] サーバーが応答しない場合の逃げ道。
+  //   タブ名を手で入れれば作成できるようにする。
+  document.getElementById('tabs').innerHTML =
+    '<div style="color:#c00;font-size:13px;line-height:1.7;margin-bottom:6px">' +
+    '<b>⚠ タブ一覧を取得できませんでした</b><br>' +
+    '<span style="color:#555">Apps Scriptの権限承認が済んでいない可能性があります。<br>' +
+    'メニュー「📋 ヒアリングシート → 🔑 権限を承認する」を一度実行してください。</span>' +
+    '</div>' +
+    '<div style="font-size:12px;color:#555;margin-bottom:4px">' +
+    'そのまま進める場合は、残すタブ名を1行ずつ入力してください:</div>' +
+    '<textarea id="manualTabs" style="width:100%;height:120px;font-size:12px"></textarea>';
+  // 既定値を入れておく（よく使う構成）
+  var ta = document.getElementById('manualTabs');
+  if (ta) ta.value = ['必須確認①', '必須確認②', '必須確認③'].join('\n');
+  document.getElementById('go').disabled = false;
+}, 5000);
+
+/** 起動時に実タブ名を読み込む */
+probe('getSheetNames', function (names) {
+  loaded = true;
+  (function (names) {
+  SHEETS = names || [];
+  var html = SHEETS.map(function (n, i) {
+    return '<div class="chk">' +
+      '<input type="checkbox" id="t' + i + '" value="' + n.replace(/"/g, '&quot;') + '">' +
+      '<label for="t' + i + '">' + n + '</label>' +
+      '<span class="auto" id="a' + i + '"></span></div>';
+  }).join('');
+  document.getElementById('tabs').innerHTML = html || '（タブが見つかりません）';
+  document.getElementById('tabs').className = '';
+  document.getElementById('go').disabled = false;
+  })(names);
+});
+
+/** 貼り付けた設定を反映し、残すタブを自動で選ぶ */
+function applyJson() {
+  var raw = document.getElementById('json').value.trim();
+  if (!raw) { alert('貼り付け欄が空です'); return; }
+  var d;
+  try { d = JSON.parse(raw); }
+  catch (e) {
+    alert('形式が正しくありません。ダッシュボードの「📋 設定をコピー」で取得した内容を貼り付けてください');
+    return;
+  }
+
+  ['client', 'property', 'address', 'contact', 'tel', 'email', 'rooms']
+    .forEach(function (k) { if (d[k]) document.getElementById(k).value = d[k]; });
+
+  LAST_EQUIPS = d.equips || [];
+  document.getElementById('msg').innerHTML = '<span style="color:#888">自動判定中…</span>';
+  // [V24] 5秒で応答が無ければ諦めて、手動選択を促す
+  var judged = false;
+  setTimeout(function () {
+    if (judged) return;
+    document.getElementById('msg').innerHTML =
+      '<span style="color:#c77">自動判定は使えませんでした。残すタブを手で選んでください</span>';
+  }, 5000);
+
+  // サーバー側で「残すべきタブ名」を推定してもらう（実タブ名ベース）
+  google.script.run.withSuccessHandler(function (keep) {
+    judged = true;
+    var set = {};
+    (keep || []).forEach(function (n) { set[n] = true; });
+    var on = 0;
+    SHEETS.forEach(function (n, i) {
+      var v = !!set[n];
+      document.getElementById('t' + i).checked = v;
+      document.getElementById('a' + i).textContent = v ? '自動' : '';
+      if (v) on++;
+    });
+    document.getElementById('msg').innerHTML =
+      '<b style="color:#0b8043">✅ 反映しました</b>（' + on + '枚を自動選択）<br>' +
+      '<span style="font-size:12px;color:#888">違う場合はチェックを直してください</span>';
+  }).withFailureHandler(function (e) {
+    document.getElementById('msg').innerHTML =
+      '<span style="color:#c00"><b>❌ 自動判定に失敗</b><br>' + e.message + '<br>' +
+      'コード.gs が古い可能性があります。貼り直して Ctrl+S してください</span>';
+  }).suggestSheets(LAST_EQUIPS);
+}
+
+var timer = null, sec = 0;
+function tick() {
+  sec++;
+  var step = sec < 5 ? '雛形をコピー中' : sec < 15 ? '不要なタブを削除中' : '案件情報を入力中';
+  var pct = Math.min(96, Math.round(sec / 25 * 100));
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#1a73e8">⏳ ' + step + '…（' + sec + '秒）</b>' +
+    '<div style="height:8px;background:#e0e0e0;border-radius:4px;margin:6px 0;overflow:hidden">' +
+    '<div style="height:8px;width:' + pct + '%;background:#1a73e8;transition:width .4s"></div></div>' +
+    '<span style="color:#888;font-size:12px">この画面は閉じないでください</span>';
+}
+
+function run() {
+  var keep = [];
+  if (SHEETS.length) {
+    SHEETS.forEach(function (n, i) {
+      var el = document.getElementById('t' + i);
+      if (el && el.checked) keep.push(n);
+    });
+  } else {
+    // [V24] タブ一覧を取得できなかった場合は手入力を使う
+    var ta = document.getElementById('manualTabs');
+    if (ta) {
+      keep = ta.value.split('\n').map(function (x) { return x.trim(); })
+        .filter(function (x) { return x; });
+    }
+  }
+  if (!keep.length) { alert('残すタブを1つ以上選んでください'); return; }
+
+  var btn = document.getElementById('go');
+  btn.disabled = true; btn.textContent = '作成中…';
+  sec = 0;
+  if (timer) clearInterval(timer);
+  timer = setInterval(tick, 1000);
+  tick();
+
+  google.script.run
+    .withSuccessHandler(done)
+    .withFailureHandler(fail)
+    .createCopy({
+      client:   document.getElementById('client').value,
+      property: document.getElementById('property').value,
+      address:  document.getElementById('address').value,
+      contact:  document.getElementById('contact').value,
+      tel:      document.getElementById('tel').value,
+      email:    document.getElementById('email').value,
+      rooms:    document.getElementById('rooms').value,
+      sheets:   keep
+    });
+}
+
+function done(r) {
+  if (timer) clearInterval(timer);
+  var btn = document.getElementById('go');
+  btn.disabled = false; btn.textContent = 'コピーを作成';
+  document.getElementById('msg').innerHTML =
+    '<div style="background:#e6f4ea;border:1px solid #0b8043;border-radius:6px;padding:10px">' +
+    '<b style="color:#0b8043;font-size:15px">✅ 完成しました（' + sec + '秒）</b><br>' +
+    '<span style="font-size:12px;color:#555">残したタブ ' + r.kept.length +
+    '枚 / 削除 ' + r.removed.length + '枚 / 自動入力 ' + (r.filled || 0) + '箇所</span>' +
+    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #b7dfc4">' +
+    '<a href="' + r.url + '" target="_blank" ' +
+    'style="display:inline-block;margin:6px 0;padding:8px 12px;background:#1a73e8;color:#fff;' +
+    'border-radius:4px;text-decoration:none;font-weight:bold">▶ 作成したシートを開く</a><br>' +
+    '<span style="font-size:12px;color:#555">' +
+    '① 内容を確認（空欄はお客様に記入いただく項目です）<br>' +
+    '② 共有またはダウンロードしてお客様へ送付<br>' +
+    '③ ダッシュボードの「✉️ 送付メール」から本文をコピーして送信<br>' +
+    '保存先: マイドライブ直下「' + r.name + '」</span>' +
+    '</div></div>';
+}
+
+function fail(e) {
+  if (timer) clearInterval(timer);
+  var btn = document.getElementById('go');
+  btn.disabled = false; btn.textContent = 'コピーを作成';
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#c00">❌ 失敗: ' + e.message + '</b>';
+}
+</script>
+</body>
+</html>

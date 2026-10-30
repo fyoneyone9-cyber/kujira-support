@@ -1,0 +1,145 @@
+// [HEARING_XLSX_V1 2026-10-29]
+// Gemini はスプレッドシートを直接作れない（空ファイルしか作れずCSVを手貼りさせる羽目になる）。
+// → サーバー側で exceljs を使い、必要なシートだけを含む .xlsx を生成して直接ダウンロードさせる。
+//    Googleドライブにそのままアップすればスプレッドシートとして開ける。
+//
+// 社内用の列は hearingSheetDefs.ts の生成時点で除去済み。
+import { NextRequest, NextResponse } from 'next/server'
+import ExcelJS from 'exceljs'
+import { HEARING_SHEET_DEFS } from '@/lib/hearingSheetDefs'
+
+export const runtime = 'nodejs'
+
+type Body = {
+  sheets: string[]                       // 作成するシート名（順番どおり）
+  info?: Record<string, string>          // 表紙に載せる案件情報
+  prefill?: Record<string, string>       // 必須確認①などの事前チェック内容
+}
+
+export async function POST(req: NextRequest) {
+  let body: Body
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'invalid json' }, { status: 400 })
+  }
+  const sheets = Array.isArray(body.sheets) ? body.sheets : []
+  if (!sheets.length) return NextResponse.json({ error: 'sheets is empty' }, { status: 400 })
+
+  const wb = new ExcelJS.Workbook()
+  wb.creator = 'KUJIRA Support'
+  wb.created = new Date()
+
+  // ---------- 表紙 ----------
+  const cover = wb.addWorksheet('表紙')
+  cover.columns = [{ width: 22 }, { width: 86 }]
+  const info = body.info || {}
+  const coverRows: [string, string][] = [
+    ['書類名', 'AdvaNceD IoT スマートチェックイン 導入時ヒアリングシート'],
+    ['貴社名', info.client || ''],
+    ['設置住所', info.address || ''],
+    ['ご担当者様', info.contact || ''],
+    ['納品予定日', info.due || ''],
+    ['導入機材・構成', info.equipment || ''],
+    ['', ''],
+    ['ご案内とお願い',
+      'この度は「AdvaNceD IoT スマートチェックイン」をご導入いただき、誠にありがとうございます。' +
+      '本シートはシステム初期設定・機器キッティングを円滑に進めるための確認用ヒアリングシートです。' +
+      '黄色の欄にご回答・チェックをお願いいたします。'],
+    ['収録シート', sheets.map((s, i) => `${i + 1}. ${s}`).join(' / ')],
+  ]
+  coverRows.forEach(([k, v]) => {
+    const r = cover.addRow([k, v])
+    r.getCell(1).font = { bold: true }
+    r.getCell(2).alignment = { wrapText: true, vertical: 'top' }
+  })
+  cover.getRow(1).font = { bold: true, size: 14 }
+
+  // ---------- 各シート ----------
+  const YELLOW: ExcelJS.Fill = {
+    type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF9C4' },
+  }
+  const prefill = body.prefill || {}
+
+  for (const name of sheets) {
+    const def = HEARING_SHEET_DEFS[name]
+    const ws = wb.addWorksheet(name.slice(0, 31))
+    if (!def || !def.length) {
+      ws.addRow([`【${name}】の定義が未登録です`])
+      ws.addRow(['雛形スプレッドシートの該当シートを転記してください。'])
+      continue
+    }
+
+    // [HEARING_XLSX_V3] 雛形の構造を再現する。
+    //   A列=大見出し/説明文, B列=設問, D列=設問(2段目), L列=ご回答欄
+    const maxCols = Math.max(...def.map(r => r.length), 12)
+    const ANS = 11                      // L列(0始まり)
+    ws.columns = Array.from({ length: maxCols }, (_, i) => {
+      if (i === 0) return { width: 4 }    // A列はインデント用に細く
+      if (i === 1) return { width: 4 }
+      if (i === ANS) return { width: 24 } // ご回答欄
+      if (i > ANS) return { width: 30 }   // 備考
+      return { width: 4 }
+    })
+
+    def.forEach((row, ri) => {
+      const vals = row.map(c => {
+        const hit = Object.keys(prefill).find(k => c.includes(k))
+        if (c === '□' && hit) return prefill[hit] === 'TRUE' ? '✔' : '□'
+        return c
+      })
+      const r = ws.addRow(vals)
+      r.alignment = { wrapText: true, vertical: 'middle' }
+
+      // テキストが入っている最初の列を調べ、A〜K列を結合して読めるようにする
+      let firstText = -1
+      for (let c = 0; c < Math.min(vals.length, ANS); c++) {
+        if (vals[c] && vals[c] !== '□') { firstText = c; break }
+      }
+      if (firstText >= 0) {
+        try { ws.mergeCells(r.number, firstText + 1, r.number, ANS) } catch { /* 既に結合済み */ }
+        const cell = r.getCell(firstText + 1)
+        cell.alignment = { wrapText: true, vertical: 'middle' }
+        const v = String(vals[firstText])
+        if (ri === 0) {
+          cell.font = { bold: true, size: 13 }
+        } else if (/^\s*\d+\.\s/.test(v)) {
+          // 大見出し
+          cell.font = { bold: true, size: 11 }
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCE6F1' } }
+        } else if (v.startsWith('※') || v.startsWith('・') || v.startsWith('AdvaNceD')) {
+          // 説明文
+          cell.font = { size: 9, color: { argb: 'FF555555' } }
+        }
+        // 行の高さを文字数から推定
+        const len = v.length
+        r.height = Math.min(120, Math.max(20, Math.ceil(len / 60) * 16 + 6))
+      }
+
+      // 回答欄
+      r.eachCell({ includeEmpty: false }, (cell) => {
+        const v = String(cell.value ?? '')
+        if (v === '□' || v === '✔') {
+          cell.fill = YELLOW
+          cell.alignment = { horizontal: 'center', vertical: 'middle' }
+          cell.font = { bold: true, size: 12 }
+          cell.border = {
+            top: { style: 'thin' }, bottom: { style: 'thin' },
+            left: { style: 'thin' }, right: { style: 'thin' },
+          }
+        }
+      })
+    })
+    ws.views = [{ state: 'frozen', ySplit: 1 }]
+  }
+
+  const buf = await wb.xlsx.writeBuffer()
+  const fname = `hearing_${(info.client || 'sheet').replace(/[\\/:*?"<>|]/g, '')}_${new Date().toISOString().slice(0, 10)}.xlsx`
+  return new NextResponse(buf as ArrayBuffer, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(fname)}`,
+    },
+  })
+}

@@ -1,0 +1,10 @@
+﻿繝薙ず繝ｧ繝ｳ譯井ｻｶ: 3 莉ｶ
+
+id=3a18499f-5214-4d69-9260-fad56f4596fd  譬ｪ蠑丈ｼ夂､ｾ繝薙ず繝ｧ繝ｳ
+    app_equips         {"surface":2,"kiosk":2,"passport":2,"smartlock":1,
+    app_imported_at    2026-10-29 13:29
+    dashboard_todos 縺ｮ繧ｭ繝ｼ謨ｰ: 5
+id=f1f299a0-8f64-41d2-99b2-42421300f678  譬ｪ蠑丈ｼ夂､ｾ繝薙ず繝ｧ繝ｳ
+    app_* 縺ｪ縺・    dashboard_todos 縺ｮ繧ｭ繝ｼ謨ｰ: 2
+id=d9cc2c97-a7cd-4d09-8bb8-2922c9b66976  譬ｪ蠑丈ｼ夂､ｾ繝薙ず繝ｧ繝ｳ
+    app_* 縺ｪ縺・    dashboard_todos 縺ｮ繧ｭ繝ｼ謨ｰ: 2

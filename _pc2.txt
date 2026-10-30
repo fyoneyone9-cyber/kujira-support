@@ -1,0 +1,36 @@
+﻿backup: C:\GensparkClaw\kujira-support\src\components\Sidebar.tsx.bak_clock_20261029_174552
+--- L112-145 ---
+ 112|     return () => clearInterval(t)
+ 113|   }, [])
+ 114| 
+ 115|   const handleLogout = async () => {
+ 116|     const supabase = createClient()
+ 117|     await supabase.auth.signOut()
+ 118|     router.push('/login')
+ 119|   }
+ 120| 
+ 121|   const dateStr = `${now.getMonth() + 1}/${now.getDate()}・・{JP_DAYS[now.getDay()]}・荏
+ 122|   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+ 123| 
+ 124|   return (
+ 125|     <aside className="w-64 min-h-screen bg-slate-800 border-r border-slate-700 flex flex-col">
+ 126|       {/* Logo + 譌･莉・*/}
+ 127|       <div className="p-6 border-b border-slate-700">
+ 128|         <div className="flex items-center gap-3">
+ 129|           <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl">
+ 130|             遂
+ 131|           </div>
+ 132|           <div>
+ 133|             <p className="font-bold text-white text-base">KUJIRA</p>
+ 134|             <p className="text-slate-400 text-sm">繧ｵ繝昴・繝医す繧ｹ繝・Β</p>
+ 135|           </div>
+ 136|         </div>
+ 137|         {/* 譌･莉倥・譎ょ綾 */}
+ 138|         <div className="mt-3 space-y-0.5">
+ 139|           <div className="text-white font-bold text-xl">{dateStr}</div>
+ 140|           <div className="text-slate-300 text-lg font-semibold">{timeStr}</div>
+ 141|         </div>
+ 142|       </div>
+ 143| 
+ 144|       {/* 繝溘ル繧ｫ繝ｬ繝ｳ繝繝ｼ */}
+ 145|       <MiniCalendar />

@@ -1,0 +1,5 @@
+﻿backup: C:\GensparkClaw\kujira-support\src\components\Sidebar.tsx.bak_sidebar2_20261029_174534
+return at L57
+guard inserted
+clock L122| const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+clock L140| <div className="text-slate-300 text-lg font-semibold">{timeStr}</div>

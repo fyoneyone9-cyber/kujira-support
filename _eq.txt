@@ -1,0 +1,22 @@
+﻿var EQUIP_SHEETS = {
+  pms:        ['PMS'],
+  smartlock:  ['繧ｹ繝槭・繝医Ο繝・け竭', '繧ｹ繝槭・繝医Ο繝・け竭｡'],
+  cardkey:    ['繧ｫ繝ｼ繝峨く繝ｼ'],
+  cylinder:   ['繧ｷ繝ｪ繝ｳ繝繝ｼ骭'],
+  cash:       ['迴ｾ驥第ｱｺ貂・],
+  p400:       ['遶ｯ譛ｫ繧ｫ繝ｼ繝画ｱｺ貂・],
+  sumaho:     ['繧ｹ繝槭・繧ｫ繝ｼ繝画ｱｺ貂・],
+  paypay:     ['PayPay豎ｺ貂・],
+  printer:    ['繝励Μ繝ｳ繧ｿ'],
+  roomtablet: ['繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ'],
+  frontci:    ['繝輔Ο繝ｳ繝医メ繧ｧ繝・け繧､繝ｳ'],
+  precheckin: ['莠句燕繝√ぉ繝・け繧､繝ｳ']
+};
+
+/** 蟶ｸ縺ｫ谿九☆繧ｷ繝ｼ繝・*/
+var ALWAYS = ['蠢・育｢ｺ隱坂蔵', '蠢・育｢ｺ隱坂贈', '蠢・育｢ｺ隱坂造'];
+
+function showDialog() {
+  var html = HtmlService.createHtmlOutputFromFile('dialog')
+    .setWidth(420).setHeight(560);
+  SpreadsheetApp.getUi().showModalDial

@@ -1,0 +1,18 @@
+﻿繝懊ャ繧ｯ繧ｹ縺ｮ逋ｺ豕ｨ縺後ヶ繝ｭ繝・け縺輔ｌ繧狗ｭ峨・螳溷ｮｳ縺悟・繧九・
+  //   笞 陬ｽ蜩∝崋譛峨・諠・ｱ(蜿ｰ謨ｰ/陬ｽ蜩∝錐/邏肴悄/騾ｲ謐・MTID遲・縺ｯ縺薙％縺ｫ蜈･繧後↑縺・％縺ｨ縲・
+  const SIBLING_SHARED_KEY = (k: string) =>
+    // 笞 manual_due_date(邏榊刀莠亥ｮ壽律)縺ｯ陬ｽ蜩√＃縺ｨ縺ｫ逡ｰ縺ｪ繧九・縺ｧ蜷梧悄蟇ｾ雎｡螟悶・
+    //   荳九・ /_date$/ 邉ｻ繝代ち繝ｼ繝ｳ縺ｫ蟾ｻ縺崎ｾｼ縺ｾ繧後↑縺・ｈ縺・怙蛻昴↓髯､螟悶☆繧九・
+    k !== 'manual_due_date' && (
+    /^manual_.*_status$/.test(k) ||          // P400/PayCube/VEGA3000 縺ｮ謇矩・迥ｶ豕・
+    /_order_date$/.test(k) ||                // 逋ｺ豕ｨ譌･
+    /_arrive_date$/.test(k) ||               // 蛻ｰ逹莠亥ｮ壽律
+    /_actual_date$/.test(k) ||               // 螳溷芦逹譌･
+    k === 'keybox_status' || k === 'paypay_status' ||
+    k === 'payment_status' || k === 'payment_memo')
+
+  // 蜷後§迴ｾ蝣ｴ(莨夂､ｾ蜷・險ｭ鄂ｮ蜈井ｽ乗園)縺ｮ莉悶・陦後ｒ霑斐☆
+  const siblingsOf = (it: DeliveryItem) =>
+    items.filter(x => x.id !== it.id &&
+      x.client_name === it.client_name &&
+      (x.install_address || '') === (it.in

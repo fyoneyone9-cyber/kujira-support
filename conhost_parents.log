@@ -1,0 +1,10 @@
+﻿=== 開始 10/20/2026 09:54:32 ===
+09:56:02 conhost PID=34832
+  親: powershell.exe PID=9356 cmd="C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\GensparkClaw\kujira-support\watchdog.ps1
+  祖: svchost.exe PID=2292 cmd=
+
+09:57:26 conhost PID=35688
+  親:  PID=27644 cmd=
+  祖:  PID= cmd=
+
+=== 終了 10/20/2026 09:57:33 ===

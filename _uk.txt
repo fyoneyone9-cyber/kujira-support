@@ -1,0 +1,2 @@
+﻿GAS: 繧ｭ繝ｼ繝ｯ繝ｼ繝芽｡ｨ繧呈峩譁ｰ・・aypay/roomtablet 繧貞炎髯､縲〔oji 繧定ｿｽ蜉・・
+page.tsx: roomtablet/paypay 繧貞炎髯､縲〔oji 繧定ｿｽ蜉

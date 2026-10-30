@@ -1,0 +1,22 @@
+﻿   43| hearing_sheet_url?: string | null
+  342| hearing_sheet_url: 'https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit?gid=849864762#gid=849864762',
+  348| { key: 'hearing_sheet_url', label: '繝偵い繝ｪ繝ｳ繧ｰ', color: 'text-purple-400',  alertable: true },
+  429| const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
+  430| const toggleSection = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }))
+  991| if (!it.hearing_sheet_url && !it.dashboard_todos?.['hearing_sheet_url_skip']) ltWarnings.push('繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医Μ繝ｳ繧ｯ縺梧悴逋ｻ骭ｲ')
+ 1025| if (!it.hearing_sheet_url && !it.dashboard_todos?.['hearing_sheet_url_skip']) cardAlerts.push({ label: '搭 繝偵い繝ｪ繝ｳ繧ｰ譛ｪ逋ｻ骭ｲ', target: urlSec })
+ 1378| className={`text-xs px-2 py-0.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-700 text-purple-300 rounded whitespace-nowrap ${it.hearing_sheet_url ?
+ 1383| {it.hearing_sheet_url && (
+ 1384| <a href={it.hearing_sheet_url} target="_blank" rel="noreferrer"
+ 1403| const hearingUrl = it.hearing_sheet_url
+ 1404| const hearingSkip = it.dashboard_todos?.['hearing_sheet_url_skip']
+ 1476| onClick={() => toggleSection(`hearing_${it.id}`)}
+ 1494| <span className="ml-auto text-slate-500 text-xs">{openSections[`hearing_${it.id}`] ? '笆ｲ 髢峨§繧・ : '笆ｼ 髢九￥'}</span>
+ 1496| {openSections[`hearing_${it.id}`] && <div className="px-3 pb-3 space-y-2">
+ 1531| const navSkip = it.dashboard_todos?.['hearing_nav_skip']
+ 1535| <button onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'hearing_nav_skip', '')}
+ 1905| onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'hearing_nav_skip', '1')}
+ 1954| <span role="button" onClick={() => toggleSection(`jit_${it.id}`)}
+ 1957| {openSections[`jit_${it.id}`] && it.jitbox_ordered !== false && (
+ 2056| className="ml-auto text-slate-500 text-xs cursor-pointer hover:text-slate-300">{(openSections[`worker_${it.id}`] ?? workerNeeded) ? '笆ｲ 髢峨§繧・ : '笆ｼ 髢九￥'}</span>
+ 2058| {(openSections[`worker_${it.id}`] ?? workerNeeded) && <div>

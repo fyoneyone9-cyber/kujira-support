@@ -1,0 +1,5 @@
+﻿backup: C:\GensparkClaw\kujira-support\src\components\Sidebar.tsx.bak_clock2_20261029_174618
+now decl L108| const [now, setNow] = useState(new Date())
+dateStr patched L121
+timeStr patched L122
+patched OK

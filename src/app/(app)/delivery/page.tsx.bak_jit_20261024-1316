@@ -1,0 +1,1415 @@
+﻿'use client'
+
+export const dynamic = 'force-dynamic'
+
+import { useEffect, useState } from 'react'
+
+type Equipment = { name?: string; value?: string }
+
+type DeliveryItem = {
+  id: string
+  client_name: string
+  install_address: string
+  product_name: string
+  quantity: number | null
+  progress: string
+  assignee: string
+  delivery_due_date: string
+  delivery_date: string | null
+  contact_name: string
+  contact_tel1: string
+  contact_tel2: string
+  notes: string
+  status: string
+  created_at: string
+  dashboard_memo?: string | null
+  dashboard_todos?: Record<string, unknown> | null
+  worker_needed?: boolean | null
+  worker_contacts?: { name?: string; tel?: string; email?: string }[] | null
+  work_date?: string | null
+  jitbox_ordered?: boolean | null
+  p400_mtid?: string | null
+  p400_tid?: string | null
+  locked?: boolean | null
+  p400_status?: string | null
+  paycube_status?: string | null
+  vega3000_status?: string | null
+  equipment?: Equipment[] | null
+  item_key?: string | null
+  slack_url?: string | null
+  hubspot_url?: string | null
+  process_sheet_url?: string | null
+  hearing_sheet_url?: string | null
+  payment_received?: boolean | null
+  missing_in_last_import?: boolean | null
+  assignee_name?: string | null
+  pms_linked?: boolean | null
+  smartlock_linked?: boolean | null
+}
+
+type AlertLevel = 'overdue' | 'critical' | 'urgent' | 'warning' | 'ok'
+
+function daysLeft(dueDate: string): number {
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const due = new Date(dueDate)
+  return Math.ceil((due.getTime() - today.getTime()) / 86400000)
+}
+
+function getAlertLevel(dueDate: string): AlertLevel {
+  const days = daysLeft(dueDate)
+  if (days < 0) return 'overdue'
+  if (days <= 3) return 'critical'
+  if (days <= 7) return 'urgent'
+  if (days <= 14) return 'warning'
+  return 'ok'
+}
+
+const levelStyle: Record<AlertLevel, { bg: string; border: string; badge: string; label: string; icon: string }> = {
+  overdue:  { bg: 'bg-red-950/70',    border: 'border-red-400',    badge: 'bg-red-700 text-white',       label: '期限超過', icon: '🚨' },
+  critical: { bg: 'bg-red-950/60',    border: 'border-red-500',    badge: 'bg-red-600 text-white',       label: '3日以内',  icon: '🚨' },
+  urgent:   { bg: 'bg-orange-950/60', border: 'border-orange-500', badge: 'bg-orange-500 text-white',    label: '1週間以内', icon: '⚠️' },
+  warning:  { bg: 'bg-yellow-950/60', border: 'border-yellow-500', badge: 'bg-yellow-600 text-white',    label: '2週間以内', icon: '📦' },
+  ok:       { bg: 'bg-slate-800',     border: 'border-slate-700',  badge: 'bg-slate-600 text-slate-200', label: '余裕あり',  icon: '✅' },
+}
+
+// 設置先住所からJITボックスのリードタイムを判定（大阪発）
+function jitLeadDays(address: string): number {
+  if (/北海道|沖縄|離島/.test(address)) return 3
+  return 2
+}
+
+// P400/PayCube=60日（2か月）、PayPay=10日、Vega3000=14日
+const LEAD_TIME: Record<string, number> = { 'P400': 60, 'PayCube': 60, 'PayPay': 60 }
+const EQUIP_STATUSES = ['未発注', '発注済み', '入荷履歴', '発送済み', '納品完了', '設定完了']
+
+type TodoItem = { label: string; deadlineDate: string | null; urgent: boolean }
+
+// 自由記入欄：外部からvalueが変わったら内部stateも同期
+function MemoField({ id, value, onSave }: { id: string; value: string; onSave: (id: string, memo: string) => void }) {
+  const [text, setText] = useState(value)
+  useEffect(() => { setText(value) }, [value])
+  return (
+    <textarea
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      onBlur={() => onSave(id, text)}
+      placeholder="メモ・状況・連絡事項など"
+      className="flex-1 px-3 py-2 text-sm bg-slate-900/60 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 resize-y"
+      rows={3}
+    />
+  )
+}
+
+// 日付に日数を加算してYYYY-MM-DD返却
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr)
+  d.setDate(d.getDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+function buildTodoItems(
+  equipment: Equipment[] | null | undefined,
+  workerNeeded: boolean | null | undefined,
+  dueDate: string,
+  jitDays: number,
+  workDate: string | null | undefined,
+  paymentReceived: boolean | null | undefined
+): TodoItem[] {
+  const eq = equipment || []
+  const today = new Date(); today.setHours(0,0,0,0)
+  const makeItem = (label: string, deadlineDaysBeforeDue: number | null): TodoItem => {
+    const deadlineDate = deadlineDaysBeforeDue !== null ? addDays(dueDate, -deadlineDaysBeforeDue) : null
+    const urgent = deadlineDate ? (new Date(deadlineDate).getTime() - today.getTime()) / 86400000 <= 3 : false
+    return { label, deadlineDate, urgent }
+  }
+  const todos: TodoItem[] = []
+  if (eq.find(e => e.name === 'P400'))     todos.push(makeItem('P400 手配', 60))
+  if (eq.find(e => e.name === 'PayCube')) {
+    if (paymentReceived) {
+      todos.push(makeItem('PayCube 手配', 60))
+    } else {
+      todos.push({ label: 'PayCube 手配（入金待ち）', deadlineDate: null, urgent: false })
+    }
+  }
+  if (eq.find(e => e.name === 'PayPay'))   todos.push(makeItem('PayPay 手配', 60))
+  todos.push(makeItem('JITボックス 発注', jitDays))
+  if (workerNeeded) {
+    const baseDate = workDate ? workDate : dueDate
+    const wDeadline = addDays(baseDate, -21)
+    const wDays = Math.ceil((new Date(wDeadline).getTime() - today.getTime()) / 86400000)
+    todos.push({ label: '作業員 手配', deadlineDate: wDeadline, urgent: wDays <= 3 })
+  }
+  todos.push(makeItem('出荷 手配', jitDays))
+  todos.push(makeItem('施工日 確定', 14))
+  return todos
+}
+
+// 機材デート管理コンポーネント（発注日・到着予定日・実到着日）
+type EquipDateProps = {
+  name: string
+  todos: Record<string, unknown> | null | undefined
+  onSave: (key: string, val: string) => void
+  dueDate: string
+}
+function EquipDates({ name, todos, onSave, dueDate }: EquipDateProps) {
+  const prefix = name.toLowerCase().replace(/[^a-z0-9]/g, '')
+  const orderKey  = `${prefix}_order_date`
+  const arriveKey = `${prefix}_arrive_date`
+  const actualKey = `${prefix}_actual_date`
+  const lt = LEAD_TIME[name] || 0
+
+  const [orderDate,  setOrderDate]  = useState((todos?.[orderKey]  as string) || '')
+  const [arriveDate, setArriveDate] = useState((todos?.[arriveKey] as string) || '')
+  const [actualDate, setActualDate] = useState((todos?.[actualKey] as string) || '')
+
+  // 外部（楽観的更新）からtodosが変わったら同期
+  useEffect(() => { setOrderDate((todos?.[orderKey]  as string) || '') }, [todos?.[orderKey]])
+  useEffect(() => { setArriveDate((todos?.[arriveKey] as string) || '') }, [todos?.[arriveKey]])
+  useEffect(() => { setActualDate((todos?.[actualKey] as string) || '') }, [todos?.[actualKey]])
+
+  const calcArrive = (od: string) => {
+    if (!od || !lt) return ''
+    const d = new Date(od); d.setDate(d.getDate() + lt)
+    return d.toISOString().slice(0, 10)
+  }
+
+  const expectedArrive = arriveDate || calcArrive(orderDate)
+  const arriveVsDue = expectedArrive && dueDate ? daysLeft(dueDate) - daysLeft(expectedArrive) : null
+
+  return (
+    <div className="mt-2 bg-slate-900/40 rounded-lg px-3 py-2 space-y-1.5">
+      <div className="flex items-center gap-2 text-xs">
+        <span className="text-slate-500 w-20">発注日:</span>
+        <input type="date" value={orderDate}
+          onChange={e => setOrderDate(e.target.value)}
+          onBlur={e => {
+            onSave(orderKey, e.target.value)
+            if (e.target.value && !arriveDate) {
+              const calc = calcArrive(e.target.value)
+              setArriveDate(calc)
+              onSave(arriveKey, calc)
+            }
+          }}
+          className="px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded text-white text-xs"
+        />
+      </div>
+      <div className="flex items-center gap-2 text-xs">
+        <span className="text-slate-500 w-20">到着予定:</span>
+        <input type="date" value={arriveDate || calcArrive(orderDate)}
+          onChange={e => setArriveDate(e.target.value)}
+          onBlur={e => onSave(arriveKey, e.target.value)}
+          className="px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded text-white text-xs"
+        />
+        {arriveVsDue !== null && (
+          <span className={`text-xs font-bold ${arriveVsDue < 0 ? 'text-red-400 animate-pulse' : arriveVsDue < 7 ? 'text-orange-400' : 'text-green-400'}`}>
+            {arriveVsDue < 0 ? `納品日${-arriveVsDue}日後到着→間に合わない！` : `納品日まで${arriveVsDue}日前到着`}
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-2 text-xs">
+        <span className="text-slate-500 w-20">実到着日:</span>
+        <input type="date" value={actualDate}
+          onChange={e => setActualDate(e.target.value)}
+          onBlur={e => onSave(actualKey, e.target.value)}
+          className="px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded text-white text-xs"
+        />
+        {actualDate && <span className="text-green-400 text-xs">入荷確認済</span>}
+      </div>
+      {lt > 0 && <p className="text-slate-600 text-xs">リードタイム目安: {lt}日</p>}
+    </div>
+  )
+}
+
+type PaymentSectionProps = {
+  it: DeliveryItem
+  patch: (id: string, u: Record<string, unknown>) => void
+  saveTodoKey: (id: string, todos: Record<string, unknown> | null | undefined, key: string, val: string) => void
+}
+function PaymentSection({ it, patch, saveTodoKey }: PaymentSectionProps) {
+  const [open, setOpen] = useState(false)
+  const payStatus = (it.dashboard_todos?.['payment_status'] as string) || '請求未発行'
+  const badgeColor = payStatus === '入金不要（無償）' ? 'bg-slate-600 text-slate-300' :
+    payStatus === '入金確認済み' ? 'bg-green-800 text-green-200' :
+    payStatus === '入金超過・要確認' ? 'bg-red-800 text-red-200 animate-pulse' :
+    payStatus === '入金待ち' ? 'bg-yellow-800 text-yellow-200' :
+    payStatus === '見積書作成中（確認中）' ? 'bg-indigo-800 text-indigo-200' :
+    payStatus === '見積書送付済み' ? 'bg-teal-800 text-teal-200' :
+    payStatus === '請求書発行済' ? 'bg-blue-800 text-blue-200' :
+    'bg-slate-700 text-slate-400'
+  return (
+    <div className="border-t border-slate-700/50 pt-3 space-y-3">
+      <button onClick={() => setOpen(v => !v)} className="flex items-center gap-2 w-full text-left">
+        <span className="text-slate-400 font-bold text-sm">入金管理</span>
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeColor}`}>{payStatus}</span>
+        <span className="ml-auto text-slate-500 text-xs">{open ? '▲ 閉じる' : '▼ 開く'}</span>
+      </button>
+      {open && (
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-1.5">
+            {['入金不要（無償）', '請求未発行', '見積書作成中（確認中）', '見積書送付済み', '請求書発行済', '入金待ち', '入金確認済み', '入金超過・要確認'].map(st => {
+              const isActive = payStatus === st
+              const isDone = st === '入金確認済み'
+              const isAlert = st === '入金超過・要確認'
+              return (
+                <button key={st}
+                  onClick={() => {
+                    saveTodoKey(it.id, it.dashboard_todos, 'payment_status', st)
+                    if (isDone || st === '入金不要（無償）') patch(it.id, { payment_received: true })
+                    else if (isActive) patch(it.id, { payment_received: false })
+                  }}
+                  className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${
+                    isActive && isDone ? 'bg-green-700 text-white' :
+                    isActive && isAlert ? 'bg-red-700 text-white animate-pulse' :
+                    isActive ? 'bg-blue-600 text-white' :
+                    'bg-slate-700 text-slate-300 hover:bg-slate-500'
+                  }`}>{st}</button>
+              )
+            })}
+          </div>
+          {!it.payment_received && payStatus !== '入金不要（無償）' && (it.equipment || []).some((e: {name?: string}) => e.name === 'PayCube') && <p className="text-xs text-orange-400 font-bold">⚠️ PayCubeは入金確認後に発注</p>}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500 w-28">請求書発行日:</span>
+            <input type="date" defaultValue={(it.dashboard_todos?.['invoice_date'] as string) || ''}
+              onBlur={(e) => saveTodoKey(it.id, it.dashboard_todos, 'invoice_date', e.target.value)}
+              className="px-2 py-0.5 text-xs bg-slate-800 border border-slate-600 rounded text-white" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500 w-28">入金期限日:</span>
+            <input type="date" defaultValue={(it.dashboard_todos?.['payment_due_date'] as string) || ''}
+              onBlur={(e) => saveTodoKey(it.id, it.dashboard_todos, 'payment_due_date', e.target.value)}
+              className="px-2 py-0.5 text-xs bg-slate-800 border border-slate-600 rounded text-white" />
+            {(() => {
+              const pd = it.dashboard_todos?.['payment_due_date'] as string
+              if (!pd || it.payment_received) return null
+              const d = Math.ceil((new Date(pd).getTime() - new Date().setHours(0,0,0,0)) / 86400000)
+              if (d < 0) return <span className="text-xs text-red-400 font-bold animate-pulse">{-d}日超過!</span>
+              if (d <= 5) return <span className="text-xs text-orange-400 font-bold">残{d}日</span>
+              return null
+            })()}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500 w-28">エビデンスURL:</span>
+            <input type="url" defaultValue={(it.dashboard_todos?.['payment_evidence_url'] as string) || ''}
+              placeholder="https://"
+              onBlur={(e) => saveTodoKey(it.id, it.dashboard_todos, 'payment_evidence_url', e.target.value)}
+              className="flex-1 px-2 py-0.5 text-xs bg-slate-900 border border-slate-600 rounded text-slate-200 placeholder-slate-600" />
+            {(it.dashboard_todos?.['payment_evidence_url'] as string) && (
+              <a href={it.dashboard_todos!['payment_evidence_url'] as string} target="_blank" rel="noreferrer" className="text-xs text-blue-400 hover:underline flex-shrink-0">開く</a>
+            )}
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-xs text-slate-500 w-28 pt-0.5">入金メモ:</span>
+            <textarea defaultValue={(it.dashboard_todos?.['payment_memo'] as string) || ''}
+              placeholder="入金遅延理由・分割払い・小言など"
+              onBlur={(e) => saveTodoKey(it.id, it.dashboard_todos, 'payment_memo', e.target.value)}
+              className="flex-1 px-2 py-1 text-xs bg-slate-800 border border-slate-600 rounded text-slate-200 placeholder-slate-600 resize-y"
+              rows={2} />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+type UrlSectionProps = { it: DeliveryItem; patch: (id: string, u: Record<string, unknown>) => void; saveTodoKey: (id: string, todos: Record<string, unknown> | null | undefined, key: string, val: string) => void }
+function UrlSection({ it, patch, saveTodoKey }: UrlSectionProps) {
+  const [editing, setEditing] = useState(false)
+  const TEMPLATE_URLS: Partial<Record<keyof DeliveryItem, string>> = {
+    process_sheet_url: 'https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=159741708#gid=159741708',
+    hearing_sheet_url: 'https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit?gid=849864762#gid=849864762',
+  }
+  const fields: { key: keyof DeliveryItem; label: string; color: string; alertable?: boolean }[] = [
+    { key: 'slack_url',         label: 'Slack',      color: 'text-blue-400',    alertable: true },
+    { key: 'hubspot_url',       label: 'HubSpot',    color: 'text-orange-400' },
+    { key: 'process_sheet_url', label: '工程表',     color: 'text-green-400',   alertable: true },
+    { key: 'hearing_sheet_url', label: 'ヒアリング', color: 'text-purple-400',  alertable: true },
+  ]
+  const hasAny = fields.some(f => !!it[f.key])
+  return (
+    <div className="border-t border-slate-700/50 pt-3 space-y-2">
+      <div className="flex items-center gap-2">
+        <p className="text-slate-400 font-bold text-sm">リンク</p>
+        <button onClick={() => setEditing(v => !v)}
+          className="text-xs px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded">
+          {editing ? '閉じる' : 'URL編集'}
+        </button>
+      </div>
+      {!editing && hasAny && (
+        <div className="flex flex-wrap gap-3 text-sm">
+          {fields.map(f => {
+            const v = it[f.key] as string | null | undefined
+            return v ? <a key={f.key} href={v} target="_blank" rel="noreferrer" className={`hover:underline ${f.color}`}>{f.label}</a> : null
+          })}
+        </div>
+      )}
+      {!editing && !hasAny && <p className="text-xs text-slate-600">リンクなし（URL編集から追加）</p>}
+      {editing && (
+        <div className="space-y-2">
+          {fields.map(f => {
+            const v = (it[f.key] as string | null | undefined) || ''
+            return (
+              <div key={f.key} className="flex items-center gap-2">
+                <span className={`text-xs font-medium w-24 flex-shrink-0 ${f.color}`}>{f.label}</span>
+                <input type="url" defaultValue={v} placeholder="https://"
+                  onBlur={(e) => { if (e.target.value !== v) patch(it.id, { [f.key]: e.target.value || null }) }}
+                  className="flex-1 px-2 py-0.5 text-xs bg-slate-900 border border-slate-600 rounded text-slate-200 placeholder-slate-600"
+                />
+                {v && <a href={v} target="_blank" rel="noreferrer" className={`text-xs hover:underline flex-shrink-0 ${f.color}`}>開く</a>}
+                {TEMPLATE_URLS[f.key] && (
+                  <a href={TEMPLATE_URLS[f.key]} target="_blank" rel="noreferrer"
+                    className="text-xs px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 flex-shrink-0 whitespace-nowrap">
+                    📄 雛形
+                  </a>
+                )}
+                {f.alertable && !v && (
+                  <button
+                    onClick={() => {
+                      const skipKey = `${f.key}_skip`
+                      const cur = it.dashboard_todos?.[skipKey]
+                      saveTodoKey(it.id, it.dashboard_todos, skipKey, cur ? '' : '1')
+                    }}
+                    className={`text-xs px-2 py-0.5 rounded font-medium transition-colors flex-shrink-0 ${
+                      it.dashboard_todos?.[`${f.key}_skip`] ? 'bg-slate-600 text-slate-300' : 'bg-transparent border border-slate-600 text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    {it.dashboard_todos?.[`${f.key}_skip`] ? '✓ 不要' : '不要'}
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function DeliveryPage() {
+  const [items, setItems] = useState<DeliveryItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<'alert' | 'all' | 'progress' | 'done'>('alert')
+  const [assigneeFilter, setAssigneeFilter] = useState<string>('米山')
+  const [allAssignees, setAllAssignees] = useState<string[]>([])
+  const [allItems, setAllItems] = useState<DeliveryItem[]>([])
+  const [updating, setUpdating] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<string | null>(null)
+  const [csvQueue, setCsvQueue] = useState<File[]>([])
+  const [stats, setStats] = useState<{ total: number; lastImport: string | null; progressAlertCount?: number } | null>(null)
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [rebuildState, setRebuildState] = useState<'idle'|'running'|'success'|'failed'>('idle')
+  const [isStale, setIsStale] = useState<boolean>(false)
+  const [popupAlerts, setPopupAlerts] = useState<{id: string; client: string; reason: string; days: number; assignee: string}[]>([])
+  const [popupDismissed, setPopupDismissed] = useState(false)
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
+  const toggleSection = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }))
+
+  const load = async () => {
+    setLoading(true)
+    const mode = filter === 'alert' ? '?mode=alert' : ''
+    const res = await fetch(`/api/delivery/items${mode}`, { cache: 'no-store' })
+    const d = await res.json()
+    let data: DeliveryItem[] = d.items || []
+    if (filter === 'done') data = data.filter(i => i.status === 'done')
+    else if (filter === 'progress') data = data.filter(i => i.status === 'active')
+    else data = data.filter(i => i.status !== 'done')
+    if (assigneeFilter !== 'all') data = data.filter(i => i.assignee === assigneeFilter)
+    // DBの最新データを基本としつつ、UIのみの一時状態（status等の楽観更新）を保持
+    // ※ dashboard_todos / dashboard_memo / status系はDB値を優先してリセットを防ぐ
+    setItems(data.sort((a, b) => a.delivery_due_date.localeCompare(b.delivery_due_date)))
+    setLoading(false)
+  }
+
+  const loadStats = async () => {
+    const res = await fetch('/api/delivery/items')
+    const d = await res.json()
+    const all: DeliveryItem[] = d.items || []
+    setAllItems(all)
+    const names = Array.from(new Set(all.map((i: DeliveryItem) => i.assignee).filter(Boolean))).sort() as string[]
+    setAllAssignees(names)
+    const lastImport = all.length > 0 ? all.reduce((a, b) => a.created_at > b.created_at ? a : b).created_at : null
+    const now = Date.now()
+    const pac = all.filter(i => {
+      if (i.status === 'done') return false
+      if (!i.delivery_due_date) return false
+      const diff = (new Date(i.delivery_due_date).getTime() - now) / (1000 * 60 * 60 * 24)
+      return diff <= 14
+    }).length
+    setStats({ total: all.length, lastImport, progressAlertCount: pac })
+    // 30日以内アラートの収集
+    const now2 = Date.now()
+    const alerts: {id: string; client: string; reason: string; days: number; assignee: string}[] = []
+    all.forEach(i => {
+      if (i.status === 'done') return
+      const client = i.client_name || ''
+      const dueDiff = i.delivery_due_date ? Math.ceil((new Date(i.delivery_due_date).getTime() - now2) / 86400000) : null
+      const assignee = i.assignee || ''
+      if (dueDiff !== null && dueDiff <= 30)
+        alerts.push({ id: i.id, client, reason: '納期', days: dueDiff, assignee })
+      if (i.worker_needed && i.work_date) {
+        const wDiff = Math.ceil((new Date(i.work_date).getTime() - now2) / 86400000)
+        if (wDiff <= 30)
+          alerts.push({ id: i.id, client, reason: '作業日', days: wDiff, assignee })
+      }
+      // PMS/スマートロック未連携 30日前アラート
+      if (dueDiff !== null && dueDiff <= 30) {
+        const equip = i.equipment || []
+        const PMS_PAT = /pms|airhost|suitebook|temairazu|innkeeper|staypro|宿泊|ホテル管理/i
+        const LOCK_PAT = /スマートロック|smart.?lock|remotelock|ttlock|epic|bitlock|qrio|akerun|igloohome|lock/i
+        const hasPms = equip.some(e => PMS_PAT.test(e.name || '') || PMS_PAT.test(e.value || ''))
+        const hasLock = equip.some(e => LOCK_PAT.test(e.name || '') || LOCK_PAT.test(e.value || ''))
+        if (hasPms && i.pms_linked === null)
+          alerts.push({ id: i.id, client, reason: 'PMS未連携', days: dueDiff ?? 0, assignee })
+        if (hasLock && i.smartlock_linked === null)
+          alerts.push({ id: i.id, client, reason: 'スマートロック未連携', days: dueDiff ?? 0, assignee })
+      }
+    })
+    alerts.sort((a, b) => a.days - b.days)
+    if (alerts.length > 0) setPopupAlerts(alerts)
+  }
+
+  const patch = async (id: string, updates: Record<string, unknown>) => {
+    setUpdating(id)
+    setItems(prev => prev.map(it => it.id === id ? { ...it, ...updates } : it))
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...updates })
+    })
+    setUpdating(null)
+  }
+
+  const saveTodoKey = async (id: string, currentTodos: Record<string, unknown> | null | undefined, key: string, val: string) => {
+    const todos = { ...(currentTodos || {}), [key]: val || null }
+    // 楽観的更新（保存前にUIに即反映）
+    setItems(prev => prev.map(it => it.id === id ? { ...it, dashboard_todos: todos } : it))
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, dashboard_todos: todos })
+    })
+  }
+
+  const saveMemo = async (id: string, memo: string) => {
+    setItems(prev => prev.map(it => it.id === id ? { ...it, dashboard_memo: memo } : it))
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, dashboard_memo: memo })
+    })
+  }
+
+  const markDone = (id: string) => {
+    if (!window.confirm('本当に納品完了しましたか？\n\n「はい」を押すと「納品完了分」に移動します。')) return
+    patch(id, { status: 'done', acknowledged_at: new Date().toISOString() })
+  }
+
+  useEffect(() => { load() }, [filter, assigneeFilter])
+  useEffect(() => { loadStats() }, [])
+  useEffect(() => {
+    const checkStale = async () => {
+      try { const r = await fetch('/api/admin/build-status'); const d = await r.json(); setIsStale(!!d.isStale) } catch {}
+    }
+    checkStale(); const t = setInterval(checkStale, 60000); return () => clearInterval(t)
+  }, [])
+
+  const triggerRebuild = async () => {
+    if (!window.confirm('コードの変更をビルドしてサーバーを再起動します。1〜3分かかります。実行しますか？')) return
+    setRebuildState('running')
+    try { await fetch('/api/admin/rebuild', { method: 'POST' }) } catch {}
+    const started = Date.now()
+    let serverWasDown = false
+    let serverDownAt = 0
+    const TOTAL_TIMEOUT = 5 * 60 * 1000   // 5分でタイムアウト
+    const DOWN_RECOVER_TIMEOUT = 2 * 60 * 1000  // サーバーが落ちてから2分復帰しなければ手動起動案内
+
+    const poll = setInterval(async () => {
+      if (Date.now() - started > TOTAL_TIMEOUT) {
+        clearInterval(poll)
+        setRebuildState('failed')
+        alert('ビルドがタイムアウトしました。\nKUJIRA起動.bat を手動で起動してください。')
+        return
+      }
+      try {
+        const r = await fetch('/api/admin/rebuild/status', { cache: 'no-store' })
+        const d = await r.json()
+        if (d.done && d.success) {
+          clearInterval(poll); setRebuildState('success')
+          setTimeout(() => window.location.reload(), 2000)
+          return
+        } else if (d.done && !d.success) {
+          clearInterval(poll); setRebuildState('failed')
+          return
+        }
+        // サーバー応答あり → 一度落ちてから復帰した場合リロード
+        if (serverWasDown) {
+          clearInterval(poll); setRebuildState('success')
+          setTimeout(() => window.location.reload(), 1500)
+          return
+        }
+      } catch {
+        // サーバー再起動中
+        if (!serverWasDown) { serverWasDown = true; serverDownAt = Date.now() }
+        // サーバーが落ちてから DOWN_RECOVER_TIMEOUT 経過しても復帰しない → 手動起動案内
+        if (serverWasDown && Date.now() - serverDownAt > DOWN_RECOVER_TIMEOUT) {
+          clearInterval(poll); setRebuildState('success')
+          alert('ビルド完了！\nサーバーの自動再起動が検出できませんでした。\nKUJIRA起動.bat を手動で起動してください。')
+          return
+        }
+      }
+    }, 3000)
+  }
+
+  const q = searchQuery.trim().toLowerCase()
+  const searchBase = q
+    ? (assigneeFilter === 'all' ? allItems : allItems.filter(i => i.assignee === assigneeFilter))
+    : items
+  const displayItems = q
+    ? searchBase.filter(i =>
+        (i.client_name || '').toLowerCase().includes(q) ||
+        (i.install_address || '').toLowerCase().includes(q) ||
+        (i.product_name || '').toLowerCase().includes(q) ||
+        (i.assignee || '').toLowerCase().includes(q) ||
+        (i.assignee_name || '').toLowerCase().includes(q) ||
+        (i.p400_mtid || '').toLowerCase().includes(q) ||
+        (i.p400_tid || '').toLowerCase().includes(q) ||
+        (i.notes || '').toLowerCase().includes(q) ||
+        (i.contact_name || '').toLowerCase().includes(q)
+      )
+    : items
+
+  const overdue  = displayItems.filter(i => getAlertLevel(i.delivery_due_date) === 'overdue')
+  const critical = displayItems.filter(i => getAlertLevel(i.delivery_due_date) === 'critical')
+  const urgent   = displayItems.filter(i => getAlertLevel(i.delivery_due_date) === 'urgent')
+
+  const progressAlertCount = stats?.progressAlertCount ?? 0
+
+  // 10日以内アラートポップアップ
+  const filteredPopupAlerts = assigneeFilter === 'all'
+    ? popupAlerts
+    : popupAlerts.filter(a => a.assignee === assigneeFilter)
+
+  const AlertPopup = filteredPopupAlerts.length > 0 && !popupDismissed ? (
+    <div className="fixed bottom-5 right-5 z-50 bg-slate-800 border border-red-500 rounded-xl shadow-2xl p-4 w-80 animate-in slide-in-from-bottom-4">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-red-400 font-bold text-sm">⚠️ 30日以内の件 ({filteredPopupAlerts.length}件)</span>
+        <button onClick={() => setPopupDismissed(true)} className="text-slate-400 hover:text-white text-lg leading-none">×</button>
+      </div>
+      <div className="space-y-1.5 max-h-60 overflow-y-auto">
+        {filteredPopupAlerts.map((a, idx) => (
+          <div key={idx}
+            onClick={() => {
+              setPopupDismissed(true)
+              setTimeout(() => {
+                const el = document.getElementById(`card-${a.id}`)
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }, 100)
+            }}
+            className={`flex items-center gap-2 text-xs rounded px-2 py-1 cursor-pointer hover:opacity-80 ${a.days <= 3 ? 'bg-red-900/60 text-red-200' : a.days <= 7 ? 'bg-orange-900/60 text-orange-200' : a.days <= 14 ? 'bg-yellow-900/60 text-yellow-200' : 'bg-slate-700/60 text-slate-300'}`}>
+            <span className="font-bold w-12 shrink-0">{a.days <= 0 ? '期限超過' : `${a.days}日後`}</span>
+            <span className="shrink-0 text-slate-400">{a.reason}</span>
+            <span className="truncate">{a.client}</span>
+          </div>
+        ))}
+      </div>
+      <button onClick={() => { setFilter('progress'); setPopupDismissed(true) }} className="mt-3 w-full py-1.5 bg-yellow-700 hover:bg-yellow-600 text-white text-xs rounded-lg">納品管理（進行中）を開く</button>
+    </div>
+  ) : null
+
+  return (
+    <>
+    <div>
+      <div className="mb-6" suppressHydrationWarning>
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-2xl font-bold text-white">IoT製品 納品予定アラート</h1>
+          <button onClick={() => window.location.reload()} className="px-3 py-1 text-sm font-bold rounded-lg bg-slate-700 hover:bg-slate-500 text-white transition-colors">🔄 リロード</button>
+          <a href="zoom://" className="px-3 py-1 text-sm font-bold rounded-lg bg-blue-700 hover:bg-blue-600 text-white transition-colors">📞 Zoom</a>
+          <a href="https://attendance-app-prod-716327310989.asia-northeast1.run.app/" target="_blank" rel="noreferrer" className="px-3 py-1 text-sm font-bold rounded-lg bg-teal-700 hover:bg-teal-600 text-white transition-colors">⏰ 勤怠管理</a>
+          <a href="https://www.kujira-kts.com/index.php?out=1" target="_blank" rel="noreferrer" className="px-3 py-1 text-sm font-bold rounded-lg bg-blue-900 hover:bg-blue-800 text-white transition-colors">🐋 KTS</a>
+          <button
+            onClick={triggerRebuild}
+            disabled={rebuildState === 'running'}
+            className={`px-3 py-1 text-sm font-bold rounded-lg inline-flex items-center gap-1 disabled:opacity-70 ${
+              rebuildState === 'success' ? 'bg-green-700 text-white' :
+              rebuildState === 'failed' ? 'bg-red-700 text-white' :
+              rebuildState === 'running' ? 'bg-amber-700 text-white' :
+              'bg-slate-700 hover:bg-slate-600 text-white'
+            }`}
+          >
+            {rebuildState === 'running' && '⏳ ビルド中...'}
+            {rebuildState === 'success' && '✅ 反映完了'}
+            {rebuildState === 'failed' && '❌ ビルド失敗'}
+            {rebuildState === 'idle' && '🔧 更新を反映'}
+          </button>
+          {isStale && <span className="text-xs text-amber-400 font-bold animate-pulse">⚠️ 未反映の変更あり</span>}
+          <a href="https://dms.and-iot.jp/admin/support/login/" target="_blank" rel="noreferrer"
+            className="px-3 py-1 text-sm font-medium bg-sky-700 hover:bg-sky-600 text-white rounded-lg transition-colors">
+            🔗 DMSログイン
+          </a>
+          <a href="https://docs.google.com/spreadsheets/d/1FxK4x534LV2sGY54KKtbow1W6iLT0Z_YTzg_R8ba8Go/edit?gid=1821350545#gid=1821350545" target="_blank" rel="noreferrer"
+            className="px-3 py-1 text-sm font-medium bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg transition-colors">
+            📊 IoTスプレッドシート
+          </a>
+        </div>
+        <p className="text-slate-400 text-base mt-1">納品予定日が近いものから自動で上位表示。CSVを取り込んで最新化してください。</p>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mb-4 text-sm">
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
+          <span className="text-slate-400">登録件数</span>
+          <span className="font-bold text-white">{stats ? `${stats.total}件` : '...'}</span>
+        </div>
+        {(() => {
+          const hoursAgo = stats?.lastImport ? (Date.now() - new Date(stats.lastImport).getTime()) / 3600000 : null
+          const isAlert = hoursAgo !== null && hoursAgo >= 24
+          return (
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${isAlert ? 'bg-red-950/80 border-red-400 animate-pulse' : 'bg-slate-800 border-slate-700'}`}>
+              {isAlert && <span className="text-lg">⚠️</span>}
+              <span className={isAlert ? 'text-red-300' : 'text-slate-400'}>最終取込</span>
+              <span className={`font-bold ${isAlert ? 'text-red-200' : 'text-white'}`}>
+                {stats?.lastImport ? new Date(stats.lastImport).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '...'}
+              </span>
+              {isAlert && <span className="text-red-300 text-xs font-medium">{Math.floor(hoursAgo)}時間未取込</span>}
+            </div>
+          )
+        })()}
+      </div>
+
+      {(overdue.length > 0 || critical.length > 0 || urgent.length > 0) && filter === 'alert' && (
+        <div className="mb-6 space-y-3">
+          {overdue.length > 0 && (
+            <div className="flex items-center gap-3 px-5 py-4 bg-red-950/80 border border-red-400 rounded-xl animate-pulse">
+              <span className="text-2xl">🚨</span>
+              <div>
+                <p className="font-bold text-red-200 text-lg">期限超過！{overdue.length}件が納品予定日を過ぎています</p>
+                <p className="text-red-300 text-sm">至急状況を確認してください</p>
+              </div>
+            </div>
+          )}
+          {critical.length > 0 && (
+            <div className="flex items-center gap-3 px-5 py-4 bg-red-900/80 border border-red-500 rounded-xl animate-pulse">
+              <span className="text-2xl">🚨</span>
+              <p className="font-bold text-red-200 text-lg">緊急！{critical.length}件が3日以内に納品予定</p>
+            </div>
+          )}
+          {urgent.length > 0 && (
+            <div className="flex items-center gap-3 px-5 py-4 bg-orange-900/60 border border-orange-500 rounded-xl">
+              <span className="text-2xl">⚠️</span>
+              <p className="font-bold text-orange-200">{urgent.length}件が1週間以内に納品予定</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="🔍 会社名・住所・製品名・担当者・MTID/TIDで検索..."
+          className="w-full px-4 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 placeholder-slate-400 focus:outline-none focus:border-blue-500 text-sm"
+        />
+        {searchQuery && (
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="text-xs text-blue-400 font-medium">🔍 全タブから検索中 — {displayItems.length}件ヒット</span>
+            <button onClick={() => setSearchQuery('')} className="text-xs text-slate-400 hover:text-white underline">クリア</button>
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-3 mb-5 flex-wrap">
+        <button onClick={() => setFilter('alert')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'alert' ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>未納品のみ</button>
+        <button onClick={() => setFilter('progress')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'progress' ? 'bg-yellow-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>納品管理（進行中）{progressAlertCount > 0 && <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{progressAlertCount}</span>}</button>
+        <button onClick={() => setFilter('done')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'done' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>納品完了分</button>
+        <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>全件表示</button>
+        <select value={assigneeFilter} onChange={e => setAssigneeFilter(e.target.value)} className="px-3 py-2 rounded-lg text-sm bg-slate-700 text-white border border-slate-600">
+          <option value="all">全担当者</option>
+          {allAssignees.map(a => <option key={a} value={a}>{a}</option>)}
+        </select>
+        <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
+          {/* キューに溜まったファイル表示 */}
+          {csvQueue.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {csvQueue.map((f, i) => (
+                <span key={i} className="flex items-center gap-1 px-2 py-1 bg-slate-700 rounded text-xs text-slate-200">
+                  📄{f.name}
+                  <button onClick={() => setCsvQueue(q => q.filter((_, j) => j !== i))} className="text-slate-400 hover:text-red-400 ml-1">✕</button>
+                </span>
+              ))}
+            </div>
+          )}
+          {/* ファイル追加ボタン */}
+          <label className="px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer bg-slate-700 hover:bg-slate-600 text-white">
+            ＋CSV追加
+            <input type="file" accept=".csv" multiple className="hidden"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || [])
+                if (files.length) setCsvQueue(q => [...q, ...files])
+                e.target.value = ''
+              }}
+            />
+          </label>
+          {/* 取込実行ボタン */}
+          <button
+            disabled={importing || csvQueue.length === 0}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${importing || csvQueue.length === 0 ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-purple-700 hover:bg-purple-600 text-white'}`}
+            onClick={async () => {
+              if (!csvQueue.length) return
+              setImporting(true); setImportResult(null)
+              const texts = await Promise.all(csvQueue.map(f => f.text()))
+              const merged = texts.map((t, i) => {
+                const lines = t.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n')
+                return i === 0 ? lines.join('\n') : lines.slice(1).join('\n')
+              }).join('\n')
+              const blob = new Blob([merged], { type: 'text/csv' })
+              const fd = new FormData(); fd.append('file', blob, 'merged.csv')
+              const res = await fetch('/api/delivery/import-csv', { method: 'POST', body: fd })
+              const d = await res.json()
+              if (d.ok) { setImportResult(`取込完了：${d.imported}件（${csvQueue.length}ファイル結合）`); setCsvQueue([]); loadStats(); load() }
+              else { setImportResult(`エラー：${d.error}`) }
+              setImporting(false)
+            }}
+          >
+            {importing ? '取込中...' : `取込実行${csvQueue.length > 0 ? `（${csvQueue.length}件）` : ''}`}
+          </button>
+        </div>
+      </div>
+
+      {importResult && (
+        <div className={`mb-3 px-4 py-3 rounded-lg text-sm font-medium ${importResult.startsWith('取込') ? 'bg-green-900/60 border border-green-600 text-green-200' : 'bg-red-900/60 border border-red-600 text-red-200'}`}>
+          {importResult}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="text-slate-400 text-center py-12">読み込み中...</div>
+      ) : displayItems.length === 0 ? (
+        <div className="text-slate-400 text-center py-12">
+          <p className="text-4xl mb-3">✅</p>
+          <p>対象の案件はありません</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {displayItems.map(it => {
+            const level = getAlertLevel(it.delivery_due_date)
+            const s = levelStyle[level]
+            const days = daysLeft(it.delivery_due_date)
+            const equipItems = it.equipment || []
+            const knownNames = ['P400', 'PayCube', 'PayPay']
+            const knownEquip = knownNames.map(name => ({ name, eq: equipItems.find(e => e.name === name) })).filter(x => x.eq)
+            const otherEquip = equipItems.filter(e => !knownNames.includes(e.name || ''))
+            const jitDays = jitLeadDays(it.install_address || '')
+            const todoItems = buildTodoItems(it.equipment, it.worker_needed, it.delivery_due_date, jitDays, it.work_date, it.payment_received)
+            const getStatus = (name: string) => {
+              if (name === 'P400')    return it.p400_status || null
+              if (name === 'PayCube') return it.paycube_status || null
+              // PayPay等はdashboard_todosに保存
+              return (it.dashboard_todos?.[`${name.toLowerCase()}_status`] as string) || null
+            }
+            const getField = (name: string) => {
+              if (name === 'P400')    return 'p400_status'
+              if (name === 'PayCube') return 'paycube_status'
+              return null // PayPay等はsaveTodoKey経由
+            }
+
+            // リードタイム警告（機材リードタイム + JIT）
+            const ltWarnings: string[] = []
+            if (it.status !== 'done') {
+              if (!it.slack_url && !it.dashboard_todos?.['slack_url_skip']) ltWarnings.push('SlackリンクがURLセクションに未登録')
+              if (!it.process_sheet_url && !it.dashboard_todos?.['process_sheet_url_skip']) ltWarnings.push('工程表リンクが未登録')
+              if (!it.hearing_sheet_url && !it.dashboard_todos?.['hearing_sheet_url_skip']) ltWarnings.push('ヒアリングシートリンクが未登録')
+              knownEquip.forEach(({ name }) => {
+                const lt = LEAD_TIME[name]; if (!lt) return
+                const st = getStatus(name)
+                // 発注済み以降はアラートしない
+                const ordered = st && ['発注済み','入荷履歴','発送済み','納品完了','設定完了'].includes(st)
+                if (ordered) return
+                if (days < 0) ltWarnings.push(`${name}：期限超過（リードタイム${lt}日）`)
+                else if (days < lt) ltWarnings.push(`${name}：残${days}日 — リードタイム${lt}日、今すぐ発注を`)
+              })
+              if (it.jitbox_ordered === null || it.jitbox_ordered === undefined) {
+                // 未発注のみアラート（発注済み・不要はスキップ）
+                if (days < 0) ltWarnings.push(`JITボックス：期限超過（リードタイム${jitDays}日）`)
+                else if (days < jitDays) ltWarnings.push(`JITボックス：残${days}日 — 西羵輸送${jitDays}日、今すぐ発注を`)
+              }
+            }
+            const isLocked = !!it.locked
+
+            return (
+              <div key={it.id} className={`${s.bg} border ${s.border} rounded-xl p-4 space-y-3 ${isLocked ? 'opacity-60' : ''}`}>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-lg">{s.icon}</span>
+                  <span className="font-bold text-white text-base">{it.client_name}</span>
+                  {it.status !== 'done'
+                    ? <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.badge}`}>{s.label}</span>
+                    : <span className="text-xs px-2 py-0.5 rounded-full bg-green-700 text-white font-medium">納品完了</span>
+                  }
+                  {it.progress && <span className="text-xs px-2 py-0.5 rounded-full bg-slate-600 text-slate-200">{it.progress}</span>}
+                  {it.missing_in_last_import && <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-800 text-yellow-200">前回取込なし</span>}
+                  <button onClick={() => patch(it.id, { locked: !isLocked })}
+                    className={`ml-auto px-2 py-0.5 text-xs rounded-lg font-medium transition-colors ${isLocked ? 'bg-red-800 text-red-200 hover:bg-red-700' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}>
+                    {isLocked ? '🔒 ロック中' : '🔓 ロック'}
+                  </button>
+                </div>
+
+                {ltWarnings.length > 0 && (
+                  <div className="bg-red-950/80 border border-red-500 rounded-lg px-3 py-2 space-y-1.5">
+                    {ltWarnings.map((w, i) => {
+                      const isProcess  = w.includes('工程表')
+                      const isHearing  = w.includes('ヒアリング')
+                      const tplUrl = isProcess
+                        ? 'https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=159741708#gid=159741708'
+                        : isHearing
+                        ? 'https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit?gid=849864762#gid=849864762'
+                        : null
+                      return (
+                        <div key={i} className="flex items-center gap-2 flex-wrap">
+                          <p className="text-red-300 text-sm font-bold animate-pulse">🚨 {w}</p>
+                          {tplUrl && (
+                            <a href={tplUrl} target="_blank" rel="noreferrer"
+                              className="text-xs px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded whitespace-nowrap flex-shrink-0">
+                              📄 雛形を開く
+                            </a>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                <div className="text-base text-slate-300 space-y-1">
+                  <p>納品予定日:{' '}
+                    <span className={`font-bold ${level === 'overdue' || level === 'critical' ? 'text-red-300' : level === 'urgent' ? 'text-orange-300' : level === 'warning' ? 'text-yellow-300' : 'text-white'}`}>
+                      {it.delivery_due_date}
+                    </span>
+                    {it.status !== 'done' && <span className="text-slate-400"> （{days < 0 ? `${-days}日超過` : `残 ${days}日`}）</span>}
+                  </p>
+                  {it.product_name && <p>製品: {it.product_name}{it.quantity ? ` x ${it.quantity}` : ''}</p>}
+                  {it.install_address && <p className="text-slate-400 text-sm">設置先: {it.install_address}</p>}
+                  {it.assignee && <p>担当: {it.assignee}</p>}
+                  {(it.contact_name || it.contact_tel1) && <p>連絡先: {it.contact_name} {it.contact_tel1}</p>}
+                  {it.contact_tel2 && <p className="text-slate-400 text-sm">{it.contact_tel2}</p>}
+                  {it.notes && <p className="text-slate-400 text-sm">備考: {it.notes}</p>}
+                  {(it.p400_mtid || it.p400_tid) && (
+                    <p className="text-sm text-slate-300">
+                      P400:
+                      {it.p400_mtid && <span className="ml-2">MTID <span className="text-white font-mono font-bold">{it.p400_mtid}</span></span>}
+                      {it.p400_tid  && <span className="ml-2">TID <span className="text-white font-mono font-bold">{it.p400_tid}</span></span>}
+                    </p>
+                  )}
+                </div>
+
+                {/* 機材ステータス + 日程管理 */}
+                {(knownEquip.length > 0 || otherEquip.length > 0) && (
+                  <div className="border-t border-slate-700/50 pt-3 space-y-4">
+                    <p className="text-slate-400 font-bold text-sm">機材ステータス / 日程管理</p>
+                    {knownEquip.map(({ name, eq }) => {
+                      const current = getStatus(name); const field = getField(name)
+                      return (
+                        <div key={name} className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-bold text-slate-200">{name}</span>
+                            {eq?.value && <span className="text-slate-400 text-sm">x {eq.value}</span>}
+                            {current
+                              ? <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${current.includes('完了') || current.includes('済み') ? 'bg-green-800 text-green-200' : 'bg-orange-800 text-orange-200'}`}>{current}</span>
+                              : <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-400">未発注</span>
+                            }
+                          </div>
+                          {it.status !== 'done' && (
+                            <div className="flex flex-wrap gap-1">
+                              {EQUIP_STATUSES.map(st => (
+                                <button key={st} disabled={updating === it.id}
+                                  onClick={() => {
+                                    if (field) {
+                                      // P400/PayCube: 専用カラムに保存
+                                      patch(it.id, { [field]: current === st ? null : st })
+                                    } else {
+                                      // PayPay等: dashboard_todosに保存
+                                      const todoKey = `${name.toLowerCase()}_status`
+                                      saveTodoKey(it.id, it.dashboard_todos, todoKey, current === st ? '' : st)
+                                    }
+                                  }}
+                                  className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${current === st ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-500'}`}>
+                                  {st}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          {/* 発注日・到着予定日・実到着日 */}
+                          <EquipDates
+                            name={name}
+                            todos={it.dashboard_todos}
+                            dueDate={it.delivery_due_date}
+                            onSave={(key, val) => saveTodoKey(it.id, it.dashboard_todos, key, val)}
+                          />
+                        </div>
+                      )
+                    })}
+                    {otherEquip.map((eq, ei) => (
+                      <p key={ei} className="text-sm text-slate-300"><span className="text-slate-400">{eq.name}:</span> {eq.value}</p>
+                    ))}
+                  </div>
+                )}
+
+                {/* PMS / スマートロック 連携ステータス（機材名動的） */}
+                {(() => {
+                  // PMS系: name に「PMS」「宿泊」「ホテル管理」含む、またはvalue に主要PMSサービス名含む
+                  const PMS_NAMES = /pms|airhost|suitebook|temairazu|innkeeper|staypro|宿泊|ホテル管理/i
+                  const LOCK_NAMES = /スマートロック|smart.?lock|remotelock|ttlock|epic|bitlock|qrio|akerun|igloohome|lock/i
+                  const pmsEquip = equipItems.find(e => PMS_NAMES.test(e.name || '') || PMS_NAMES.test(e.value || ''))
+                  const lockEquip = equipItems.find(e => LOCK_NAMES.test(e.name || '') || LOCK_NAMES.test(e.value || ''))
+                  if (!pmsEquip && !lockEquip) return null
+                  const days21 = it.delivery_due_date ? Math.ceil((new Date(it.delivery_due_date).getTime() - new Date().setHours(0,0,0,0)) / 86400000) : null
+                  const IntegRow = ({ label, field, val }: { label: string; field: 'pms_linked' | 'smartlock_linked'; val: boolean | null | undefined }) => {
+                    const warn = val === null && days21 !== null && days21 <= 21 && days21 > 0
+                    const over = val === null && days21 !== null && days21 <= 0
+                    return (
+                      <div className={`flex items-center gap-3 flex-wrap rounded-lg px-3 py-2 ${val === true ? 'bg-green-950/40 border border-green-800' : warn ? 'bg-orange-950/50 border border-orange-700' : 'bg-slate-800/50 border border-slate-700'}`}>
+                        <span className="text-sm text-slate-300 font-medium">{label}:</span>
+                        {([
+                          { v: null,  txt: '❌ 未連携',  cls: 'bg-slate-600 text-slate-300 hover:bg-slate-500' },
+                          { v: true,  txt: '✅ 連携済み', cls: 'bg-green-700 text-green-100 hover:bg-green-600' },
+                          { v: false, txt: '➖ 不要',    cls: 'bg-slate-700 text-slate-400 hover:bg-slate-600' },
+                        ] as { v: boolean|null; txt: string; cls: string }[]).map(({ v, txt, cls }) => {
+                          const active = val === v
+                          return <button key={txt} onClick={() => patch(it.id, { [field]: v })}
+                            className={`px-3 py-1 text-xs rounded-lg font-bold transition-colors border ${active ? `${cls} border-current` : 'bg-transparent border-slate-700 text-slate-500 hover:border-slate-500 hover:text-slate-300'}`}>{txt}</button>
+                        })}
+                        {val === null && warn && <span className="text-xs text-orange-300 animate-pulse font-bold">⚠️ 残{days21}日 — 連携設定を急いでください</span>}
+                        {val === null && over  && <span className="text-xs text-red-300 animate-pulse font-bold">🚨 期限超過 — 連携未完了</span>}
+                        {val === null && days21 !== null && days21 > 30 && <span className="text-xs text-slate-500">残{days21}日（30日前からアラート）</span>}
+                        {val === null && (
+                          <a href="https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit?gid=849864762#gid=849864762"
+                            target="_blank" rel="noreferrer"
+                            className="ml-auto text-xs px-2 py-0.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-700 text-purple-300 rounded whitespace-nowrap">
+                            📋 ヒアリング雛形
+                          </a>
+                        )}
+                      </div>
+                    )
+                  }
+                  // ラベルはシートの値をそのまま使う（name と value を結合、重複排除）
+                  const joinLabel = (eq: Equipment) => {
+                    const parts = [eq.name, eq.value].filter(Boolean)
+                    // name と value が同じ内容を含む場合は value だけ使う
+                    if (parts.length === 2 && (parts[0]!.includes(parts[1]!) || parts[1]!.includes(parts[0]!))) return parts[1]!
+                    return parts.join('（') + (parts.length > 1 ? '）' : '')
+                  }
+                  const hearingUrl = it.hearing_sheet_url
+                  const hearingSkip = it.dashboard_todos?.['hearing_sheet_url_skip']
+
+                  // 機材から必要なヒアリングシートを判定
+                  const equip = it.equipment || []
+                  const LOCK_PAT2  = /スマートロック|smart.?lock|remotelock|ttlock|epic|bitlock|qrio|akerun|igloohome|lock/i
+                  const CARD_PAT   = /カードキー|card.?key/i
+                  const CYLI_PAT   = /シリンダー|cylinder/i
+                  const PMS_PAT2   = /pms|airhost|suitebook|temairazu|innkeeper|staypro|宿泊|ホテル管理/i
+                  const TABLET_PAT = /ルームタブレット|room.?tablet/i
+                  const PRINTER_PAT= /プリンタ|printer/i
+                  const hasLock2   = equip.some(e => LOCK_PAT2.test(e.name || '') || LOCK_PAT2.test(e.value || ''))
+                  const hasCard    = equip.some(e => CARD_PAT.test(e.name || '')  || CARD_PAT.test(e.value || ''))
+                  const hasCyli    = equip.some(e => CYLI_PAT.test(e.name || '')  || CYLI_PAT.test(e.value || ''))
+                  const hasPms2    = equip.some(e => PMS_PAT2.test(e.name || '')  || PMS_PAT2.test(e.value || ''))
+                  const hasP400    = equip.some(e => /p400/i.test(e.name || '')   || /p400/i.test(e.value || ''))
+                  const hasPaycube = equip.some(e => /paycube|pay.?cube/i.test(e.name || '') || /paycube|pay.?cube/i.test(e.value || ''))
+                  const hasPaypay  = equip.some(e => /paypay|pay.?pay/i.test(e.name || '')  || /paypay|pay.?pay/i.test(e.value || ''))
+                  const hasTablet  = equip.some(e => TABLET_PAT.test(e.name || '') || TABLET_PAT.test(e.value || ''))
+                  const hasPrinter = equip.some(e => PRINTER_PAT.test(e.name || '') || PRINTER_PAT.test(e.value || ''))
+
+                  const TMPL = 'https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit'
+                  const hearingSheets: { label: string; reason: string }[] = [
+                    { label: '必須確認①',       reason: '全物件必須' },
+                    { label: '必須確認②',       reason: '全物件必須（基本情報）' },
+                    { label: '必須確認③',       reason: '全物件必須（部屋情報）' },
+                    ...(hasPms2    ? [{ label: 'PMS',              reason: 'PMS連携あり' }] : []),
+                    ...(hasLock2   ? [{ label: 'スマートロック①', reason: 'スマートロックあり' },
+                                     { label: 'スマートロック②', reason: 'スマートロックあり' },
+                                     { label: 'スマートロック③', reason: 'スマートロックあり' }] : []),
+                    ...(hasCard    ? [{ label: 'カードキー',       reason: 'カードキーあり' }] : []),
+                    ...(hasCyli    ? [{ label: 'シリンダー錠',     reason: 'シリンダー錠あり' }] : []),
+                    ...(hasP400    ? [{ label: '端末カード決済',   reason: 'P400あり' }] : []),
+                    ...(hasPaycube ? [{ label: '現金決済',         reason: 'PayCubeあり' }] : []),
+                    ...(hasPaypay  ? [{ label: 'スマホカード決済', reason: 'PayPayあり' }] : []),
+                    ...(hasTablet  ? [{ label: 'ルームタブレット', reason: 'ルームタブレットあり' }] : []),
+                    ...(hasPrinter ? [{ label: 'プリンタ',         reason: 'プリンタあり' }] : []),
+                    { label: '事前チェックイン', reason: '全物件推奨' },
+                    ...(true       ? [{ label: 'フロントチェックイン', reason: '有人対応がある場合' }] : []),
+                  ]
+
+                  // 既知情報（カードに入力済みの情報）
+                  const knownInfo: { label: string; value: string }[] = [
+                    { label: '会社名',     value: it.client_name || '' },
+                    { label: '住所',       value: it.install_address || '' },
+                    { label: '担当者',     value: it.contact_name || '' },
+                    { label: '製品',       value: equip.map(e => [e.name, e.value].filter(Boolean).join(' ')).join('、') },
+                    { label: 'P400数',     value: hasP400 ? (equip.find(e => /p400/i.test(e.name || ''))?.value || '不明') : '' },
+                    { label: 'PayCube数',  value: hasPaycube ? (equip.find(e => /paycube/i.test(e.name || ''))?.value || '不明') : '' },
+                  ].filter(i => i.value)
+
+                  return (
+                    <div className="border-t border-slate-700/50 pt-3 space-y-2">
+                      <p className="text-slate-400 font-bold text-sm">🔗 システム連携状況</p>
+                      {pmsEquip  && <IntegRow label={joinLabel(pmsEquip)}  field="pms_linked"       val={it.pms_linked ?? null} />}
+                      {lockEquip && <IntegRow label={joinLabel(lockEquip)} field="smartlock_linked" val={it.smartlock_linked ?? null} />}
+
+                      {/* ヒアリングシートナビ（折りたたみ） */}
+                      <div className={`rounded-lg border ${hearingUrl ? 'border-purple-800' : 'border-slate-600'}`}>
+                        <div
+                          role="button"
+                          onClick={() => toggleSection(`hearing_${it.id}`)}
+                          className={`flex items-center gap-2 px-3 py-2 cursor-pointer rounded-lg ${hearingUrl ? 'bg-purple-950/40 hover:bg-purple-950/60' : 'bg-slate-800/50 hover:bg-slate-800'}`}
+                        >
+                          <span className="text-sm text-slate-300 font-bold">📋 ヒアリングシート</span>
+                          {hearingUrl
+                            ? <span className="text-purple-300 text-xs">登録済み</span>
+                            : hearingSkip
+                              ? <span className="text-xs text-slate-500">スキップ済み</span>
+                              : <span className="text-xs text-orange-300 font-bold animate-pulse">⚠️ 未登録</span>
+                          }
+                          <span className="ml-auto text-slate-500 text-xs">{openSections[`hearing_${it.id}`] ? '▲ 閉じる' : '▼ 開く'}</span>
+                        </div>
+                        {openSections[`hearing_${it.id}`] && <div className="px-3 pb-3 space-y-2">
+                        <div className="flex items-center gap-2 flex-wrap pt-1">
+                          {hearingUrl && <a href={hearingUrl} target="_blank" rel="noreferrer" className="text-purple-300 hover:underline text-sm font-bold">📋 開く</a>}
+                          <a href={TMPL} target="_blank" rel="noreferrer"
+                            className="text-xs px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded whitespace-nowrap">📄 雛形</a>
+                        </div>
+
+                        {/* 既知情報 */}
+                        {knownInfo.length > 0 && (
+                          <div className="bg-blue-950/40 border border-blue-800 rounded px-2 py-1.5 space-y-0.5">
+                            <p className="text-xs text-blue-400 font-bold mb-1">✅ 事前に入力できる情報</p>
+                            {knownInfo.map(k => (
+                              <div key={k.label} className="flex gap-2 text-xs">
+                                <span className="text-slate-500 w-20 flex-shrink-0">{k.label}:</span>
+                                <span className="text-slate-200">{k.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* 必要シート一覧 */}
+                        <div className="space-y-1">
+                          <p className="text-xs text-slate-400 font-bold">📌 必要なシート（機材から自動判定）</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {hearingSheets.map(s => (
+                              <div key={s.label} className="flex flex-col items-start">
+                                <span className="text-xs px-2 py-0.5 bg-purple-900/60 border border-purple-700 text-purple-200 rounded whitespace-nowrap">{s.label}</span>
+                                <span className="text-xs text-slate-600 mt-0.5 px-1">{s.reason}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Geminiプロンプト生成 / 不要 ボタン */}
+                        {(() => {
+                          const navSkip = it.dashboard_todos?.['hearing_nav_skip']
+                          if (navSkip) return (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-slate-500">ナビゲート不要に設定済み</span>
+                              <button onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'hearing_nav_skip', '')}
+                                className="text-xs text-slate-500 hover:text-slate-300 underline">取り消す</button>
+                            </div>
+                          )
+                          const promptText = `あなたはスマートチェックインシステム「AdvaNceD IoT」の導入サポート担当です。
+以下のお客様情報をもとに、導入前にお客様にやっていただく準備事項を、わかりやすく丁寧な日本語でナビゲートしてください。
+
+【お客様情報】
+- 会社名: ${it.client_name || '未入力'}
+- 設置住所: ${it.install_address || '未入力'}
+- 担当者: ${it.contact_name || '未入力'}
+- 納品予定日: ${it.delivery_due_date || '未入力'}
+- 導入機材: ${(it.equipment || []).map((e: Equipment) => [e.name, e.value].filter(Boolean).join(' ')).join('、') || '未入力'}
+
+【準備事項（該当するものをすべてナビゲートしてください）】
+1. 現地設置環境の準備
+   - KIOSK設置予定箇所へのLAN配線工事（Cat5e以上推奨）
+   - 100Vコンセントの確保（本体から3m以内）
+   - 設置予定位置の周囲写真を送付
+
+2. ネットワーク設定の確認
+   - ipconfig /all のスクリーンショットを送付
+   - 必要に応じてAdvanced IP Scannerでスキャン結果を送付
+
+3. PMS連携の確認${hasPms2 ? `（このお客様はPMS連携あり）
+   - ステイシーの「公開API連携」への加入が必要
+   - 11月中に契約開始が必要` : '（このお客様はPMS連携なし）'}
+
+4. DMS（チェックイン管理システム）アカウント設定
+   - アカウント作成後に届く初期パスワードを弊社へ共有
+   - ヒアリングシートへの記入
+
+5. 画像素材の提供
+   - ロゴ画像（PNG/JPEG、推奨縦35px×横128.93px）
+   - 背景画像（PNG/JPEG、10MB以内）
+
+6. 設置当日の準備${hasPaycube ? `
+   - 現金精算機テスト用釣銭（1円×16枚、5円×17枚、10円×16枚、50円×16枚、100円×16枚、500円×16枚、1000円×40枚）` : ''}${hasP400 ? `
+   - P400（カード決済端末）の加盟店番号をSB payment社から取得` : ''}
+
+必要なヒアリングシート: ${hearingSheets.map(s => s.label).join('、')}
+
+各準備事項について、お客様が具体的に何をすればよいかを番号付きでわかりやすく案内してください。`
+
+                          return (
+                            <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-slate-700/50">
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(promptText)
+                                    .then(() => alert('Geminiプロンプトをクリップボードにコピーしました！\nGemini ( https://gemini.google.com ) に貼り付けてください。'))
+                                    .catch(() => alert('コピー失敗。手動でコピーしてください。'))
+                                }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white text-xs rounded-lg font-bold transition-colors"
+                              >
+                                🤖 Geminiプロンプト生成・コピー
+                              </button>
+                              <button
+                                onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'hearing_nav_skip', '1')}
+                                className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-400 text-xs rounded-lg transition-colors"
+                              >
+                                ➖ ナビゲート不要
+                              </button>
+                            </div>
+                          )
+                        })()}
+                        </div>}{/* /hearing折りたたみ内 */}
+                      </div>{/* /hearing折りたたみ外枠 */}
+                    </div>
+                  )
+                })()}
+
+                {/* JITボックス / 作業員 */}
+                <div className="border-t border-slate-700/50 pt-3 space-y-3">
+                  {/* JIT */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm text-slate-400">JITボックス:</span>
+                    {([
+                      { val: null,  label: '未発注', cls: 'bg-slate-700 text-slate-300 hover:bg-slate-600' },
+                      { val: true,  label: '発注済み', cls: 'bg-blue-700 text-blue-100 hover:bg-blue-600' },
+                      { val: false, label: '不要',   cls: 'bg-slate-600 text-slate-400 hover:bg-slate-500' },
+                    ] as { val: boolean | null; label: string; cls: string }[]).map(({ val, label, cls }) => {
+                      const active = it.jitbox_ordered === val
+                      return (
+                        <button key={label} onClick={() => patch(it.id, { jitbox_ordered: val })}
+                          className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors border ${active ? `${cls} border-current` : 'bg-transparent border-slate-700 text-slate-500 hover:border-slate-500 hover:text-slate-300'}`}>
+                          {label}
+                        </button>
+                      )
+                    })}
+                    <span className="text-xs text-slate-600">西羵{jitDays}日</span>
+                  </div>
+
+                  {/* 作業員手配（折りたたみ） */}
+                  <div className="space-y-2">
+                    <div className={`rounded-lg border ${it.worker_needed ? 'border-orange-700' : 'border-slate-700'}`}>
+                      <div className={`flex items-center gap-2 flex-wrap px-3 py-2 rounded-lg ${it.worker_needed ? 'bg-orange-950/40' : 'bg-slate-800/50'}`}>
+                        <span className="text-sm text-slate-400">作業員手配:</span>
+                        <span
+                          role="button"
+                          onClick={() => patch(it.id, { worker_needed: !it.worker_needed })}
+                          className={`px-3 py-0.5 text-xs rounded-lg font-medium cursor-pointer transition-colors ${it.worker_needed ? 'bg-orange-700 text-orange-100' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}>
+                          {it.worker_needed ? '⚠️ 手配必要' : '不要'}
+                        </span>
+                        {it.worker_needed && (() => {
+                          const todos = it.dashboard_todos || {}
+                          const missing: string[] = []
+                          if (!it.work_date) missing.push('作業日')
+                          if (!(it as any).work_start_time) missing.push('作業開始時間')
+                          if (!['打診中','見積待ち','見積 OK','発注済み','作業完了'].includes((todos['worker_estimate_status'] as string) || '')) missing.push('見積もり')
+                          if (!(todos['worker_name'] as string)) missing.push('担当者名')
+                          if (!(todos['worker_contact'] as string)) missing.push('連絡先')
+                          if (!(todos['worker_estimate_amount'] as string)) missing.push('見積金額')
+                          return missing.length > 0 ? (
+                            <span className="text-xs text-orange-300 font-bold">⚠️ 未入力: {missing.join('・')}</span>
+                          ) : (
+                            <span className="text-xs text-green-400">✅ 入力完了</span>
+                          )
+                        })()}
+                        <span
+                          role="button"
+                          onClick={() => toggleSection(`worker_${it.id}`)}
+                          className="ml-auto text-slate-500 text-xs cursor-pointer hover:text-slate-300">▼ 開く</span>
+                      </div>
+                      {openSections[`worker_${it.id}`] && <div>
+                    {it.worker_needed && (
+                      <div className="bg-slate-900/50 border-t border-slate-700 rounded-b-lg p-3 space-y-2">
+
+                        {/* 作業日 */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-500 w-24">作業日:</span>
+                          <input type="date" defaultValue={it.work_date || ''}
+                            onBlur={(e) => { if (e.target.value !== (it.work_date || '')) patch(it.id, { work_date: e.target.value || null }) }}
+                            className="px-2 py-0.5 text-xs bg-slate-800 border border-slate-600 rounded text-white"
+                          />
+                        </div>
+
+                        {/* 作業開始時間 */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-500 w-24">作業開始:</span>
+                          <input type="time" defaultValue={(it as any).work_start_time || ''}
+                            onBlur={(e) => { if (e.target.value !== ((it as any).work_start_time || '')) patch(it.id, { work_start_time: e.target.value || null }) }}
+                            className="px-2 py-0.5 text-xs bg-slate-800 border border-slate-600 rounded text-white"
+                          />
+                        </div>
+
+                        {/* 見積もりステータス */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs text-slate-500 w-24">見積もり:</span>
+                          {['未発注', '打診中', '見積待ち', '見積 OK', '発注済み', '作業完了'].map(st => {
+                            const cur = (it.dashboard_todos?.['worker_estimate_status'] as string) || '未発注'
+                            return (
+                              <button key={st}
+                                onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'worker_estimate_status', cur === st ? '未発注' : st)}
+                                className={`px-2 py-0.5 text-xs rounded font-medium transition-colors ${
+                                  cur === st ? (st === '未発注' ? 'bg-slate-500 text-white' : 'bg-blue-600 text-white') : 'bg-slate-700 text-slate-300 hover:bg-slate-500'
+                                }`}>{st}</button>
+                            )
+                          })}
+                        </div>
+
+                        {/* 担当作業員名 */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-500 w-24">担当者名:</span>
+                          <input type="text"
+                            defaultValue={(it.dashboard_todos?.['worker_name'] as string) || ''}
+                            placeholder="作業員名・会社名"
+                            onBlur={(e) => saveTodoKey(it.id, it.dashboard_todos, 'worker_name', e.target.value)}
+                            className="flex-1 px-2 py-0.5 text-xs bg-slate-800 border border-slate-600 rounded text-slate-200 placeholder-slate-600"
+                          />
+                        </div>
+
+                        {/* 連絡先 */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-500 w-24">連絡先:</span>
+                          <input type="text"
+                            defaultValue={(it.dashboard_todos?.['worker_contact'] as string) || ''}
+                            placeholder="電話・メール・連絡方法"
+                            onBlur={(e) => saveTodoKey(it.id, it.dashboard_todos, 'worker_contact', e.target.value)}
+                            className="flex-1 px-2 py-0.5 text-xs bg-slate-800 border border-slate-600 rounded text-slate-200 placeholder-slate-600"
+                          />
+                        </div>
+
+                        {/* 見積金額 */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-500 w-24">見積金額:</span>
+                          <input type="text"
+                            defaultValue={(it.dashboard_todos?.['worker_estimate_amount'] as string) || ''}
+                            placeholder="例: 35,000円"
+                            onBlur={(e) => saveTodoKey(it.id, it.dashboard_todos, 'worker_estimate_amount', e.target.value)}
+                            className="w-40 px-2 py-0.5 text-xs bg-slate-800 border border-slate-600 rounded text-slate-200 placeholder-slate-600"
+                          />
+                        </div>
+
+                        {/* メモ */}
+                        <div className="flex items-start gap-2">
+                          <span className="text-xs text-slate-500 w-24 pt-0.5">メモ:</span>
+                          <textarea
+                            defaultValue={(it.dashboard_todos?.['worker_memo'] as string) || ''}
+                            placeholder="見積待ち理由・小言・特記事項など"
+                            onBlur={(e) => saveTodoKey(it.id, it.dashboard_todos, 'worker_memo', e.target.value)}
+                            className="flex-1 px-2 py-1 text-xs bg-slate-800 border border-slate-600 rounded text-slate-200 placeholder-slate-600 resize-y"
+                            rows={2}
+                          />
+                        </div>
+
+                        {/* DBに保存済みの連絡先情報（CSV由来） */}
+                        {it.worker_contacts && it.worker_contacts.filter(c => c.name || c.tel || c.email).length > 0 && (
+                          <div className="border-t border-slate-700/50 pt-2">
+                            <p className="text-xs text-slate-500 mb-1">登録済み作業員情報 (CSV):</p>
+                            {it.worker_contacts.filter(c => c.name || c.tel || c.email).map((c, ci) => (
+                              <p key={ci} className="text-slate-300 text-xs ml-1">{[c.name, c.tel, c.email].filter(Boolean).join(' / ')}</p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                      </div>}{/* /_worker_open */}
+                    </div>{/* /worker折りたたみ */}
+                  </div>
+                </div>
+
+                {/* 入金管理 折りたたみ */}
+                <PaymentSection it={it} patch={patch} saveTodoKey={saveTodoKey} />
+
+
+                <UrlSection it={it} patch={patch} saveTodoKey={saveTodoKey} />
+
+                <div className="flex items-center gap-2 border-t border-slate-700/50 pt-2">
+                  <span className="text-sm text-slate-400">納品予定日変更:</span>
+                  <input type="date" defaultValue={it.delivery_due_date}
+                    onBlur={(e) => { if (e.target.value && e.target.value !== it.delivery_due_date) patch(it.id, { delivery_due_date: e.target.value }) }}
+                    className="px-2 py-1 text-sm bg-slate-800 border border-slate-600 rounded text-white"
+                  />
+                </div>
+
+                <div className="border-t border-slate-700/50 pt-2 space-y-2">
+                  <p className="text-slate-400 font-bold text-sm">次にすべきこと</p>
+                  <div className="space-y-1.5">
+                    {todoItems.map(({ label, deadlineDate, urgent }) => {
+                      const isJit = label.startsWith('JITボックス')
+                      const jitDone = isJit && it.jitbox_ordered !== null && it.jitbox_ordered !== undefined
+                      const isWorker = label === '作業員 手配'
+                      const workerDone = isWorker && (it.dashboard_todos?.['worker_estimate_status'] as string) === '作業完了'
+                      const checked = jitDone || workerDone || !!(it.dashboard_todos?.[label] as boolean)
+                      const today2 = new Date(); today2.setHours(0,0,0,0)
+                      const dLeft = deadlineDate ? Math.ceil((new Date(deadlineDate).getTime() - today2.getTime()) / 86400000) : null
+                      return (
+                        <label key={label} className="flex items-center gap-2 cursor-pointer text-sm hover:text-white">
+                          <input type="checkbox" checked={checked}
+                            onChange={() => {/* controlled: handled by onClick */}}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              if (jitDone || workerDone) return
+                              const msg = checked
+                                ? `「${label}」のチェックを外しますか？`
+                                : `「${label}」を完了にしますか？`
+                              if (!window.confirm(msg)) return
+                              saveTodoKey(it.id, it.dashboard_todos, label, checked ? '' : '1')
+                            }}
+                            disabled={jitDone || workerDone}
+                            className="w-4 h-4 accent-blue-500 flex-shrink-0 disabled:opacity-50 cursor-pointer"
+                          />
+                          <span className={checked ? 'line-through text-slate-500' : 'text-slate-300'}>{label}</span>
+                          {deadlineDate && !checked && (
+                            <span className={`text-xs ml-1 font-medium ${
+                              dLeft !== null && dLeft < 0 ? 'text-red-400 animate-pulse' :
+                              urgent ? 'text-orange-400 font-bold' : 'text-slate-500'
+                            }`}>
+                              {dLeft !== null && dLeft < 0 ? `期限${-dLeft}日超過` :
+                               dLeft === 0 ? '今日まで' :
+                               `${deadlineDate}まで（残${dLeft}日）`}
+                            </span>
+                          )}
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 items-end border-t border-slate-700/50 pt-2">
+                  <MemoField id={it.id} value={it.dashboard_memo || ''} onSave={saveMemo} />
+                  <div className="flex gap-2 flex-shrink-0 flex-wrap">
+                    <a href="https://dms.and-iot.jp/admin/support/login/" target="_blank" rel="noreferrer"
+                      className="px-3 py-2 bg-cyan-800 hover:bg-cyan-700 text-white text-xs rounded-lg font-medium transition-colors whitespace-nowrap">
+                      🖥️ DMS管理
+                    </a>
+                    {it.status !== 'done' && (
+                      <button disabled={updating === it.id} onClick={() => markDone(it.id)}
+                        className="px-4 py-2 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm rounded-lg font-medium transition-colors whitespace-nowrap">
+                        納品完了にする
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+    {AlertPopup}
+    </>
+  )
+}

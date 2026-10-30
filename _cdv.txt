@@ -1,0 +1,10 @@
+﻿  繧ｿ繝悶ｒ蜍慕噪隱ｭ霎ｼ(getSheetNames)             True
+  繝舌・繧ｸ繝ｧ繝ｳ陦ｨ遉ｺ(getVersion)                True
+  閾ｪ蜍募愛螳・suggestSheets)                True
+--- 莉･荳九・蜿､縺・沿縺ｮ逞戊ｷ｡縲ょ・驛ｨ False 縺梧ｭ｣ ---
+  PMS蜷阪・蜈･蜉帶ｬ・                          False
+  繧ｫ繝ｼ繝峨く繝ｼ縺ｮ繝｡繝ｼ繧ｫ繝ｼ谺・                       False
+  蝗ｺ螳壹メ繧ｧ繝・け繝懊ャ繧ｯ繧ｹ chk_pms                 False
+  繝輔Ο繝ｳ繝医メ繧ｧ繝・け繧､繝ｳ                         False
+
+繝輔ぃ繧､繝ｫ繧ｵ繧､繧ｺ: 10358 bytes

@@ -1,0 +1,26 @@
+﻿backup: C:\GensparkClaw\kujira-support\src\app\(app)\delivery\page.tsx.bak_418_20261029_173935
+--- L296-308 ---
+  296|               onBlur={(e) => saveTodoKey(it.id, it.dashboard_todos, 'payment_due_date', e.target.value)}
+  297|               className="px-2 py-0.5 text-xs bg-slate-800 border border-slate-600 rounded text-white" />
+  298|             {(() => {
+  299|               const pd = it.dashboard_todos?.['payment_due_date'] as string
+  300|               if (!pd || it.payment_received) return null
+  301|               const d = Math.ceil((new Date(pd).getTime() - new Date().setHours(0,0,0,0)) / 86400000)
+  302|               if (d < 0) return <span className="text-xs text-red-400 font-bold animate-pulse">{-d}譌･雜・℃!</span>
+  303|               if (d <= 5) return <span className="text-xs text-orange-400 font-bold">谿宮d}譌･</span>
+  304|               return null
+  305|             })()}
+  306|           </div>
+  307|           <div className="flex items-center gap-2">
+  308|             <span className="text-xs text-slate-500 w-28">繧ｨ繝薙ョ繝ｳ繧ｹURL:</span>
+
+--- L1244-1252 ---
+ 1244|                   const LOCK_NAMES = /繧ｹ繝槭・繝医Ο繝・け|smart.?lock|remotelock|ttlock|epic|bitlock|qrio|akerun|igloohome|lock/i
+ 1245|                   const pmsEquip = equipItems.find(e => PMS_NAMES.test(e.name || '') || PMS_NAMES.test(e.value || ''))
+ 1246|                   const lockEquip = equipItems.find(e => LOCK_NAMES.test(e.name || '') || LOCK_NAMES.test(e.value || ''))
+ 1247|                   if (!pmsEquip && !lockEquip) return null
+ 1248|                   const days21 = it.delivery_due_date ? Math.ceil((new Date(it.delivery_due_date).getTime() - new Date().setHours(0,0,0,0)) / 86400000
+ 1249|                   // [INTEG_ACTION_LOG_V1 2026-10-29] 隕∝ｯｾ蠢懊↓蟇ｾ縺吶ｋ縲後＞縺､繝ｻ菴輔ｒ縺励◆縺九阪・險倬鹸縲・
+ 1250|                   //   菫晏ｭ伜・縺ｯ dashboard_todos・・mport-csv縺瑚ｧｦ繧峨↑縺・・縺ｧ蜀榊叙霎ｼ縺ｧ豸医∴縺ｪ縺・ｼ峨・
+ 1251|                   const IntegActionLog = ({ field }: { field: 'pms_linked' | 'smartlock_linked' }) => {
+ 1252|                     const logKey = `integ_log_${field}`

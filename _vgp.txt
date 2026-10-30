@@ -1,0 +1,27 @@
+﻿=== 繝繧､繧｢繝ｭ繧ｰ縺悟他縺ｶ髢｢謨ｰ ===
+  createCopy         OK
+  getSheetNames      OK
+  getVersion         OK
+  suggestSheets      OK
+  withFailureHandler NG 繧ｳ繝ｼ繝牙・縺ｫ辟｡縺・
+
+=== 繧ｳ繝ｼ繝牙・縺ｮ荳ｻ隕・未謨ｰ ===
+  onOpen             OK
+  showDialog         OK
+  getVersion         OK
+  getSheetNames      OK
+  suggestSheets      OK
+  createCopy         OK
+  fillInfo           OK
+
+=== createCopy 縺悟女縺大叙繧九く繝ｼ ===
+  p.sheets       菴ｿ逕ｨ
+  p.client       菴ｿ逕ｨ
+  p.property     菴ｿ逕ｨ
+  p.address      菴ｿ逕ｨ
+  p.contact      菴ｿ逕ｨ
+  p.tel          菴ｿ逕ｨ
+  p.email        菴ｿ逕ｨ
+  p.rooms        菴ｿ逕ｨ
+
+謨ｴ蜷域ｧ: NG ['withFailureHandler']

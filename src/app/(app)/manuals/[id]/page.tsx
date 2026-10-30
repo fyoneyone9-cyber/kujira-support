@@ -5,13 +5,14 @@ import { notFound } from 'next/navigation'
 export default async function ManualDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: manual } = await supabase
     .from('manuals')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!manual) notFound()

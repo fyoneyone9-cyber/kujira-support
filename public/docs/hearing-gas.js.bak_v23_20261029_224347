@@ -1,0 +1,253 @@
+/**
+ * ヒアリングシート 必要シートだけコピー作成
+ * ------------------------------------------------------------------
+ * 雛形スプレッドシートを丸ごとコピーし、不要なシートを削除する方式。
+ * 書式・結合・色・列幅がすべて original のまま残るので完全に一致する。
+ *
+ * 【設置方法】
+ *   1. 雛形スプレッドシートを開く
+ *   2. 拡張機能 → Apps Script
+ *   3. 中身を全部消してこのコードを貼り付け
+ *   4. 保存（💾）
+ *   5. 雛形を再読み込み → メニューに「📋 ヒアリングシート」が出る
+ */
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('📋 ヒアリングシート')
+    .addItem('必要シートだけコピー作成', 'showDialog')
+    .addToUi();
+}
+
+/** 機材 → 必要シート の対応。ダッシュボードの判定と同じ。 */
+/**
+ * [V17 2026-10-29] 機材フラグ -> そのシートを示すキーワード
+ * シート名の完全一致で判定するとズレて削除漏れが出たので、部分一致にする。
+ */
+var EQUIP_KEYWORDS = {
+  pms:         ['PMS'],
+  smartlock:   ['\u30b9\u30de\u30fc\u30c8\u30ed\u30c3\u30af'],
+  cardkey:     ['\u30ab\u30fc\u30c9\u30ad\u30fc'],
+  cylinder:    ['\u30b7\u30ea\u30f3\u30c0\u30fc'],
+  cash:        ['\u73fe\u91d1'],
+  p400:        ['\u7aef\u672b\u30ab\u30fc\u30c9'],
+  sumaho:      ['\u30b9\u30de\u30db\u30ab\u30fc\u30c9', '\u30b9\u30de\u30fc\u30c8\u30ab\u30fc\u30c9'],
+  paypay:      ['PayPay', '\u30da\u30a4\u30da\u30a4'],
+  printer:     ['\u30d7\u30ea\u30f3\u30bf'],
+  roomtablet:  ['\u30eb\u30fc\u30e0\u30bf\u30d6\u30ec\u30c3\u30c8'],
+  precheckin:  ['\u4e8b\u524d\u30c1\u30a7\u30c3\u30af\u30a4\u30f3'],
+  koji:        ['\u5de5\u4e8b'],
+};
+
+/** 常に残すシートのキーワード */
+var ALWAYS_KEYWORDS = ['\u5fc5\u9808\u78ba\u8a8d', '\u8868\u7d19'];
+
+/** このコードのバージョン。ダイアログに表示して新旧を判別する。 */
+var GAS_VERSION = 'V22 2026-10-29';
+
+/** 実際のタブ名を返す（ダイアログが一覧表示に使う） */
+function getSheetNames() {
+  return SpreadsheetApp.getActiveSpreadsheet().getSheets().map(function (sh) {
+    return sh.getName();
+  });
+}
+
+/** バージョン確認用（ダイアログが最初に呼ぶ） */
+function getVersion() {
+  return GAS_VERSION;
+}
+
+/**
+ * 機材フラグから「残すべきタブ名」を推定する。
+ * 実在するタブ名だけを返すので、存在しないシート名を指定する事故が起きない。
+ */
+function suggestSheets(equips) {
+  var names = getSheetNames();
+  var keep = [];
+  names.forEach(function (n) {
+    for (var a = 0; a < ALWAYS_KEYWORDS.length; a++) {
+      if (n.indexOf(ALWAYS_KEYWORDS[a]) >= 0) { keep.push(n); return; }
+    }
+    for (var e = 0; e < (equips || []).length; e++) {
+      var kws = EQUIP_KEYWORDS[equips[e]] || [];
+      for (var k = 0; k < kws.length; k++) {
+        if (n.indexOf(kws[k]) >= 0) { keep.push(n); return; }
+      }
+    }
+  });
+  return keep;
+}
+
+function showDialog() {
+  var html = HtmlService.createHtmlOutputFromFile('dialog')
+    .setWidth(420).setHeight(560);
+  SpreadsheetApp.getUi().showModalDialog(html, '必要シートだけコピー作成');
+}
+
+/**
+ * 実際にコピーを作る。
+ * @param {Object} p {client, property, contact, due, equips:[key...]}
+ */
+function createCopy(p) {
+  var src = SpreadsheetApp.getActiveSpreadsheet();
+
+  // [V17] 残すタブ名はダイアログから実タブ名の配列で渡される（ズレない）
+  var keep = {};
+  (p.sheets || []).forEach(function (n) { keep[n] = true; });
+
+  // 雛形を丸ごとコピー（書式・結合・色がそのまま残る）
+  var name = 'ヒアリングシート_' + (p.client || '') + '_' +
+    Utilities.formatDate(new Date(), 'JST', 'yyyyMMdd');
+  var copy = src.copy(name);
+
+  // 不要シートを削除
+  // [V15] deleteSheet() を1枚ずつ呼ぶと往復が多くて非常に遅い（実測165秒）。
+  //   Sheets API の batchUpdate で**1リクエストにまとめて**削除する。
+  var removed = [];
+  var all = copy.getSheets();
+  var delIds = [];
+  for (var i = 0; i < all.length; i++) {
+    if (!keep[all[i].getName()]) {
+      delIds.push(all[i].getSheetId());
+      removed.push(all[i].getName());
+    }
+  }
+
+  if (delIds.length) {
+    var ok = false;
+    try {
+      var reqs = delIds.map(function (id) {
+        return { deleteSheet: { sheetId: id } };
+      });
+      var res = UrlFetchApp.fetch(
+        'https://sheets.googleapis.com/v4/spreadsheets/' + copy.getId() + ':batchUpdate',
+        {
+          method: 'post',
+          contentType: 'application/json',
+          headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+          payload: JSON.stringify({ requests: reqs }),
+          muteHttpExceptions: true
+        });
+      ok = (res.getResponseCode() === 200);
+      if (!ok) Logger.log('batchUpdate failed: ' + res.getContentText());
+    } catch (e) {
+      Logger.log('batchUpdate error: ' + e);
+    }
+
+    // 一括削除が使えない環境では従来方式にフォールバック
+    if (!ok) {
+      removed = [];
+      var again = copy.getSheets();
+      for (var j = 0; j < again.length; j++) {
+        if (!keep[again[j].getName()]) {
+          try { removed.push(again[j].getName()); copy.deleteSheet(again[j]); } catch (e2) {}
+        }
+      }
+    }
+  }
+
+  // 案件情報を自動入力（全シート）
+  var filled = 0;
+  try { filled = fillInfo(copy, p) || 0; } catch (e) {}
+
+  return {
+    url: copy.getUrl(),
+    name: name,
+    kept: Object.keys(keep).filter(function (n) {
+      return copy.getSheetByName(n) !== null;
+    }),
+    removed: removed,
+    filled: filled
+  };
+}
+
+/**
+ * 分かっている情報を全シートに書き込む。
+ * 「項目名を含む行」を探し、その行の回答欄に値を入れる。
+ * 既に値がある場合は上書きしない。
+ */
+function fillInfo(ss, p) {
+  // [V20] 施設名と住所は別物。申込書から施設名が取れるので分けて使う。
+  //   p.property = 施設名（例: ビジョングランピング淡路）
+  //   p.address  = 設置先住所。無ければ property を住所として扱う。
+  var addr = p.address || p.property || '';
+  var zip = '';
+  var m = addr.match(/〒?\s*(\d{3}-?\d{4})/);
+  if (m) { zip = m[1]; addr = addr.replace(m[0], '').trim(); }
+  var facility = p.property || addr;
+
+  // シート名 -> [[項目名に含まれる語, 入れる値], ...]
+  // 上にあるものから順に照合し、最初に当たったものを使う。
+  var PLAN = {
+    '必須確認②': [
+      ['組織名',                         p.client],
+      ['メールアドレス（代表）',           p.email],
+      ['お電話番号（代表）',              p.tel],
+      ['DMSにログインされる方のお名前',    p.contact],
+      ['DMSにログインされる方のメールアドレス', p.email],
+      ['物件名',                         facility],
+      ['物件の住所',                      addr],
+      ['物件の郵便番号',                  zip],
+      ['領収書に印字する電話番号',         p.tel],
+      ['緊急連絡先電話番号',              p.tel],
+      ['物件内にあるお部屋の総数',         p.rooms]
+    ],
+    // PMS / スマートロック① は製品ごとのAPIキー等なので案件情報からは埋まらない。
+    // 必須確認③ は部屋番号の一覧表（回答欄なし）なので対象外。
+    'カードキー': [
+      ['メーカーをご回答',  p.cardkeyMaker],
+      ['お名前',           p.contact],
+      ['携帯電話番号',      p.tel],
+      ['メールアドレス',    p.email]
+    ],
+    'PayPay決済': [
+      ['お名前',        p.contact],
+      ['メールアドレス', p.email]
+    ]
+  };
+
+  var filled = 0;
+  for (var sheetName in PLAN) {
+    var sh = ss.getSheetByName(sheetName);
+    if (!sh) continue;
+
+    // [V15b] 往復を減らすため、シート全体を1回で読む。
+    var values = sh.getDataRange().getValues();
+    if (!values.length) continue;
+
+    // 『ご回答欄』の列を探す（シートごとに違う）
+    var ansCol = 0;
+    for (var r = 0; r < Math.min(6, values.length); r++) {
+      for (var c = 0; c < values[r].length; c++) {
+        if (String(values[r][c]).indexOf('ご回答欄') >= 0) { ansCol = c + 1; break; }
+      }
+      if (ansCol) break;
+    }
+    if (!ansCol) continue;
+
+    // メモリ上で値を決めてから、最後に1回だけ書き込む
+    var col = [];
+    for (var k = 0; k < values.length; k++) {
+      col.push([values[k][ansCol - 1] !== undefined ? values[k][ansCol - 1] : '']);
+    }
+
+    var plan = PLAN[sheetName];
+    var usedRow = {};
+    var changed = false;
+    for (var pi = 0; pi < plan.length; pi++) {
+      var key = plan[pi][0], val = plan[pi][1];
+      if (!val) continue;
+      for (var r2 = 0; r2 < values.length; r2++) {
+        if (usedRow[r2]) continue;
+        if (values[r2].join(' ').indexOf(key) < 0) continue;
+        usedRow[r2] = true;
+        if (!col[r2][0]) { col[r2][0] = val; filled++; changed = true; }
+        break;
+      }
+    }
+    if (changed) sh.getRange(1, ansCol, col.length, 1).setValues(col);
+  }
+  return filled;
+}
+
+/** 旧版の名前での呼び出しにも対応 */

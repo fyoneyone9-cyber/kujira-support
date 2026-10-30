@@ -1,0 +1,23 @@
+﻿逕ｳ霎ｼ譖ｸ縺ｮ讖滓攝: {"surface":2,"kiosk":2,"passport":2,"smartlock":1,"pms":1,"printer":1,"qr":1,"hub":1,"paycube":1,"p400":1}
+
+equips: pms, smartlock, cash, p400, kiosk, surface, paycube, passport, sumaho, paypay, koji
+
+=== 蟾･遞狗ｮ｡逅・｡ｨ縺ｮ蛹ｺ蛻・蛻､螳夂ｵ先棡 ===
+  笨・01.蜈ｱ騾・                 key=always
+     02.陬懷勧驥・                key=hojokin
+  笨・03.繝√ぉ繝・け繧､繝ｳ繧ｷ繧ｹ繝・Β          key=always
+  笨・04.PMS                 key=pms
+     05.繧ｫ繝ｼ繝峨く繝ｼ               key=cardkey
+  笨・06.繧ｹ繝槭・繝医Ο繝・け             key=smartlock
+     07.繧ｭ繝ｼ繝懊ャ繧ｯ繧ｹ              key=keybox
+  笨・08.KIOSK               key=kiosk
+     09.蜊謎ｸ・KIOSK            key=kiosk_desk
+     09.蜊謎ｸ階IOSK             key=kiosk_desk
+     10.繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ            key=roomtablet
+  笨・11.Surface             key=surface
+     12.繧ｿ繝悶Ξ繝・ヨ               key=tablet
+  笨・13.P400                key=p400
+  笨・14.PayCube             key=paycube
+  笨・15.PayPay              key=paypay
+  笨・16.繧ｹ繝槭・繧ｫ繝ｼ繝画ｱｺ貂・           key=sumaho
+  笨・17.繝代せ繝昴・繝医Μ繝ｼ繝繝ｼ           key=passport

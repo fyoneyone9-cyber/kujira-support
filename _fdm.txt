@@ -1,0 +1,33 @@
+﻿--- L410-432 ---
+  410| export default function DeliveryPage() {
+  411|   const [items, setItems] = useState<DeliveryItem[]>([])
+  412|   const [loading, setLoading] = useState(true)
+  413|   const [mounted, setMounted] = useState(false)
+  414|   useEffect(() => { setMounted(true) }, [])
+  415|   const [filter, setFilter] = useState<'alert' | 'all' | 'progress' | 'done'>('progress')
+  416|   const [assigneeFilter, setAssigneeFilter] = useState<string>('邀ｳ螻ｱ')
+  417|   const [allAssignees, setAllAssignees] = useState<string[]>([])
+  418|   const [allItems, setAllItems] = useState<DeliveryItem[]>([])
+  419|   const [updating, setUpdating] = useState<string | null>(null)
+  420|   const [importing, setImporting] = useState(false)
+  421|   const [importResult, setImportResult] = useState<string | null>(null)
+  422|   const [csvQueue, setCsvQueue] = useState<File[]>([])
+  423|   const [stats, setStats] = useState<{ total: number; lastImport: string | null; progressAlertCount?: number } | null>(null)
+  424|   // [HYDRATION_FIX_V1 2026-10-29] 譎ょ綾陦ｨ遉ｺ縺ｯSSR縺ｨ繧ｯ繝ｩ繧､繧｢繝ｳ繝医〒蠢・★繧ｺ繝ｬ繧・
+  425|   //   (Date.now() / toLocaleString 縺ｮ繝ｭ繧ｱ繝ｼ繝ｫ蟾ｮ)縲３eact #418 縺ｮ蜴溷屏縺縺｣縺溘・
+  426|   //   繝槭え繝ｳ繝亥ｾ後↓縺縺第緒逕ｻ縺励※荳堺ｸ閾ｴ繧堤┌縺上☆縲・
+  427|   const [mounted, setMounted] = useState(false)
+  428|   useEffect(() => { setMounted(true) }, [])
+  429|   const [searchQuery, setSearchQuery] = useState<string>('')
+  430|   const [rebuildState, setRebuildState] = useState<'idle'|'running'|'success'|'failed'>('idle')
+  431|   const [isStale, setIsStale] = useState<boolean>(false)
+  432|   const [popupAlerts, setPopupAlerts] = useState<{id: string; client: string; reason: string; days: number; assignee: string}[]>([
+
+蜑企勁蟇ｾ雎｡:
+    // [HYDRATION_FIX_V1 2026-10-29] 譎ょ綾陦ｨ遉ｺ縺ｯSSR縺ｨ繧ｯ繝ｩ繧､繧｢繝ｳ繝医〒蠢・★繧ｺ繝ｬ繧・
+    //   (Date.now() / toLocaleString 縺ｮ繝ｭ繧ｱ繝ｼ繝ｫ蟾ｮ)縲３eact #418 縺ｮ蜴溷屏縺縺｣縺溘・
+    //   繝槭え繝ｳ繝亥ｾ後↓縺縺第緒逕ｻ縺励※荳堺ｸ閾ｴ繧堤┌縺上☆縲・
+    const [mounted, setMounted] = useState(false)
+    useEffect(() => { setMounted(true) }, [])
+
+removed 5 lines

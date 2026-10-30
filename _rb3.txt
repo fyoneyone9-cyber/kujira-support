@@ -1,0 +1,4 @@
+﻿sheets: 1
+  蠢・育｢ｺ隱坂蔵              rows=31   maxcol=14
+
+wrote C:\GensparkClaw\kujira-support\src\lib\hearingSheetDefs.ts

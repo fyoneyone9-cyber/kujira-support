@@ -1,0 +1,25 @@
+﻿  470|   }
+  471| 
+  472|   const loadStats = async () => {
+  473|     const res = await fetch('/api/delivery/items')
+  474|     const d = await res.json()
+  475|     const all: DeliveryItem[] = d.items || []
+  476|     setAllItems(all)
+  477|     const names = Array.from(new Set(all.map((i: DeliveryItem) => i.assignee).filter(Boolean))).sort() as string[]
+  478|     setAllAssignees(names)
+  479|     // [LAST_IMPORT_FIX_V1 2026-10-29] created_at(繝ｬ繧ｳ繝ｼ繝我ｽ懈・譌･譎・縺ｧ縺ｯ縺ｪ縺・
+  480|     //   last_imported_at(蜿冶ｾｼ譌･譎・繧定ｦ九ｋ縲Ｊmport-csv 縺ｯ upsert 縺ｪ縺ｮ縺ｧ
+  481|     //   譌｢蟄倩｡後・ created_at 縺ｯ譖ｴ譁ｰ縺輔ｌ縺壹√梧怙邨ょ叙霎ｼ縲阪′菴墓律繧ょ商縺・∪縺ｾ陦ｨ遉ｺ縺輔ｌ縺ｦ縺・◆縲・
+  482|     const lastImport = all.length > 0
+  483|       ? (all.map(x => x.last_imported_at).filter(Boolean).sort().slice(-1)[0] || null)
+  484|       : null
+  485|     const now = Date.now()
+  486|     const pac = all.filter(i => {
+  487|       if (i.status === 'done') return false
+  488|       if (!i.delivery_due_date) return false
+  489|       const diff = (new Date(i.delivery_due_date).getTime() - now) / (1000 * 60 * 60 * 24)
+  490|       return diff <= 14
+  491|     }).length
+  492|     setStats({ total: all.length, lastImport, progressAlertCount: pac })
+  493|     // 30譌･莉･蜀・い繝ｩ繝ｼ繝医・蜿朱寔
+  494|     const now2 = Date.now()

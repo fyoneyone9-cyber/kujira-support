@@ -1,0 +1,171 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+
+const navItems: { href: string; label: string; icon: string; alert?: boolean; external?: boolean }[] = [
+  { href: '/dashboard', label: 'ダッシュボード', icon: '🏠' },
+  { href: '/paycube', label: 'PayCube保守', icon: '🔔', alert: true },
+  { href: '/delivery', label: 'IoT製品納品アラート', icon: '📦', alert: true },
+  { href: '/inventory', label: '在庫管理', icon: '📊', alert: true },
+  { href: '/ai-summary', label: 'AI要約＋迷惑判定', icon: '🤖' },
+  { href: '/troubleshooting', label: 'トラブルシューティング', icon: '🔧' },
+  { href: '/keybox', label: 'キーボックス管理', icon: '🗝️' },
+  { href: '/entrance', label: '玄関集合機・NW管理', icon: '🏢' },
+  { href: '/onboarding', label: '新人教育', icon: '🎓' },
+  { href: '/manuals', label: 'マニュアル', icon: '📋' },
+  { href: '/nippou', label: '日報作成', icon: '📝' },
+  { href: '/teleapo', label: 'テレアポ', icon: '📞' },
+  { href: '/automations', label: '自動化', icon: '⚡' },
+  { href: '/mail-templates', label: 'メールテンプレート', icon: '📧' },
+  { href: '/purchase-orders', label: '発注書', icon: '📋' },
+  { href: '/p400-orders', label: 'P400注文書', icon: '💳' },
+  { href: '/assignment', label: '引き当てシート', icon: '📬' },
+  { href: '/rentacar', label: 'レンタカー', icon: '🚗' },
+  { href: '/tasks', label: 'タスク', icon: '✅' },
+  { href: '/admin', label: 'メンバー管理', icon: '👥' },
+]
+
+const JP_DAYS = ['日', '月', '火', '水', '木', '金', '土']
+const JP_MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+
+function MiniCalendar() {
+  const today = new Date()
+  const [viewYear, setViewYear] = useState(today.getFullYear())
+  const [viewMonth, setViewMonth] = useState(today.getMonth())
+
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  const isCurrentMonth = viewYear === today.getFullYear() && viewMonth === today.getMonth()
+
+  const prev = () => {
+    if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11) }
+    else setViewMonth(m => m - 1)
+  }
+  const next = () => {
+    if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0) }
+    else setViewMonth(m => m + 1)
+  }
+
+  const cells: (number | null)[] = []
+  for (let i = 0; i < firstDay; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  return (
+    <div className="px-3 py-3 border-b border-slate-700">
+      {/* ヘッダー：月移動 */}
+      <div className="flex items-center justify-between mb-2">
+        <button onClick={prev} className="text-slate-400 hover:text-white px-1 text-sm">‹</button>
+        <span className="text-slate-300 text-xs font-bold">
+          {viewYear}年 {JP_MONTHS[viewMonth]}
+        </span>
+        <button onClick={next} className="text-slate-400 hover:text-white px-1 text-sm">›</button>
+      </div>
+      {/* 曜日ヘッダー */}
+      <div className="grid grid-cols-7 mb-1">
+        {JP_DAYS.map((d, i) => (
+          <div key={d} className={`text-center text-xs font-medium ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-slate-500'}`}>
+            {d}
+          </div>
+        ))}
+      </div>
+      {/* 日付グリッド */}
+      <div className="grid grid-cols-7 gap-y-0.5">
+        {cells.map((day, idx) => {
+          if (!day) return <div key={`e-${idx}`} />
+          const col = idx % 7
+          const isToday = isCurrentMonth && day === today.getDate()
+          const isSun = col === 0
+          const isSat = col === 6
+          return (
+            <div key={day} className={`text-center text-xs py-0.5 rounded-md font-medium leading-5
+              ${isToday ? 'bg-blue-600 text-white' :
+                isSun ? 'text-red-400' :
+                isSat ? 'text-blue-400' :
+                'text-slate-400'}`}>
+              {day}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+export default function Sidebar() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const [now, setNow] = useState(new Date())
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60000)
+    return () => clearInterval(t)
+  }, [])
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
+  const dateStr = `${now.getMonth() + 1}/${now.getDate()}（${JP_DAYS[now.getDay()]}）`
+  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+
+  return (
+    <aside className="w-64 min-h-screen bg-slate-800 border-r border-slate-700 flex flex-col">
+      {/* Logo + 日付 */}
+      <div className="p-6 border-b border-slate-700">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl">
+            🐋
+          </div>
+          <div>
+            <p className="font-bold text-white text-base">KUJIRA</p>
+            <p className="text-slate-400 text-sm">サポートシステム</p>
+          </div>
+        </div>
+        {/* 日付・時刻 */}
+        <div className="mt-3 space-y-0.5">
+          <div className="text-white font-bold text-xl">{dateStr}</div>
+          <div className="text-slate-300 text-lg font-semibold">{timeStr}</div>
+        </div>
+      </div>
+
+      {/* ミニカレンダー */}
+      <MiniCalendar />
+
+      {/* Nav */}
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {navItems.map((item) => {
+          const isActive = !item.external && (pathname === item.href || pathname.startsWith(item.href + '/'))
+          const cls = `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold transition-colors ${isActive ? 'bg-blue-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700'}`
+          return item.external ? (
+            <a key={item.href} href={item.href} target="_blank" rel="noreferrer" className={cls}>
+              <span className="text-xl">{item.icon}</span>
+              {item.label}
+            </a>
+          ) : (
+            <Link key={item.href} href={item.href} className={cls}>
+              <span className="text-xl">{item.icon}</span>
+              {item.label}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* Logout */}
+      <div className="p-4 border-t border-slate-700">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+        >
+          <span>🚪</span>
+          ログアウト
+        </button>
+      </div>
+    </aside>
+  )
+}

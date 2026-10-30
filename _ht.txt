@@ -1,0 +1,2 @@
+﻿const hasTablet  = equip.some(e => TABLET_PAT.test(e.name || '') || TABLET_PAT.test(e.value || ''))
+const hasPrinter = equip.some(e => PRINTER_PAT.test(e.name || '') || PRINTER_PAT.test(e.value || ''))

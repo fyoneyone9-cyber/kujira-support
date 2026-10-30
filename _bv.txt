@@ -1,0 +1,8 @@
+﻿  hearing-gas.js                 GAS_VERSION = V27 2026-10-29
+  hearing-gas-dialog.html        DIALOG_VERSION = V27 2026-10-29
+  koutei-gas.js                  KOUTEI_VERSION = K2 2026-10-29
+  koutei-gas-dialog.html         DIALOG_VERSION = K2 2026-10-29
+
+=== 辣ｧ蜷・===
+  繝偵い繝ｪ繝ｳ繧ｰ: V27 2026-10-29 / V27 2026-10-29 -> 荳閾ｴ
+  蟾･遞狗ｮ｡逅・ : K2 2026-10-29 / K2 2026-10-29 -> 荳閾ｴ

@@ -1,0 +1,15 @@
+﻿   56| const today = new Date(); today.setHours(0, 0, 0, 0)
+  122| const today = new Date(); today.setHours(0,0,0,0)
+  301| const d = Math.ceil((new Date(pd).getTime() - new Date().setHours(0,0,0,0)) / 86400000)
+  485| const now = Date.now()
+  494| const now2 = Date.now()
+  620| patch(id, { status: 'done', acknowledged_at: new Date().toISOString() })
+  657| const started = Date.now()
+  664| if (Date.now() - started > TOTAL_TIMEOUT) {
+  689| if (!serverWasDown) { serverWasDown = true; serverDownAt = Date.now() }
+  691| if (serverWasDown && Date.now() - serverDownAt > DOWN_RECOVER_TIMEOUT) {
+  800| const hoursAgo = stats?.lastImport ? (Date.now() - new Date(stats.lastImport).getTime()) / 3600000 : null
+  807| {stats?.lastImport ? new Date(stats.lastImport).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '.
+ 1244| const days21 = it.delivery_due_date ? Math.ceil((new Date(it.delivery_due_date).getTime() - new Date().setHours(0,0,0,0)) / 86400000) : null
+ 1250| const today = new Date().toISOString().slice(0, 10)
+ 1930| const today2 = new Date(); today2.setHours(0,0,0,0)

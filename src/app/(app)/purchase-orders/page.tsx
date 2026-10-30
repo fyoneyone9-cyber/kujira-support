@@ -149,7 +149,7 @@ export default function PurchaseOrdersPage() {
         <h1 className="text-2xl font-bold text-white">発注書管理</h1>
         <button
           onClick={() => setShowForm(v => !v)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-base font-medium transition-colors"
         >
           {showForm ? '閉じる' : '+ 新規作成'}
         </button>
@@ -162,55 +162,55 @@ export default function PurchaseOrdersPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-slate-400">発注日</label>
+              <label className="text-base text-slate-400">発注日</label>
               <input type="date" value={orderDate} onChange={e => setOrderDate(e.target.value)}
-                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="text-sm text-slate-400">納期</label>
+              <label className="text-base text-slate-400">納期</label>
               <input type="text" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} placeholder="例: 2024年3月末"
-                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="text-sm text-slate-400">仕入先名</label>
+              <label className="text-base text-slate-400">仕入先名</label>
               <input type="text" value={vendorName} onChange={e => setVendorName(e.target.value)}
-                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="text-sm text-slate-400">支払条件</label>
+              <label className="text-base text-slate-400">支払条件</label>
               <input type="text" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)}
-                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div className="col-span-2">
-              <label className="text-sm text-slate-400">入荷場所</label>
+              <label className="text-base text-slate-400">入荷場所</label>
               <input type="text" value={deliveryPlace} onChange={e => setDeliveryPlace(e.target.value)}
-                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div className="col-span-2">
-              <label className="text-sm text-slate-400">備考</label>
+              <label className="text-base text-slate-400">備考</label>
               <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
           </div>
 
           {/* プリセット */}
           <div className="flex gap-2 flex-wrap">
-            <span className="text-sm text-slate-400 self-center">プリセット:</span>
+            <span className="text-base text-slate-400 self-center">プリセット:</span>
             <button onClick={() => addPreset('PayCube本体', 370000)}
-              className="bg-slate-600 hover:bg-slate-500 text-white text-xs px-3 py-1 rounded-lg">
+              className="bg-slate-600 hover:bg-slate-500 text-white text-sm px-3 py-1 rounded-lg">
               PayCube本体 ¥370,000
             </button>
             <button onClick={() => addPreset('電源アダプター', 2000)}
-              className="bg-slate-600 hover:bg-slate-500 text-white text-xs px-3 py-1 rounded-lg">
+              className="bg-slate-600 hover:bg-slate-500 text-white text-sm px-3 py-1 rounded-lg">
               電源アダプター ¥2,000
             </button>
           </div>
 
           {/* 品目テーブル */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead>
-                <tr className="text-slate-400 text-xs">
+                <tr className="text-slate-400 text-sm">
                   <th className="text-left pb-2">品名</th>
                   <th className="text-left pb-2">補足</th>
                   <th className="text-right pb-2 w-16">数量</th>
@@ -257,10 +257,10 @@ export default function PurchaseOrdersPage() {
           </div>
 
           <button onClick={() => setItems(prev => [...prev, emptyItem()])}
-            className="text-sm text-blue-400 hover:text-blue-300">+ 行を追加</button>
+            className="text-base text-blue-400 hover:text-blue-300">+ 行を追加</button>
 
           {/* 合計 */}
-          <div className="border-t border-slate-700 pt-4 space-y-1 text-sm text-right">
+          <div className="border-t border-slate-700 pt-4 space-y-1 text-base text-right">
             <div className="text-slate-400">小計: <span className="text-white">¥{subtotal.toLocaleString()}</span></div>
             <div className="text-slate-400">消費税(10%): <span className="text-white">¥{tax.toLocaleString()}</span></div>
             <div className="text-white font-bold text-base">合計(税込): ¥{total.toLocaleString()}</div>
@@ -280,9 +280,9 @@ export default function PurchaseOrdersPage() {
         ) : orders.length === 0 ? (
           <div className="p-8 text-center text-slate-400">発注書がありません</div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead className="bg-slate-700/50">
-              <tr className="text-slate-400 text-xs">
+              <tr className="text-slate-400 text-sm">
                 <th className="text-left px-4 py-3">発注番号</th>
                 <th className="text-left px-4 py-3">発注日</th>
                 <th className="text-left px-4 py-3">仕入先</th>
@@ -306,18 +306,18 @@ export default function PurchaseOrdersPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-2">
                       <a href={`/api/purchase-orders/${order.id}/excel`}
-                        className="bg-green-700 hover:bg-green-600 text-white text-xs px-2 py-1 rounded transition-colors">
+                        className="bg-green-700 hover:bg-green-600 text-white text-sm px-2 py-1 rounded transition-colors">
                         Excel
                       </a>
                       <select value={order.status} onChange={e => handleStatusChange(order.id, e.target.value)}
-                        className="bg-slate-700 border border-slate-600 text-white text-xs rounded px-2 py-1">
+                        className="bg-slate-700 border border-slate-600 text-white text-sm rounded px-2 py-1">
                         <option value="draft">下書き</option>
                         <option value="sent">送付済</option>
                         <option value="delivered">納品済</option>
                         <option value="cancelled">キャンセル</option>
                       </select>
                       <button onClick={() => handleDelete(order.id)}
-                        className="bg-red-700 hover:bg-red-600 text-white text-xs px-2 py-1 rounded transition-colors">
+                        className="bg-red-700 hover:bg-red-600 text-white text-sm px-2 py-1 rounded transition-colors">
                         削除
                       </button>
                     </div>

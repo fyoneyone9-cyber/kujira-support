@@ -1,0 +1,194 @@
+<!--
+  ヒアリングシート コピー作成ダイアログ
+  --------------------------------------------------
+  Apps Script のファイル名を「dialog」にして貼り付けてください。
+  （Apps Script エディタ左の「＋」→ HTML → 名前を dialog にする）
+
+  [V17 2026-10-29]
+    シート名の完全一致で判定するとズレて削除漏れが出たため、
+    実際のタブ名を読み込んで一覧表示する方式に変更。
+    自動チェックは機材構成からキーワード照合で行う。
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+ body{font-family:"Helvetica Neue",Arial,"Hiragino Sans","Meiryo",sans-serif;font-size:14px;padding:14px;color:#222}
+ h3{margin:0 0 10px;font-size:16px}
+ label{display:block;margin:7px 0 2px;font-weight:bold;font-size:13px;color:#555}
+ input[type=text],textarea{width:100%;padding:7px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;font-size:13px}
+ textarea{height:54px;font-family:monospace;font-size:11px}
+ .chk{display:flex;align-items:center;gap:7px;padding:4px 0}
+ .chk label{margin:0;font-weight:normal;font-size:14px}
+ .chk .auto{font-size:11px;color:#0b8043}
+ .box{border:1px solid #ddd;border-radius:6px;padding:9px;margin-top:9px;max-height:240px;overflow:auto}
+ button{margin-top:12px;width:100%;padding:11px;background:#0b8043;color:#fff;border:0;border-radius:5px;font-weight:bold;font-size:15px;cursor:pointer}
+ button:disabled{background:#999}
+ #paste{background:#1a73e8;margin-top:6px;padding:8px;font-size:13px}
+ #msg{margin-top:10px;font-size:13px;line-height:1.6}
+ a{color:#1a73e8}
+ .hint{font-size:12px;color:#888;margin-top:3px}
+ .loading{color:#888;font-size:13px;padding:8px}
+</style>
+</head>
+<body>
+<h3>必要シートだけコピー作成</h3>
+
+<label>① ダッシュボードの「📋 設定をコピー」した内容を貼り付け</label>
+<textarea id="json" placeholder="ここに貼り付けると、下の項目とタブのチェックが自動で入ります"></textarea>
+<button id="paste" onclick="applyJson()">⬇ 貼り付けた内容を反映</button>
+
+<label>会社名</label>
+<input type="text" id="client" placeholder="株式会社ビジョン">
+<label>物件名・住所</label>
+<input type="text" id="property" placeholder="〒656-2401 兵庫県淡路市岩屋2604">
+<label>ご担当者</label>
+<input type="text" id="contact" placeholder="石川様">
+<label>電話番号</label>
+<input type="text" id="tel" placeholder="0799-00-0000">
+<label>メールアドレス</label>
+<input type="text" id="email" placeholder="info@example.com">
+<label>客室数</label>
+<input type="text" id="rooms" placeholder="20">
+
+<div class="box">
+  <div style="font-weight:bold;font-size:13px;margin-bottom:5px">
+    残すタブ（このシートに実際にあるタブです）
+  </div>
+  <div id="tabs" class="loading">タブを読み込み中…</div>
+  <div class="hint">※ ①を貼り付けると機材構成から自動でチェックが入ります</div>
+</div>
+
+<button id="go" onclick="run()" disabled>コピーを作成</button>
+<div id="msg"></div>
+
+<script>
+var SHEETS = [];      // 実タブ名
+var LAST_EQUIPS = []; // 直近の機材フラグ
+
+/** 起動時に実タブ名を読み込む */
+google.script.run.withSuccessHandler(function (names) {
+  SHEETS = names || [];
+  var html = SHEETS.map(function (n, i) {
+    return '<div class="chk">' +
+      '<input type="checkbox" id="t' + i + '" value="' + n.replace(/"/g, '&quot;') + '">' +
+      '<label for="t' + i + '">' + n + '</label>' +
+      '<span class="auto" id="a' + i + '"></span></div>';
+  }).join('');
+  document.getElementById('tabs').innerHTML = html || '（タブが見つかりません）';
+  document.getElementById('tabs').className = '';
+  document.getElementById('go').disabled = false;
+}).withFailureHandler(function (e) {
+  document.getElementById('tabs').innerHTML =
+    '<span style="color:#c00">タブの読み込みに失敗: ' + e.message + '</span>';
+}).getSheetNames();
+
+/** 貼り付けた設定を反映し、残すタブを自動で選ぶ */
+function applyJson() {
+  var raw = document.getElementById('json').value.trim();
+  if (!raw) { alert('貼り付け欄が空です'); return; }
+  var d;
+  try { d = JSON.parse(raw); }
+  catch (e) {
+    alert('形式が正しくありません。ダッシュボードの「📋 設定をコピー」で取得した内容を貼り付けてください');
+    return;
+  }
+
+  ['client', 'property', 'contact', 'tel', 'email', 'rooms']
+    .forEach(function (k) { if (d[k]) document.getElementById(k).value = d[k]; });
+
+  LAST_EQUIPS = d.equips || [];
+  document.getElementById('msg').innerHTML = '<span style="color:#888">自動判定中…</span>';
+
+  // サーバー側で「残すべきタブ名」を推定してもらう（実タブ名ベース）
+  google.script.run.withSuccessHandler(function (keep) {
+    var set = {};
+    (keep || []).forEach(function (n) { set[n] = true; });
+    var on = 0;
+    SHEETS.forEach(function (n, i) {
+      var v = !!set[n];
+      document.getElementById('t' + i).checked = v;
+      document.getElementById('a' + i).textContent = v ? '自動' : '';
+      if (v) on++;
+    });
+    document.getElementById('msg').innerHTML =
+      '<b style="color:#0b8043">✅ 反映しました</b>（' + on + '枚を自動選択）<br>' +
+      '<span style="font-size:12px;color:#888">違う場合はチェックを直してください</span>';
+  }).withFailureHandler(function (e) {
+    document.getElementById('msg').innerHTML =
+      '<span style="color:#c00">自動判定に失敗: ' + e.message + '</span>';
+  }).suggestSheets(LAST_EQUIPS);
+}
+
+var timer = null, sec = 0;
+function tick() {
+  sec++;
+  var step = sec < 5 ? '雛形をコピー中' : sec < 15 ? '不要なタブを削除中' : '案件情報を入力中';
+  var pct = Math.min(96, Math.round(sec / 25 * 100));
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#1a73e8">⏳ ' + step + '…（' + sec + '秒）</b>' +
+    '<div style="height:8px;background:#e0e0e0;border-radius:4px;margin:6px 0;overflow:hidden">' +
+    '<div style="height:8px;width:' + pct + '%;background:#1a73e8;transition:width .4s"></div></div>' +
+    '<span style="color:#888;font-size:12px">この画面は閉じないでください</span>';
+}
+
+function run() {
+  var keep = [];
+  SHEETS.forEach(function (n, i) {
+    if (document.getElementById('t' + i).checked) keep.push(n);
+  });
+  if (!keep.length) { alert('残すタブを1つ以上選んでください'); return; }
+
+  var btn = document.getElementById('go');
+  btn.disabled = true; btn.textContent = '作成中…';
+  sec = 0;
+  if (timer) clearInterval(timer);
+  timer = setInterval(tick, 1000);
+  tick();
+
+  google.script.run
+    .withSuccessHandler(done)
+    .withFailureHandler(fail)
+    .createCopy({
+      client:   document.getElementById('client').value,
+      property: document.getElementById('property').value,
+      contact:  document.getElementById('contact').value,
+      tel:      document.getElementById('tel').value,
+      email:    document.getElementById('email').value,
+      rooms:    document.getElementById('rooms').value,
+      sheets:   keep
+    });
+}
+
+function done(r) {
+  if (timer) clearInterval(timer);
+  var btn = document.getElementById('go');
+  btn.disabled = false; btn.textContent = 'コピーを作成';
+  document.getElementById('msg').innerHTML =
+    '<div style="background:#e6f4ea;border:1px solid #0b8043;border-radius:6px;padding:10px">' +
+    '<b style="color:#0b8043;font-size:15px">✅ 完成しました（' + sec + '秒）</b><br>' +
+    '<span style="font-size:12px;color:#555">残したタブ ' + r.kept.length +
+    '枚 / 削除 ' + r.removed.length + '枚 / 自動入力 ' + (r.filled || 0) + '箇所</span>' +
+    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #b7dfc4">' +
+    '<a href="' + r.url + '" target="_blank" ' +
+    'style="display:inline-block;margin:6px 0;padding:8px 12px;background:#1a73e8;color:#fff;' +
+    'border-radius:4px;text-decoration:none;font-weight:bold">▶ 作成したシートを開く</a><br>' +
+    '<span style="font-size:12px;color:#555">' +
+    '① 内容を確認（空欄はお客様に記入いただく項目です）<br>' +
+    '② 共有またはダウンロードしてお客様へ送付<br>' +
+    '③ ダッシュボードの「✉️ 送付メール」から本文をコピーして送信<br>' +
+    '保存先: マイドライブ直下「' + r.name + '」</span>' +
+    '</div></div>';
+}
+
+function fail(e) {
+  if (timer) clearInterval(timer);
+  var btn = document.getElementById('go');
+  btn.disabled = false; btn.textContent = 'コピーを作成';
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#c00">❌ 失敗: ' + e.message + '</b>';
+}
+</script>
+</body>
+</html>

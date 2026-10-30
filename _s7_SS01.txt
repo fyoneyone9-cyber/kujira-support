@@ -1,0 +1,49 @@
+{
+ "items": [
+  {
+   "label": "👑 S1-01 全世界同時降伏、玉座に座る俺と跪く人類",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),(coronation of world conqueror:1.6),1girl kneeling in endless crowd,(every nation surrendered:1.5),(pov from throne looking down at bowed masses:1.5),(golden crown and cape:1.4),(absolute victory:1.4),(cathedral scale throne hall:1.4)"
+  },
+  {
+   "label": "👑 S1-02 首脳たちが震えながら忠誠を誓う",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),(world leaders prostrating before throne:1.6),1girl as attendant standing beside throne,(trembling oath of loyalty:1.5),(signed surrender documents piled:1.4),(my word is now law:1.5),(throne room:1.3),(intoxicating power:1.4)"
+  },
+  {
+   "label": "👑 S1-03 「欲しいものを言え」側近が問う、俺は笑う",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),(king smirking on throne:1.5),1girl glancing up nervously from below,(advisors awaiting his first demand:1.4),(anything in the world is yours:1.5),(his gaze sweeping over kneeling girls:1.5),(dark anticipation:1.4),(throne room:1.3)"
+  },
+  {
+   "label": "👑 S1-04 最初の勅令、「この国の娘は俺のものだ」",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),1girl listening to royal decree broadcast with widening eyes,(all daughters belong to the king decree:1.6),(loudspeaker proclamation over city:1.5),(citizens frozen in streets:1.4),(shameless absolute law:1.5),(dystopian city square:1.3),(no one can object:1.4)"
+  },
+  {
+   "label": "👑 S1-05 誰も逆らえない、分かっていてやる背徳",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),(king walking through parting crowd:1.5),1girl bowing as he passes close,(his hand brushing her hair in public:1.5),(no one dares raise their eyes:1.5),(doing it because no one can stop me:1.5),(guilty thrill on his face:1.4),(street scene:1.3)"
+  },
+  {
+   "label": "👑 S1-06 征服者の寝室、世界地図を眺めて選ぶ夜",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),(king alone in opulent bedroom studying world map:1.5),1girl portrait among photos pinned on map,(choosing tonight summons:1.5),(wine glass in hand:1.3),(luxurious royal bedchamber:1.4),(predatory leisure:1.5),(moral line already behind him:1.4)"
+  },
+  {
+   "label": "👑 S1-07 朝は少女たちの手で着替えさせられる",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),1girl dressing the king with lowered eyes,(morning dressing ritual by selected girls:1.5),(his arms spread lazily:1.4),(ornate royal garments:1.4),(servants trembling fingers on buttons:1.4),(royal chamber:1.3),(casual ownership:1.5)"
+  },
+  {
+   "label": "👑 S1-08 朝食は玉座で、膝の上に給仕係",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),1girl sitting on king lap feeding him breakfast,(girl as living tray:1.5),(court pretending not to see:1.5),(gilded dining hall:1.4),(her stiff obedient posture:1.4),(his relaxed grin:1.4),(normalized depravity:1.5)"
+  },
+  {
+   "label": "👑 S1-09 謁見は退屈、貢ぎ物より娘の顔を見る",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),(king slouching on throne bored by tribute:1.5),1girl in line of presented daughters,(gold piled ignored:1.4),(his eyes only on the girls faces:1.5),(diplomats sweating:1.4),(throne room audience:1.3),(lust replacing politics:1.4)"
+  },
+  {
+   "label": "👑 S1-10 視察と称して学校を回る、生徒全員が最敬礼",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),1girl bowing deeply with entire class,(king strolling classroom aisle:1.5),(inspection tour of schools:1.5),(his finger lifting a girl chin:1.5),(teachers paralyzed:1.4),(classroom:1.3),(abuse dressed as ceremony:1.5)"
+  },
+  {
+   "label": "👑 S1-11 気に入った娘に紋章のチョーカーを贈る",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),1girl receiving crown-sigil choker around her neck,(king fastening it himself:1.5),(mark of royal property:1.6),(classmates watching in silence:1.4),(her confused flushed face:1.4),(claiming in public:1.5),(school hallway:1.3)"
+  },
+  {
+   "label": "👑 S1-12 夜のニュースが俺の「寵愛」を美談として報じる",
+   "value": "(royal palace:1.3),(absolute ruler's domain:1.2),1girl watching tv news glorifying the king favor,

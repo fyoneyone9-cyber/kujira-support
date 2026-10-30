@@ -1,0 +1,7 @@
+﻿繝・く繧ｹ繝域ｬ・ client, property, contact, tel, email, rooms, pms, cardkeyMaker, lockMaker
+繝√ぉ繝・け谺・ chk_pms, chk_smartlock, chk_cardkey, chk_cylinder, chk_cash, chk_p400, chk_sumaho, chk_paypay, chk_printer, chk_roomtablet, chk_precheckin, chk_frontci
+
+id陦晉ｪ・ 縺ｪ縺・竊・豁｣蟶ｸ
+JS縺慶hk_蜿ら・: OK
+KEYS: 12 莉ｶ / 蟇ｾ蠢懊＠縺ｪ縺・ｂ縺ｮ: 縺ｪ縺・竊・豁｣蟶ｸ
+荳肴ｭ｣縺ｪlabel for: 縺ｪ縺・竊・豁｣蟶ｸ

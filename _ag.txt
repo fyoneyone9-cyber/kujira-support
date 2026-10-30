@@ -1,0 +1,25 @@
+﻿=== 1. 繝舌・繧ｸ繝ｧ繝ｳ謨ｴ蜷・===
+  OK  荳閾ｴ V26 2026-10-29
+
+=== 2. 譁・ｭ怜喧縺第､懈渊 ===
+  OK  hearing-gas.js 遐ｴ謳阪↑縺・  OK  dialog 遐ｴ謳阪↑縺・
+=== 3. 髢｢謨ｰ縺ｮ蟇ｾ蠢・===
+  OK  onOpen 螳夂ｾｩ縺ゅｊ
+  OK  showDialog 螳夂ｾｩ縺ゅｊ
+  OK  getVersion 螳夂ｾｩ縺ゅｊ
+  OK  getSheetNames 螳夂ｾｩ縺ゅｊ
+  OK  suggestSheets 螳夂ｾｩ縺ゅｊ
+  OK  createCopy 螳夂ｾｩ縺ゅｊ
+  OK  fillInfo 螳夂ｾｩ縺ゅｊ
+  OK  checkAuth 螳夂ｾｩ縺ゅｊ
+
+=== 4. JS讒区枚 ===
+  OK  hearing-gas.js 讒区枚OK
+  OK  dialog 讒区枚OK
+
+=== 5. 蟒・ｭ｢隕∫ｴ縺ｮ谿矩ｪｸ ===
+  OK  frontci・医ヵ繝ｭ繝ｳ繝医メ繧ｧ繝・け繧､繝ｳ・・髯､蜴ｻ貂医∩
+  OK  蝗ｺ螳壹メ繧ｧ繝・け繝懊ャ繧ｯ繧ｹ chk_ 髯､蜴ｻ貂医∩
+  OK  PMS蜷阪・蜈･蜉帶ｬ・髯､蜴ｻ貂医∩
+
+RESULT: PASS

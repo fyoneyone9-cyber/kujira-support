@@ -1,0 +1,14 @@
+﻿   47|   pms_linked?: boolean | null
+   48|   smartlock_linked?: boolean | null
+  501|       // PMS/繧ｹ繝槭・繝医Ο繝・け譛ｪ騾｣謳ｺ 30譌･蜑阪い繝ｩ繝ｼ繝・
+  508|         if (hasPms && i.pms_linked === null)
+  509|           alerts.push({ id: i.id, client, reason: 'PMS譛ｪ騾｣謳ｺ', days: dueDiff ?? 0, assignee })
+  510|         if (hasLock && i.smartlock_linked === null)
+  511|           alerts.push({ id: i.id, client, reason: '繧ｹ繝槭・繝医Ο繝・け譛ｪ騾｣謳ｺ', days: dueDiff ?? 0, assignee })
+ 1017|               if (equipItems.some(e => /pms|airhost|螳ｿ豕掛繝帙ユ繝ｫ邂｡逅・i.test(e.name || '') || /pms|airhost/i.test(e.value || '')) && it.pms_linked === null) cardAlerts.push({ label: '妾 PMS譛ｪ
+ 1018|               if (equipItems.some(e => /繧ｹ繝槭・繝医Ο繝・け|smart.?lock|lock/i.test(e.name || '')) && it.smartlock_linked === null) cardAlerts.push({ label: '柏 繧ｹ繝槭・繝医Ο繝・け譛ｪ騾｣謳ｺ', target: integSec })
+ 1048|                     <span className="text-xs font-bold text-red-300">笞・・隕∝ｯｾ蠢・</span>
+ 1238|                   const IntegRow = ({ label, field, val }: { label: string; field: 'pms_linked' | 'smartlock_linked'; val: boolean | null | undefined }) => {
+ 1245|                           { v: null,  txt: '笶・譛ｪ騾｣謳ｺ',  cls: 'bg-slate-600 text-slate-300 hover:bg-slate-500' },
+ 1346|                       {pmsEquip  && <IntegRow label={joinLabel(pmsEquip)}  field="pms_linked"       val={it.pms_linked ?? null} />}
+ 1347|                       {lockEquip && <IntegRow label={joinLabel(lockEquip)} field="smartlock_linked" val={it.smartlock_linked ?? null} />}

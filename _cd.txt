@@ -1,0 +1,10 @@
+﻿python.exe :   File "<string>", line 5
+発生場所 行:1 文字:36
++ ... \kujira-support; & "C:\Users\fyone\anaconda3\python.exe" -X utf8 -c "
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (  File "<string>", line 5:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    print('PMS蜷阪・蜈･蜉帶ｬ・', 'id=" pms\'
+                       ^
+SyntaxError: unterminated string literal (detected at line 5); perhaps you escaped the end quote?

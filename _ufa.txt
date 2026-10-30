@@ -1,0 +1,3 @@
+﻿UrlFetchApp菴ｿ逕ｨ: True
+getOAuthToken菴ｿ逕ｨ: True
+appsscript.json逶ｸ蠖薙・螳｣險: 縺ｪ縺暦ｼ・AS縺瑚・蜍墓耳螳夲ｼ・

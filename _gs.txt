@@ -1,0 +1,33 @@
+﻿getSheetNames    True
+suggestSheets    True
+createCopy       True
+onOpen           True
+showDialog       True
+fillInfo         True
+
+function suggestSheets(equips) {
+  var names = getSheetNames();
+  var keep = [];
+  names.forEach(function (n) {
+    for (var a = 0; a < ALWAYS_KEYWORDS.length; a++) {
+      if (n.indexOf(ALWAYS_KEYWORDS[a]) >= 0) { keep.push(n); return; }
+    }
+    for (var e = 0; e < (equips || []).length; e++) {
+      var kws = EQUIP_KEYWORDS[equips[e]] || [];
+      for (var k = 0; k < kws.length; k++) {
+        if (n.indexOf(kws[k]) >= 0) { keep.push(n); return; }
+      }
+    }
+  });
+  return keep;
+}
+
+function showDialog() {
+  var html = HtmlService.createHtmlOutputFromFile('dialog')
+    .setWidth(420).setHeight(560);
+  SpreadsheetApp.getUi().showModalDialog(html, '蠢・ｦ√す繝ｼ繝医□縺代さ繝斐・菴懈・');
+}
+
+/**
+ * 螳滄圀縺ｫ繧ｳ繝斐・繧剃ｽ懊ｋ縲・
+ * 

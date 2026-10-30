@@ -1,0 +1,29 @@
+33806091:  years old,kindergarten girl,black hair,twin braids,(toddler:1.9),(flat chest:2.0),(tiny body:1.9),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_youchien_B',la
+
+33806330: girl,5 years old,kindergarten girl,brown short hair,(toddler:1.9),(flat chest:2.0),(tiny body:1.9),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_youchien_C',la
+
+33806563: mpt:'1girl,4 years old,kindergarten girl,silver bob,(toddler:1.9),(flat chest:2.0),(tiny body:1.9),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_shougaku_A',la
+
+33806799: '1girl,9 years old,black straight long hair,(young child:1.7),(flat chest:1.7),(small stature:1.7),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_shougaku_B',la
+
+33807027: ,prompt:'1girl,10 years old,pink twin tails,(young child:1.7),(flat chest:1.7),(small stature:1.7),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_shougaku_C',la
+
+33807256: prompt:'1girl,8 years old,white silver hair,(young child:1.8),(flat chest:1.8),(small stature:1.8),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_chuugaku_A',la
+
+33807466:  中A',age:'unknown',prompt:'1girl,13 years old,black long hair,(young teen:1.5),(small breasts:1.4),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_chuugaku_B',la
+
+33807677: 中B',age:'unknown',prompt:'1girl,13 years old,purple long hair,(young teen:1.5),(small breasts:1.4),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_chuugaku_C',la
+
+33807889: C',age:'unknown',prompt:'1girl,14 years old,blonde short hair,(young teen:1.5),(small breasts:1.4),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_jk_A',label:'💤
+
+33808074: _jk_A',label:'💤ロヒS2 JK-A',age:'unknown',prompt:'1girl,16 years old,black long hair,(teen girl:1.4),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_jk_B',label:'💤
+
+33808264: ',label:'💤ロヒS2 JK-B',age:'unknown',prompt:'1girl,16 years old,brown wavy long hair,(teen girl:1.4),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_jk_C',label:'💤
+
+33808448: 2_jk_C',label:'💤ロヒS2 JK-C',age:'unknown',prompt:'1girl,17 years old,blue long hair,(teen girl:1.4),insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_tifa',label:'💤
+
+33808716: asy vii,(tifa lockhart:1.4),long black hair,low ponytail,red eyes,(large breasts:1.2),20 years old,insane',outfits_ref:"S0273"});\nwindow.CHAR_TEMPLATES.female.push({id:'char_rohypnol_s2_aerith',label:
+
+33808987:  fantasy vii,(aerith gainsborough:1.4),long brown braided hair,pink ribbon,green eyes,22 years old,insane',outfits_ref:"S0273"});\n// ===== /[ROHY_S2] =====\n\n// ===== [ROHY_S3] ロヒプノールS3 (2026-10-24) ==
+
+total=14

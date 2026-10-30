@@ -1,0 +1,67 @@
+﻿ 1393|                         {/* Gemini繝励Ο繝ｳ繝励ヨ逕滓・ / 荳崎ｦ・繝懊ち繝ｳ */}
+ 1394|                         {(() => {
+ 1395|                           const navSkip = it.dashboard_todos?.['hearing_nav_skip']
+ 1396|                           if (navSkip) return (
+ 1397|                             <div className="flex items-center gap-2">
+ 1398|                               <span className="text-xs text-slate-500">繝翫ン繧ｲ繝ｼ繝井ｸ崎ｦ√↓險ｭ螳壽ｸ医∩</span>
+ 1399|                               <button onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'hearing_nav_skip', '')}
+ 1400|                                 className="text-xs text-slate-500 hover:text-slate-300 underline">蜿悶ｊ豸医☆</button>
+ 1401|                             </div>
+ 1402|                           )
+ 1403|                           const promptText = `縺ゅ↑縺溘・繧ｹ繝槭・繝医メ繧ｧ繝・け繧､繝ｳ繧ｷ繧ｹ繝・Β縲窟dvaNceD IoT縲阪・蟆主・繧ｵ繝昴・繝域球蠖薙〒縺吶・
+ 1404| 莉･荳九・縺雁ｮ｢讒俶ュ蝣ｱ繧偵ｂ縺ｨ縺ｫ縲∝ｰ主・蜑阪↓縺雁ｮ｢讒倥↓繧・▲縺ｦ縺・◆縺縺乗ｺ門ｙ莠矩・ｒ縲√ｏ縺九ｊ繧・☆縺丈ｸ∝ｯｧ縺ｪ譌･譛ｬ隱槭〒繝翫ン繧ｲ繝ｼ繝医＠縺ｦ縺上□縺輔＞縲・
+ 1405| 
+ 1406| 縲舌♀螳｢讒俶ュ蝣ｱ縲・
+ 1407| - 莨夂､ｾ蜷・ ${it.client_name || '譛ｪ蜈･蜉・}
+ 1408| - 險ｭ鄂ｮ菴乗園: ${it.install_address || '譛ｪ蜈･蜉・}
+ 1409| - 諡・ｽ楢・ ${it.contact_name || '譛ｪ蜈･蜉・}
+ 1410| - 邏榊刀莠亥ｮ壽律: ${it.delivery_due_date || '譛ｪ蜈･蜉・}
+ 1411| - 蟆主・讖滓攝: ${(it.equipment || []).map((e: Equipment) => [e.name, e.value].filter(Boolean).join(' ')).join('縲・) || '譛ｪ蜈･蜉・}
+ 1412| 
+ 1413| 縲先ｺ門ｙ莠矩・ｼ郁ｩｲ蠖薙☆繧九ｂ縺ｮ繧偵☆縺ｹ縺ｦ繝翫ン繧ｲ繝ｼ繝医＠縺ｦ縺上□縺輔＞・峨・
+ 1414| 1. 迴ｾ蝨ｰ險ｭ鄂ｮ迺ｰ蠅・・貅門ｙ
+ 1415|    - KIOSK險ｭ鄂ｮ莠亥ｮ夂ｮ・園縺ｸ縺ｮLAN驟咲ｷ壼ｷ･莠具ｼ・at5e莉･荳頑耳螂ｨ・・
+ 1416|    - 100V繧ｳ繝ｳ繧ｻ繝ｳ繝医・遒ｺ菫晢ｼ域悽菴薙°繧・m莉･蜀・ｼ・
+ 1417|    - 險ｭ鄂ｮ莠亥ｮ壻ｽ咲ｽｮ縺ｮ蜻ｨ蝗ｲ蜀咏悄繧帝∽ｻ・
+ 1418| 
+ 1419| 2. 繝阪ャ繝医Ρ繝ｼ繧ｯ險ｭ螳壹・遒ｺ隱・
+ 1420|    - ipconfig /all 縺ｮ繧ｹ繧ｯ繝ｪ繝ｼ繝ｳ繧ｷ繝ｧ繝・ヨ繧帝∽ｻ・
+ 1421|    - 蠢・ｦ√↓蠢懊§縺ｦAdvanced IP Scanner縺ｧ繧ｹ繧ｭ繝｣繝ｳ邨先棡繧帝∽ｻ・
+ 1422| 
+ 1423| 3. PMS騾｣謳ｺ縺ｮ遒ｺ隱・{hasPms2 ? `・医％縺ｮ縺雁ｮ｢讒倥・PMS騾｣謳ｺ縺ゅｊ・・
+ 1424|    - 繧ｹ繝・う繧ｷ繝ｼ縺ｮ縲悟・髢帰PI騾｣謳ｺ縲阪∈縺ｮ蜉蜈･縺悟ｿ・ｦ・
+ 1425|    - 11譛井ｸｭ縺ｫ螂醍ｴ・幕蟋九′蠢・ｦ～ : '・医％縺ｮ縺雁ｮ｢讒倥・PMS騾｣謳ｺ縺ｪ縺暦ｼ・}
+ 1426| 
+ 1427| 4. DMS・医メ繧ｧ繝・け繧､繝ｳ邂｡逅・す繧ｹ繝・Β・峨い繧ｫ繧ｦ繝ｳ繝郁ｨｭ螳・
+ 1428|    - 繧｢繧ｫ繧ｦ繝ｳ繝井ｽ懈・蠕後↓螻翫￥蛻晄悄繝代せ繝ｯ繝ｼ繝峨ｒ蠑顔､ｾ縺ｸ蜈ｱ譛・
+ 1429|    - 繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医∈縺ｮ險伜・
+ 1430| 
+ 1431| 5. 逕ｻ蜒冗ｴ譚舌・謠蝉ｾ・
+ 1432|    - 繝ｭ繧ｴ逕ｻ蜒擾ｼ・NG/JPEG縲∵耳螂ｨ邵ｦ35pxﾃ玲ｨｪ128.93px・・
+ 1433|    - 閭梧勹逕ｻ蜒擾ｼ・NG/JPEG縲・0MB莉･蜀・ｼ・
+ 1434| 
+ 1435| 6. 險ｭ鄂ｮ蠖捺律縺ｮ貅門ｙ${hasPaycube ? `
+ 1436|    - 迴ｾ驥醍ｲｾ邂玲ｩ溘ユ繧ｹ繝育畑驥｣驫ｭ・・蜀・・6譫壹・蜀・・7譫壹・0蜀・・6譫壹・0蜀・・6譫壹・00蜀・・6譫壹・00蜀・・6譫壹・000蜀・・0譫夲ｼ荏 : ''}${hasP400 ? `
+ 1437|    - P400・医き繝ｼ繝画ｱｺ貂育ｫｯ譛ｫ・峨・蜉逶溷ｺ礼分蜿ｷ繧担B payment遉ｾ縺九ｉ蜿門ｾ輿 : ''}
+ 1438| 
+ 1439| 蠢・ｦ√↑繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝・ ${hearingSheets.map(s => s.label).join('縲・)}
+ 1440| 
+ 1441| 蜷・ｺ門ｙ莠矩・↓縺､縺・※縲√♀螳｢讒倥′蜈ｷ菴鍋噪縺ｫ菴輔ｒ縺吶ｌ縺ｰ繧医＞縺九ｒ逡ｪ蜿ｷ莉倥″縺ｧ繧上°繧翫ｄ縺吶￥譯亥・縺励※縺上□縺輔＞縲Ａ
+ 1442| 
+ 1443|                           return (
+ 1444|                             <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-slate-700/50">
+ 1445|                               <button
+ 1446|                                 onClick={() => {
+ 1447|                                   navigator.clipboard.writeText(promptText)
+ 1448|                                     .then(() => alert('Gemini繝励Ο繝ｳ繝励ヨ繧偵け繝ｪ繝・・繝懊・繝峨↓繧ｳ繝斐・縺励∪縺励◆・―nGemini ( https://gemini.google.com ) 縺ｫ雋ｼ繧贋ｻ倥￠縺ｦ縺上□縺輔＞縲・))
+ 1449|                                     .catch(() => alert('繧ｳ繝斐・螟ｱ謨励よ焔蜍輔〒繧ｳ繝斐・縺励※縺上□縺輔＞縲・))
+ 1450|                                 }}
+ 1451|                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white text-xs rounded-lg font-bold transition-colors"
+ 1452|                               >
+ 1453|                                 ､・Gemini繝励Ο繝ｳ繝励ヨ逕滓・繝ｻ繧ｳ繝斐・
+ 1454|                               </button>
+ 1455|                               <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer"
+ 1456|                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-600 text-white text-xs rounded-lg font-bold transition-colors">
+ 1457|                                 笨ｨ Gemini繧帝幕縺・
+ 1458|                               </a>
+ 1459|                               <button

@@ -1,0 +1,62 @@
+﻿start = L2316
+indent = 36
+ 2316| 36|                                     {/* [KOUTEI_GAS_UI_V1 2026-10-29] 繧ｹ繝励Ξ繝・ラ繧ｷ繝ｼ繝育沿・域嶌蠑上◎縺ｮ縺ｾ縺ｾ・・*/}
+ 2317| 36|                                     <div className="mt-2 pt-2 border-t border-slate-700/50">
+ 2318| 38|                                       <div className="flex items-center gap-2 flex-wrap">
+ 2319| 40|                                         <span className="text-sm text-emerald-300 font-bold">箝・繧ｹ繝励Ξ繝・ラ繧ｷ繝ｼ繝医〒菴懊ｋ・域耳螂ｨ・・
+ 2320| 40|                                         <span className="text-sm px-2 py-1 rounded bg-slate-800 border border-
+ 2321| 42|                                           譛譁ｰ: K1 2026-10-29
+ 2322| 40|                                         </span>
+ 2323| 40|                                         <button onClick={async () => {
+ 2324| 42|                                           try {
+ 2325| 44|                                             const r = await fetch('/api/delivery/gas-source?f=koutei&t=' + Dat
+ 2326| 44|                                             const t = await r.text()
+ 2327| 44|                                             if (!t.includes('createKouteiCopy')) { alert('笞 蜿門ｾ励↓螟ｱ謨励・trl+Shift+R
+ 2328| 44|                                             await navigator.clipboard.writeText(t)
+ 2329| 44|                                             alert(`笨・繧ｳ繝ｼ繝・gs 繧偵さ繝斐・縺励∪縺励◆・・{t.length.toLocaleString()}譁・ｭ暦ｼ噂n\n蟾･遞狗ｮ｡逅・｡ｨ縺ｮ
+ 2330| 42|                                           } catch { alert('繧ｳ繝斐・螟ｱ謨・) }
+ 2331| 40|                                         }}
+ 2332| 42|                                           className="text-sm px-2.5 py-1 rounded bg-blue-700 hover:bg-blue-600
+ 2333| 42|                                           搭 繧ｳ繝ｼ繝・gs 繧偵さ繝斐・
+ 2334| 40|                                         </button>
+ 2335| 40|                                         <button onClick={async () => {
+ 2336| 42|                                           try {
+ 2337| 44|                                             const r = await fetch('/api/delivery/gas-source?f=koutei-dialog&t=
+ 2338| 44|                                             const t = await r.text()
+ 2339| 44|                                             if (!t.includes('createKouteiCopy')) { alert('笞 蜿門ｾ励↓螟ｱ謨励・trl+Shift+R
+ 2340| 44|                                             await navigator.clipboard.writeText(t)
+ 2341| 44|                                             alert(`笨・dialog_koutei 繧偵さ繝斐・縺励∪縺励◆・・{t.length.toLocaleString()}譁・ｭ暦ｼ噂n\
+ 2342| 42|                                           } catch { alert('繧ｳ繝斐・螟ｱ謨・) }
+ 2343| 40|                                         }}
+ 2344| 42|                                           className="text-sm px-2.5 py-1 rounded bg-blue-700 hover:bg-blue-600
+ 2345| 42|                                           搭 dialog_koutei 繧偵さ繝斐・
+ 2346| 40|                                         </button>
+ 2347| 38|                                       </div>
+ 2348| 38|                                       <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
+ 2349| 40|                                         <b className="text-rose-300">笞 2繝輔ぃ繧､繝ｫ縺ｨ繧りｲｼ繧頑崛縺医※縺上□縺輔＞</b>・育援譁ｹ縺縺代□縺ｨ蜍輔″縺ｾ縺帙ｓ・・br />
+ 2350| 40|                                         蛻晏屓: 蟾･遞狗ｮ｡逅・｡ｨ縺ｮ蜴滓悽繧・b>繧ｳ繝斐・</b> 竊・諡｡蠑ｵ讖溯・ 竊・Apps Script 竊・荳願ｨ・縺､繧定ｲｼ莉・竊・Ctrl+S<br />
+ 2351| 40|                                         莉･髯・ 繝｡繝九Η繝ｼ <b className="text-amber-300">翌 蟾･遞狗ｮ｡逅・竊・蠢・ｦ√↑蟾･遞九□縺代さ繝斐・菴懈・</b><br />
+ 2352| 40|                                         <span className="text-emerald-400">蜴滓悽繧偵さ繝斐・縺励※荳崎ｦ∬｡後ｒ豸医☆縺ｮ縺ｧ縲∵嶌蠑上・濶ｲ繝ｻ譚｡莉ｶ莉倥″譖ｸ蠑上′縺昴・縺ｾ縺ｾ谿九ｊ
+ 2353| 38|                                       </p>
+ 2354| 36|                                     </div>
+ 2355| 34|                                   </div>
+ 2356| 32|                                 )
+ 2357| 30|                               })()}
+ 2358| 30|                               <button
+ 2359| 32|                                 onClick={() => {
+ 2360| 34|                                   navigator.clipboard.writeText(promptText)
+ 2361| 36|                                     .then(() => alert('Gemini繝励Ο繝ｳ繝励ヨ繧偵け繝ｪ繝・・繝懊・繝峨↓繧ｳ繝斐・縺励∪縺励◆・―nGemini ( https://gemini.g
+ 2362| 36|                                     .catch(() => alert('繧ｳ繝斐・螟ｱ謨励よ焔蜍輔〒繧ｳ繝斐・縺励※縺上□縺輔＞縲・))
+ 2363| 32|                                 }}
+ 2364| 32|                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-700 hover:bg-indigo
+ 2365| 30|                               >
+ 2366| 32|                                 ､・Gemini繝励Ο繝ｳ繝励ヨ逕滓・繝ｻ繧ｳ繝斐・
+ 2367| 30|                               </button>
+ 2368| 30|                               <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer"
+ 2369| 32|                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-600
+ 2370| 32|                                 笨ｨ Gemini繧帝幕縺・
+ 2371| 30|                               </a>
+ 2372| 30|                               <button
+ 2373| 32|                                 onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'hearing_nav_skip', '1')
+ 2374| 32|                                 className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-400 text-xs 
+ 2375| 30|                               >

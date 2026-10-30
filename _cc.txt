@@ -1,0 +1,58 @@
+﻿function createCopy(p) {
+  var src = SpreadsheetApp.getActiveSpreadsheet();
+
+  // 谿九☆繧ｷ繝ｼ繝亥錐繧呈ｱｺ繧√ｋ
+  var keep = {};
+  ALWAYS.forEach(function (n) { keep[n] = true; });
+  (p.equips || []).forEach(function (k) {
+    (EQUIP_SHEETS[k] || []).forEach(function (n) { keep[n] = true; });
+  });
+
+  // 髮帛ｽ｢繧剃ｸｸ縺斐→繧ｳ繝斐・・域嶌蠑上・邨仙粋繝ｻ濶ｲ縺後◎縺ｮ縺ｾ縺ｾ谿九ｋ・・
+  var name = '繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝・' + (p.client || '') + '_' +
+    Utilities.formatDate(new Date(), 'JST', 'yyyyMMdd');
+  var copy = src.copy(name);
+
+  // 荳崎ｦ√す繝ｼ繝医ｒ蜑企勁
+  var removed = [];
+  copy.getSheets().forEach(function (sh) {
+    var n = sh.getName();
+    if (!keep[n]) {
+      try { copy.deleteSheet(sh); removed.push(n); } catch (e) {}
+    }
+  });
+
+  // 譯井ｻｶ諠・ｱ繧定・蜍募・蜉幢ｼ亥・繧ｷ繝ｼ繝茨ｼ・
+  var filled = 0;
+  try { filled = fillInfo(copy, p) || 0; } catch (e) {}
+
+  return {
+    url: copy.getUrl(),
+    name: name,
+    kept: Object.keys(keep).filter(function (n) {
+      return copy.getSheetByName(n) !== null;
+    }),
+    removed: removed,
+    filled: filled
+  };
+}
+
+/**
+ * 蛻・°縺｣縺ｦ縺・ｋ諠・ｱ繧貞・繧ｷ繝ｼ繝医↓譖ｸ縺崎ｾｼ繧縲・
+ * 縲碁・岼蜷阪ｒ蜷ｫ繧陦後阪ｒ謗｢縺励√◎縺ｮ陦後・蝗樒ｭ疲ｬ・↓蛟､繧貞・繧後ｋ縲・
+ * 譌｢縺ｫ蛟､縺後≠繧句ｴ蜷医・荳頑嶌縺阪＠縺ｪ縺・・
+ */
+function fillInfo(ss, p) {
+  var zip = '', addr = p.property || '';
+  var m = addr.match(/縲・\s*(\d{3}-?\d{4})/);
+  if (m) { zip = m[1]; addr = addr.replace(m[0], '').trim(); }
+
+  // 繧ｷ繝ｼ繝亥錐 -> [[鬆・岼蜷阪↓蜷ｫ縺ｾ繧後ｋ隱・ 蜈･繧後ｋ蛟､], ...]
+  // 荳翫↓縺ゅｋ繧ゅ・縺九ｉ鬆・↓辣ｧ蜷医＠縲∵怙蛻昴↓蠖薙◆縺｣縺溘ｂ縺ｮ繧剃ｽｿ縺・・
+  var PLAN = {
+    '蠢・育｢ｺ隱坂贈': [
+      ['邨・ｹ泌錐',                         p.client],
+      ['繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ・井ｻ｣陦ｨ・・,           p.email],
+      ['縺企崕隧ｱ逡ｪ蜿ｷ・井ｻ｣陦ｨ・・,              p.tel],
+      ['DMS縺ｫ繝ｭ繧ｰ繧､繝ｳ縺輔ｌ繧区婿縺ｮ縺雁錐蜑・,    p.contact],
+      ['DMS縺ｫ

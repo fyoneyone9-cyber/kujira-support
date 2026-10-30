@@ -1,10 +1,11 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function EditManualPage({ params }: { params: { id: string } }) {
+export default function EditManualPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
@@ -19,7 +20,7 @@ export default function EditManualPage({ params }: { params: { id: string } }) {
       const { data } = await supabase
         .from('manuals')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
       if (data) {
         setTitle(data.title)
@@ -29,7 +30,7 @@ export default function EditManualPage({ params }: { params: { id: string } }) {
       setFetching(false)
     }
     fetchManual()
-  }, [params.id])
+  }, [id])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,7 +46,7 @@ export default function EditManualPage({ params }: { params: { id: string } }) {
         content: content.trim(),
         updated_at: new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) {
       setError('保存に失敗しました: ' + error.message)
@@ -53,13 +54,13 @@ export default function EditManualPage({ params }: { params: { id: string } }) {
       return
     }
 
-    router.push(`/manuals/${params.id}`)
+    router.push(`/manuals/${id}`)
   }
 
   const handleDelete = async () => {
     if (!confirm('このマニュアルを削除しますか？')) return
     const supabase = await createClient()
-    await supabase.from('manuals').delete().eq('id', params.id)
+    await supabase.from('manuals').delete().eq('id', id)
     router.push('/manuals')
   }
 

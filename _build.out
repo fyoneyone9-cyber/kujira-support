@@ -1,0 +1,91 @@
+   ▲ Next.js 15.5.25
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 8.6s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/56) ...
+   Generating static pages (14/56) 
+   Generating static pages (28/56) 
+   Generating static pages (42/56) 
+ ✓ Generating static pages (56/56)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      232 B         103 kB
+├ ○ /_not-found                            999 B         104 kB
+├ ○ /admin                               1.39 kB         104 kB
+├ ○ /ai-summary                          2.99 kB         106 kB
+├ ƒ /api/admin/add-paycube-manual          232 B         103 kB
+├ ƒ /api/admin/build-status                232 B         103 kB
+├ ƒ /api/admin/create-user                 232 B         103 kB
+├ ƒ /api/admin/rebuild                     232 B         103 kB
+├ ƒ /api/admin/rebuild/status              232 B         103 kB
+├ ƒ /api/admin/setup-paycube-table         232 B         103 kB
+├ ƒ /api/admin/shutdown                    232 B         103 kB
+├ ƒ /api/ai/email-reply                    232 B         103 kB
+├ ƒ /api/ai/email-summary                  232 B         103 kB
+├ ƒ /api/ai/hotel-analyze                  232 B         103 kB
+├ ƒ /api/ai/manual-generate                232 B         103 kB
+├ ƒ /api/ai/nippou                         232 B         103 kB
+├ ƒ /api/ai/phone-check                    232 B         103 kB
+├ ƒ /api/ai/summarize-log                  232 B         103 kB
+├ ƒ /api/ai/teleapo-suggest                232 B         103 kB
+├ ƒ /api/ai/to-manual                      232 B         103 kB
+├ ƒ /api/assignment-rules                  232 B         103 kB
+├ ƒ /api/auth/google                       232 B         103 kB
+├ ƒ /api/auth/google/callback              232 B         103 kB
+├ ƒ /api/backup                            232 B         103 kB
+├ ƒ /api/delivery/check-alerts             232 B         103 kB
+├ ƒ /api/delivery/import-csv               232 B         103 kB
+├ ƒ /api/delivery/items                    232 B         103 kB
+├ ƒ /api/google/calendar                   232 B         103 kB
+├ ƒ /api/inventory/import-csv              232 B         103 kB
+├ ƒ /api/inventory/items                   232 B         103 kB
+├ ƒ /api/mail-templates                    232 B         103 kB
+├ ƒ /api/p400-orders                       232 B         103 kB
+├ ƒ /api/p400-orders/[id]                  232 B         103 kB
+├ ƒ /api/p400-orders/[id]/excel            232 B         103 kB
+├ ƒ /api/paycube/check-alerts              232 B         103 kB
+├ ƒ /api/paycube/contracts                 232 B         103 kB
+├ ƒ /api/paycube/import-csv                232 B         103 kB
+├ ƒ /api/purchase-orders                   232 B         103 kB
+├ ƒ /api/purchase-orders/[id]              232 B         103 kB
+├ ƒ /api/purchase-orders/[id]/excel        232 B         103 kB
+├ ƒ /api/setup                             232 B         103 kB
+├ ƒ /api/teleapo-memo                      232 B         103 kB
+├ ○ /assignment                          2.62 kB         105 kB
+├ ƒ /auth/callback                         232 B         103 kB
+├ ○ /automations                           232 B         103 kB
+├ ○ /dashboard                           4.56 kB         111 kB
+├ ○ /delivery                            30.1 kB         133 kB
+├ ○ /entrance                             2.5 kB         105 kB
+├ ○ /inventory                           2.61 kB         105 kB
+├ ○ /keybox                              6.08 kB         109 kB
+├ ○ /login                               1.35 kB         169 kB
+├ ○ /mail-templates                      2.73 kB         105 kB
+├ ƒ /manuals                               176 B         106 kB
+├ ƒ /manuals/[id]                          176 B         106 kB
+├ ƒ /manuals/[id]/edit                   1.56 kB         169 kB
+├ ○ /manuals/new                         2.85 kB         170 kB
+├ ○ /nippou                              2.45 kB         105 kB
+├ ○ /onboarding                          1.97 kB         105 kB
+├ ○ /p400-orders                         2.67 kB         105 kB
+├ ○ /paycube                             12.1 kB         115 kB
+├ ○ /purchase-orders                     3.03 kB         106 kB
+├ ○ /rentacar                              232 B         103 kB
+├ ○ /tasks                               1.27 kB         104 kB
+├ ○ /teleapo                             31.2 kB         134 kB
+├ ƒ /troubleshooting                       176 B         106 kB
+└ ƒ /troubleshooting/[id]                  176 B         106 kB
++ First Load JS shared by all             103 kB
+  ├ chunks/1255-7316b50163a428e6.js      46.4 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js  54.2 kB
+  └ other shared chunks (total)          2.08 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,19 @@
+﻿gas.js   frontci: False
+gas.js   繝輔Ο繝ｳ繝・ False
+dialog   frontci: False
+dialog   繝輔Ο繝ｳ繝・ False
+
+var EQUIP_KEYWORDS = {
+  pms:        ['PMS'],
+  smartlock:  ['繧ｹ繝槭・繝医Ο繝・け'],      // 竭竭｢ 縺ｮ荳｡譁ｹ繧呈鏡縺・
+  cardkey:    ['繧ｫ繝ｼ繝峨く繝ｼ'],
+  cylinder:   ['繧ｷ繝ｪ繝ｳ繝繝ｼ'],
+  cash:       ['迴ｾ驥・],
+  p400:       ['遶ｯ譛ｫ繧ｫ繝ｼ繝・],
+  sumaho:     ['繧ｹ繝槭・繧ｫ繝ｼ繝・, '繧ｹ繝槭・繝医き繝ｼ繝・],
+  paypay:     ['PayPay', '繝壹う繝壹う'],
+  printer:    ['繝励Μ繝ｳ繧ｿ'],
+  roomtablet: ['繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ'],
+  precheckin: ['莠句燕繝√ぉ繝・け繧､繝ｳ'],
+  koji:       ['蟾･莠・]
+};

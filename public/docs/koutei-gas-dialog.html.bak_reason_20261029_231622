@@ -1,0 +1,213 @@
+<!--
+  工程管理表 コピー作成ダイアログ  [KOUTEI_GAS_V1 2026-10-29]
+  --------------------------------------------------
+  Apps Script のファイル名を「dialog_koutei」にして貼り付けてください。
+  （エディタ左の「＋」→ HTML → 名前を dialog_koutei にする）
+
+  ⚠ koutei-gas.js とセットで貼り替えること。片方だけだと動きません。
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+ body{font-family:"Helvetica Neue",Arial,"Hiragino Sans","Meiryo",sans-serif;font-size:14px;padding:14px;color:#222}
+ h3{margin:0 0 8px;font-size:16px}
+ label{display:block;margin:7px 0 2px;font-weight:bold;font-size:13px;color:#555}
+ input[type=text],textarea{width:100%;padding:7px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;font-size:13px}
+ textarea{height:50px;font-family:monospace;font-size:11px}
+ .chk{display:flex;align-items:center;gap:7px;padding:4px 0}
+ .chk label{margin:0;font-weight:normal;font-size:14px}
+ .chk .auto{font-size:11px;color:#0b8043}
+ .box{border:1px solid #ddd;border-radius:6px;padding:9px;margin-top:9px;max-height:260px;overflow:auto}
+ button{margin-top:12px;width:100%;padding:11px;background:#0b8043;color:#fff;border:0;border-radius:5px;font-weight:bold;font-size:15px;cursor:pointer}
+ button:disabled{background:#999}
+ #paste{background:#1a73e8;margin-top:6px;padding:8px;font-size:13px}
+ #msg{margin-top:10px;font-size:13px;line-height:1.6}
+ #diag{font-size:11px;background:#f5f5f5;border:1px solid #ddd;border-radius:4px;padding:6px;margin-bottom:8px;font-family:monospace;white-space:pre-wrap}
+ .hint{font-size:12px;color:#888;margin-top:3px}
+ a{color:#1a73e8}
+</style>
+</head>
+<body>
+<h3>必要な工程だけコピー作成 <span id="ver" style="font-size:11px;color:#888;font-weight:normal"></span></h3>
+<div id="diag">診断中…</div>
+
+<label>① ダッシュボードの「📋 設定をコピー」した内容を貼り付け</label>
+<textarea id="json" placeholder="ここに貼り付けると、下の項目と工程のチェックが自動で入ります"></textarea>
+<button id="paste" onclick="applyJson()">⬇ 貼り付けた内容を反映</button>
+
+<label>会社名</label>
+<input type="text" id="client" placeholder="株式会社ビジョン">
+<label>施設名・物件名</label>
+<input type="text" id="property" placeholder="ビジョングランピング淡路">
+<label>稼働予定日</label>
+<input type="text" id="due" placeholder="2026-12-31">
+
+<div class="box">
+  <div style="font-weight:bold;font-size:13px;margin-bottom:5px">
+    残す工程（この表に実際にある区分です）
+  </div>
+  <div id="cats" style="color:#888">読み込み中…</div>
+  <div class="hint">※ ①を貼り付けると機材構成から自動でチェックが入ります</div>
+</div>
+
+<button id="go" onclick="run()" disabled>コピーを作成</button>
+<div id="msg"></div>
+
+<script>
+// [KOUTEI_GAS_V1] koutei-gas.js とバージョンを揃えること
+var DIALOG_VERSION = 'K1 2026-10-29';
+var CATS = [];          // {name, key}
+var diagLog = [];
+
+function diag(m) {
+  diagLog.push(m);
+  var el = document.getElementById('diag');
+  if (el) el.textContent = diagLog.join('\n');
+}
+diag('dialog_koutei 読込OK (' + DIALOG_VERSION + ')');
+
+/** サーバー関数を試し、結果を診断欄に出す */
+function probe(name, fn, arg) {
+  var done = false;
+  setTimeout(function () {
+    if (!done) diag('  ' + name + ' : 応答なし（5秒）');
+  }, 5000);
+  try {
+    var r = google.script.run
+      .withSuccessHandler(function (res) {
+        done = true;
+        diag('  ' + name + ' : OK ' + (Array.isArray(res) ? '(' + res.length + '件)' : String(res).slice(0, 40)));
+        if (fn) fn(res);
+      })
+      .withFailureHandler(function (e) {
+        done = true;
+        diag('  ' + name + ' : 失敗 -> ' + (e && e.message ? e.message : String(e)));
+      });
+    if (arg !== undefined) r[name](arg); else r[name]();
+  } catch (err) {
+    done = true;
+    diag('  ' + name + ' : 例外 -> ' + err);
+  }
+}
+
+if (typeof google === 'undefined' || !google.script || !google.script.run) {
+  diag('❌ google.script.run が使えません');
+} else {
+  diag('google.script.run OK');
+}
+
+// バージョン照合（片方だけ古い事故を検出する）
+probe('getKouteiVersion', function (v) {
+  document.getElementById('ver').textContent = '[' + v + ']';
+  if (v === DIALOG_VERSION) return;
+  var b = document.createElement('div');
+  b.style.cssText = 'background:#fdecea;border:2px solid #c00;border-radius:6px;' +
+    'padding:10px;margin-bottom:10px;font-size:13px;line-height:1.7';
+  b.innerHTML = '<b style="color:#c00">⚠ コードとdialogのバージョンが違います</b><br>' +
+    '<span style="font-family:monospace">コード: ' + v + ' / dialog: ' + DIALOG_VERSION + '</span><br>' +
+    '<b>' + (v < DIALOG_VERSION ? 'コード側' : 'dialog側') + 'が古い</b>ので両方貼り直してください';
+  document.body.insertBefore(b, document.body.firstChild);
+});
+
+// 区分の一覧を読み込む
+probe('getKouteiCategories', function (list) {
+  CATS = list || [];
+  var html = CATS.map(function (c, i) {
+    return '<div class="chk">' +
+      '<input type="checkbox" id="c' + i + '">' +
+      '<label for="c' + i + '">' + c.name + '</label>' +
+      '<span class="auto" id="a' + i + '"></span></div>';
+  }).join('');
+  document.getElementById('cats').innerHTML = html || '（区分が見つかりません）';
+  document.getElementById('cats').style.color = '';
+  document.getElementById('go').disabled = false;
+  // 共通は最初からON
+  CATS.forEach(function (c, i) {
+    if (c.key === 'always') document.getElementById('c' + i).checked = true;
+  });
+});
+
+/** 貼り付けた設定から自動チェック */
+function applyJson() {
+  var raw = document.getElementById('json').value.trim();
+  if (!raw) { alert('貼り付け欄が空です'); return; }
+  var d;
+  try { d = JSON.parse(raw); }
+  catch (e) { alert('形式が正しくありません'); return; }
+
+  if (d.client) document.getElementById('client').value = d.client;
+  if (d.property) document.getElementById('property').value = d.property;
+  if (d.due) document.getElementById('due').value = d.due;
+
+  var on = {};
+  (d.equips || []).forEach(function (k) { on[k] = true; });
+  // ヒアリング側のキー名を工程側に合わせる
+  if (on['precheckin']) on['always'] = true;
+
+  var n = 0;
+  CATS.forEach(function (c, i) {
+    var v = (c.key === 'always') || !!on[c.key];
+    document.getElementById('c' + i).checked = v;
+    document.getElementById('a' + i).textContent = v ? '自動' : '';
+    if (v) n++;
+  });
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#0b8043">✅ 反映しました</b>（' + n + '区分を自動選択）<br>' +
+    '<span style="font-size:12px;color:#888">違う場合はチェックを直してください</span>';
+}
+
+var timer = null, sec = 0;
+function tick() {
+  sec++;
+  document.getElementById('msg').innerHTML =
+    '<b style="color:#1a73e8">⏳ 作成中…（' + sec + '秒）</b><br>' +
+    '<span style="color:#888;font-size:12px">この画面は閉じないでください</span>';
+}
+
+function run() {
+  var cats = [];
+  CATS.forEach(function (c, i) {
+    if (document.getElementById('c' + i).checked) cats.push(c.name);
+  });
+  if (!cats.length) { alert('残す工程を1つ以上選んでください'); return; }
+
+  var btn = document.getElementById('go');
+  btn.disabled = true; btn.textContent = '作成中…';
+  sec = 0;
+  if (timer) clearInterval(timer);
+  timer = setInterval(tick, 1000);
+  tick();
+
+  google.script.run
+    .withSuccessHandler(function (r) {
+      if (timer) clearInterval(timer);
+      btn.disabled = false; btn.textContent = 'コピーを作成';
+      document.getElementById('msg').innerHTML =
+        '<div style="background:#e6f4ea;border:1px solid #0b8043;border-radius:6px;padding:10px">' +
+        '<b style="color:#0b8043;font-size:15px">✅ 完成しました（' + sec + '秒）</b><br>' +
+        '<span style="font-size:12px;color:#555">残した工程 ' + r.kept +
+        '行 / 削除 ' + r.removed + '行</span><br>' +
+        '<a href="' + r.url + '" target="_blank" ' +
+        'style="display:inline-block;margin-top:8px;padding:8px 12px;background:#1a73e8;color:#fff;' +
+        'border-radius:4px;text-decoration:none;font-weight:bold">▶ 作成した工程表を開く</a><br>' +
+        '<span style="font-size:12px;color:#555">保存先: マイドライブ直下「' + r.name + '」</span>' +
+        '</div>';
+    })
+    .withFailureHandler(function (e) {
+      if (timer) clearInterval(timer);
+      btn.disabled = false; btn.textContent = 'コピーを作成';
+      document.getElementById('msg').innerHTML =
+        '<b style="color:#c00">❌ 失敗: ' + e.message + '</b>';
+    })
+    .createKouteiCopy({
+      client: document.getElementById('client').value,
+      property: document.getElementById('property').value,
+      due: document.getElementById('due').value,
+      cats: cats
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,814 @@
+'use client'
+
+import React, { useEffect, useState } from 'react'
+
+type EquipmentItem = { name: string; value: string }
+
+type DeliveryItem = {
+  id: string
+  client_name: string
+  install_address: string
+  product_name: string
+  quantity: number | null
+  progress: string
+  assignee: string
+  delivery_due_date: string
+  delivery_date: string | null
+  contact_name: string
+  contact_tel1: string
+  contact_tel2: string
+  notes: string
+  status: string
+  created_at: string
+  equipment?: EquipmentItem[] | null
+  p400_status?: string | null
+  paycube_status?: string | null
+  vega3000_status?: string | null
+  manual_ordered?: string[] | null
+  dashboard_memo?: string | null
+  checked_by?: string | null
+  checked_at?: string | null
+  equipment_arrival_dates?: Record<string, string> | null
+  locked?: boolean | null
+  jitbox_ordered?: boolean | null
+}
+
+type AlertLevel = 'overdue' | 'critical' | 'urgent' | 'warning' | 'ok'
+
+// 品目（機器）ごとの発注〜納品リードタイム（日数の目安）。
+// 工程管理表（スマートチェックイン_工程管理）より。機器発注系は長納期のため、
+// 「納品予定日までの残日数」だけでなく「今すぐ発注しても間に合うか」を考慮して警告する。
+// name は CSVの機器列名／製品名の両方にマッチするように正規表現で判定する。
+
+// JITBOXチャーター便の検出と大阪発リードタイム計算
+// 備考(notes)または製品名(product_name)に「JITBOX」「JITボックス」が含まれる場合に表示
+function hasJitbox(it: { notes?: string; product_name?: string }): boolean {
+  const text = `${it.notes || ''} ${it.product_name || ''}`.toLowerCase()
+  return /jitbox|jitボックス|jit ボックス/.test(text)
+}
+
+// 大阪発のJITBOX所要日数（900km基準）
+function getJitboxLeadDays(installAddress: string): { days: number; note: string } {
+  const addr = installAddress || ''
+  if (/北海道|青森|岩手|秋田|沖縄|離島/.test(addr)) {
+    return { days: 2, note: '大阪→当地 約900km超のため翌々日（日祝またぎは+1日）' }
+  }
+  if (/宮城|山形|福島/.test(addr)) {
+    return { days: 2, note: '大阪→東北 約900km前後のため翌々日' }
+  }
+  return { days: 1, note: '大阪→当地 900km圏内のため翌日（目安）' }
+}
+
+const LEAD_TIME_DAYS: { match: RegExp; days: number; label: string }[] = [
+  { match: /P400/i, days: 60, label: 'P400' },                          // 発注〜納品 約2か月
+  { match: /PayCube|ペイキューブ/i, days: 50, label: 'PayCube' },         // 約50日
+  { match: /VEGA3000|ベガ3000/i, days: 45, label: 'VEGA3000' },          // 決済端末・目安45日
+  { match: /キーボックス/i, days: 60, label: 'キーボックス' },             // 約60日
+  { match: /卓上KIOSK|卓上キオスク/i, days: 30, label: '卓上KIOSK' },
+  { match: /KIOSK|キオスク/i, days: 30, label: 'KIOSK' },                 // 約1か月
+  { match: /パスポートリーダー/i, days: 30, label: 'パスポートリーダー' },
+]
+
+type MatchedEquipment = { label: string; days: number }
+type EquipmentLookup = {
+  product_name: string
+  equipment?: EquipmentItem[] | null
+  manual_ordered?: string[] | null
+  equipment_arrival_dates?: Record<string, string> | null
+}
+
+// アイテムに紐づく機器（equipment配列優先、無ければproduct_nameから判定）のうち
+// リードタイムが必要なものを全て抽出する。
+function getMatchedEquipment(it: EquipmentLookup): MatchedEquipment[] {
+  const names: string[] = []
+  if (it.equipment && it.equipment.length > 0) {
+    names.push(...it.equipment.map(e => e.name))
+  }
+  if (it.product_name) names.push(it.product_name)
+
+  const matched: MatchedEquipment[] = []
+  for (const lt of LEAD_TIME_DAYS) {
+    if (names.some(n => lt.match.test(n)) && !matched.some(m => m.label === lt.label)) {
+      matched.push({ label: lt.label, days: lt.days })
+    }
+  }
+  return matched
+}
+
+function getArrivalDate(it: EquipmentLookup, label: string): string | null {
+  return it.equipment_arrival_dates?.[label] || null
+}
+
+// 機器1つあたりの「発注猶予日数」を計算する。
+// ・到着予定日が入力されていれば、それが納品予定日に間に合うかで判定（最も正確）
+// ・到着予定日が未入力で発注済みチェックのみなら「安全（null）」として扱う（到着日入力を促す）
+// ・未発注・到着日未入力ならリードタイム推定値で判定
+function getEquipmentBuffer(dueDate: string, it: EquipmentLookup, m: MatchedEquipment): number | null {
+  const arrival = getArrivalDate(it, m.label)
+  if (arrival) {
+    // 納品予定日 - 到着予定日（マイナスなら到着が納品予定日より後＝危険）
+    const due = new Date(dueDate); due.setHours(0, 0, 0, 0)
+    const arr = new Date(arrival); arr.setHours(0, 0, 0, 0)
+    return Math.ceil((due.getTime() - arr.getTime()) / 86400000)
+  }
+  const ordered = it.manual_ordered?.includes(m.label)
+  if (ordered) return null // 発注済みだが到着日未入力→猶予切迫からは除外（到着日入力待ち）
+  return daysLeft(dueDate) - m.days
+}
+
+// 警告レベル判定に使う、全機器の中で最も危険な（小さい）猶予日数。
+// 到着予定日が全て納品予定日に間に合っている／発注済み(到着日未入力)の機器しかなければ null（安全）。
+function getRiskiestBuffer(dueDate: string, it: EquipmentLookup): number | null {
+  const matched = getMatchedEquipment(it)
+  if (matched.length === 0) return null
+  const buffers = matched.map(m => getEquipmentBuffer(dueDate, it, m)).filter((b): b is number => b !== null)
+  if (buffers.length === 0) return null
+  return Math.min(...buffers)
+}
+
+function daysLeft(dueDate: string): number {
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const due = new Date(dueDate)
+  return Math.ceil((due.getTime() - today.getTime()) / 86400000)
+}
+
+// 後方互換用：最も長い未確定リードタイム（UI表示の「想定リードタイム」用）
+function getLeadTimeDays(it: EquipmentLookup): number {
+  const matched = getMatchedEquipment(it).filter(m => {
+    const arrival = getArrivalDate(it, m.label)
+    const ordered = it.manual_ordered?.includes(m.label)
+    return !arrival && !ordered
+  })
+  if (matched.length === 0) return 0
+  return Math.max(...matched.map(m => m.days))
+}
+
+// リードタイム・到着予定日を考慮した「発注猶予日数」＝ 案件全体として最もリスクが高い値。
+// 機器が無い案件（設定系タスク等）は従来通り納品予定日までの残日数を使う。
+function orderBufferDays(dueDate: string, it: EquipmentLookup): number {
+  const riskiest = getRiskiestBuffer(dueDate, it)
+  if (riskiest !== null) return riskiest
+  if (getMatchedEquipment(it).length > 0) return daysLeft(dueDate) // 機器はあるが全て安全
+  return daysLeft(dueDate)
+}
+
+function getAlertLevel(dueDate: string, it: EquipmentLookup): AlertLevel {
+  const days = orderBufferDays(dueDate, it)
+  if (days < 0) return 'overdue'
+  if (days <= 3) return 'critical'
+  if (days <= 7) return 'urgent'
+  if (days <= 14) return 'warning'
+  return 'ok'
+}
+
+// 機器名→手配状況フィールドの対応（CSVの「P400手配状況」等）
+function getArrangementStatus(it: DeliveryItem, label: string): string {
+  if (label === 'P400') return it.p400_status || ''
+  if (label === 'PayCube') return it.paycube_status || ''
+  if (label === 'VEGA3000') return it.vega3000_status || ''
+  return ''
+}
+
+// ダッシュボード側で「発注済み」チェックを入れた機器か判定（CSV取込では消えない）
+function isManuallyOrdered(it: DeliveryItem, label: string): boolean {
+  return !!(it.manual_ordered && it.manual_ordered.includes(label))
+}
+
+// 「〇〇だから〇〇を確認して」形式の理由文を自動生成する。
+// 機器ごとに「到着予定日」が入っていればそれを最優先で使い、無ければ発注済みチェック／
+// リードタイム推定の順で判定する。最もリスクが高い機器を中心に案内する。
+function getAlertReason(it: DeliveryItem): React.ReactNode {
+  const allMatched = getMatchedEquipment(it)
+  const plain = daysLeft(it.delivery_due_date)
+  const who = it.assignee ? `担当：${it.assignee}さん` : '担当者'
+
+  if (allMatched.length > 0) {
+    const withArrival = allMatched.map(m => ({
+      m,
+      arrival: getArrivalDate(it, m.label),
+      buffer: getEquipmentBuffer(it.delivery_due_date, it, m),
+      ordered: isManuallyOrdered(it, m.label),
+      status: getArrangementStatus(it, m.label),
+    }))
+    const risky = withArrival.filter(w => w.buffer !== null).sort((a, b) => (a.buffer as number) - (b.buffer as number))
+    const safe = withArrival.filter(w => w.buffer === null)
+
+    if (risky.length === 0) {
+      const names = safe.map(w => w.m.label).join('・')
+      return (
+        <div className="space-y-1">
+          <p>📦 <strong>{names}</strong> は発注済みですが、<span className="text-yellow-300 font-bold">商品到着予定日が未入力</span>です。</p>
+          <p>📅 納品予定日 <strong>{it.delivery_due_date}</strong>（残 {plain}日）</p>
+          <p>✏️ メーカー・仕入先から届いた到着予定日をダッシュボードに入力してください。</p>
+        </div>
+      )
+    }
+
+    const equipRows = withArrival.map(w => {
+      const buf = w.buffer
+      const bufText = buf === null
+        ? <span className="text-green-300">発注済み（到着日未入力）</span>
+        : buf < 0
+          ? <span className="text-red-300 font-bold">{-buf}日超過（間に合わない）</span>
+          : buf <= 3
+            ? <span className="text-red-300 font-bold">残{buf}日（今すぐ対応）</span>
+            : buf <= 7
+              ? <span className="text-orange-300 font-bold">残{buf}日（今週中）</span>
+              : buf <= 14
+                ? <span className="text-yellow-300 font-bold">残{buf}日（要確認）</span>
+                : <span className="text-green-300">残{buf}日（余裕あり）</span>
+      const arrivalText = w.arrival
+        ? <span>到着予定 <strong>{w.arrival}</strong></span>
+        : w.ordered
+          ? <span className="text-slate-400">発注済み・到着日未入力</span>
+          : w.status
+            ? <span className="text-slate-400">手配状況：{w.status}</span>
+            : <span className="text-red-400 font-bold">未発注・到着日未入力</span>
+      return (
+        <li key={w.m.label} className="flex flex-wrap gap-2 items-center text-base">
+          <span className="font-bold text-white min-w-[8rem]">📦 {w.m.label}</span>
+          <span className="text-slate-400 text-sm">（リードタイム約{w.m.days}日）</span>
+          <span>{arrivalText}</span>
+          <span className="text-slate-500">｜</span>
+          <span>発注猶予：{bufText}</span>
+        </li>
+      )
+    })
+
+    const mainBuffer = risky[0].buffer as number
+    const actions: string[] = []
+    if (mainBuffer < 0) {
+      if (risky[0].arrival) {
+        actions.push('仕入先に納期前倒しを交渉する')
+        actions.push('お客様に納品予定日の再調整を相談する')
+      } else {
+        actions.push('発注済みか今すぐ確認（未発注なら至急発注）')
+        actions.push('今日発注しても間に合わないため、お客様に納期再調整を相談する')
+      }
+    } else if (mainBuffer <= 3) {
+      actions.push('今すぐ発注状況を確認・発注を完了させる')
+      actions.push('到着予定日をダッシュボードに入力する')
+    } else if (mainBuffer <= 7) {
+      actions.push('今週中に発注状況を確認する')
+      actions.push('到着予定日をダッシュボードに入力する')
+    } else {
+      actions.push('念のため発注状況・到着予定日を確認する')
+    }
+    if (safe.length > 0) {
+      actions.push(`${safe.map(w => w.m.label).join('・')} の到着予定日をダッシュボードに入力する`)
+    }
+
+    return (
+      <div className="space-y-2 text-base">
+        <div className="flex flex-wrap gap-3 text-slate-300">
+          <span>📅 納品予定日 <strong className="text-white">{it.delivery_due_date}</strong>（残 {plain}日）</span>
+          <span>👤 {who}</span>
+          {it.progress && <span>📋 進捗：{it.progress}</span>}
+        </div>
+        <ul className="space-y-1 pl-1 border-l-2 border-slate-600">
+          {equipRows}
+        </ul>
+        <div className="mt-1 pt-1 border-t border-slate-700">
+          <p className="text-slate-400 text-sm font-bold mb-1">🔴 今すぐやること：</p>
+          <ul className="space-y-0.5 pl-3">
+            {actions.map((a, i) => <li key={i} className="text-yellow-200 text-sm">▶ {a}</li>)}
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+  const progressNote = it.progress ? `進捗：「${it.progress}」` : ''
+  let summary = ''
+  let actionText = ''
+  if (plain < 0) {
+    summary = `納品予定日（${it.delivery_due_date}）を ${-plain}日 超過しています。`
+    actionText = '進捗状況と遅延理由を今すぐ確認してください。'
+  } else if (plain <= 3) {
+    summary = `納品予定日（${it.delivery_due_date}）まであと ${plain}日 です。`
+    actionText = '設定・動作確認・訪問調整等が完了しているか確認してください。'
+  } else if (plain <= 7) {
+    summary = `納品予定日まであと ${plain}日 です。`
+    actionText = '今週中に対応状況を確認してください。'
+  } else {
+    summary = `納品予定日まであと ${plain}日 あります。`
+    actionText = '念のため進捗を確認しておいてください。'
+  }
+  return (
+    <div className="space-y-1 text-base">
+      <p>📅 {summary}</p>
+      {progressNote && <p className="text-slate-400">{progressNote}</p>}
+      <p>👤 {who} ▶ {actionText}</p>
+    </div>
+  )
+}
+
+const levelStyle: Record<AlertLevel, { bg: string; border: string; badge: string; label: string; icon: string }> = {
+  overdue:  { bg: 'bg-red-950/70', border: 'border-red-400', badge: 'bg-red-700 text-white', label: '🔴 期限超過', icon: '🚨' },
+  critical: { bg: 'bg-red-950/60', border: 'border-red-500', badge: 'bg-red-600 text-white', label: '🔴 3日以内', icon: '🚨' },
+  urgent:   { bg: 'bg-orange-950/60', border: 'border-orange-500', badge: 'bg-orange-500 text-white', label: '🟠 1週間以内', icon: '⚠️' },
+  warning:  { bg: 'bg-yellow-950/60', border: 'border-yellow-500', badge: 'bg-yellow-600 text-white', label: '🟡 2週間以内', icon: '📦' },
+  ok:       { bg: 'bg-slate-800', border: 'border-slate-700', badge: 'bg-slate-600 text-slate-200', label: '✅ 余裕あり', icon: '✅' },
+}
+
+export default function DeliveryPage() {
+  const [items, setItems] = useState<DeliveryItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<'alert' | 'all' | 'done'>('alert')
+  const [updating, setUpdating] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<string | null>(null)
+  const [stats, setStats] = useState<{ total: number; lastImport: string | null } | null>(null)
+  const [openBanner, setOpenBanner] = useState<AlertLevel | null>(null)
+  const [assigneeFilter, setAssigneeFilter] = useState<string>('米山')
+
+  const load = async () => {
+    setLoading(true)
+    const mode = filter === 'alert' ? '?mode=alert' : ''
+    const res = await fetch(`/api/delivery/items${mode}`)
+    const d = await res.json()
+    let data: DeliveryItem[] = d.items || []
+    if (filter === 'done') data = data.filter(i => i.status === 'done')
+    setItems(data.sort((a, b) => a.delivery_due_date.localeCompare(b.delivery_due_date)))
+    setLoading(false)
+  }
+
+  const loadStats = async () => {
+    const res = await fetch('/api/delivery/items')
+    const d = await res.json()
+    const all: DeliveryItem[] = d.items || []
+    const lastImport = all.length > 0
+      ? all.reduce((a, b) => a.created_at > b.created_at ? a : b).created_at
+      : null
+    setStats({ total: all.length, lastImport })
+  }
+
+  useEffect(() => { load() }, [filter])
+  useEffect(() => { loadStats() }, [])
+
+
+  const toggleJitboxOrdered = async (it: DeliveryItem) => {
+    const next = !it.jitbox_ordered
+    const msg = next
+      ? `「${it.client_name}」のJITBOX手配を「手配済み」にしますか？`
+      : `「${it.client_name}」のJITBOX手配を「未手配」に戻しますか？`
+    if (!window.confirm(msg)) return
+    setItems(prev => prev.map(p => p.id === it.id ? { ...p, jitbox_ordered: next } : p))
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: it.id, jitbox_ordered: next })
+    })
+  }
+
+  const markDone = async (id: string) => {
+    setUpdating(id)
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status: 'done', acknowledged_at: new Date().toISOString() })
+    })
+    setUpdating(null)
+    load()
+  }
+
+  // 機器の発注済みチェックを切り替える（CSV再取込しても消えない manual_ordered に保存）
+  const toggleOrdered = async (it: DeliveryItem, label: string) => {
+    const current = it.manual_ordered || []
+    const next = current.includes(label) ? current.filter(l => l !== label) : [...current, label]
+    setItems(prev => prev.map(p => p.id === it.id ? { ...p, manual_ordered: next } : p))
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: it.id, manual_ordered: next })
+    })
+  }
+
+  // 機器の商品到着予定日を保存（CSV再取込しても消えない equipment_arrival_dates に保存）
+  const setArrivalDate = async (it: DeliveryItem, label: string, date: string) => {
+    const current = { ...(it.equipment_arrival_dates || {}) }
+    if (date) current[label] = date
+    else delete current[label]
+    setItems(prev => prev.map(p => p.id === it.id ? { ...p, equipment_arrival_dates: current } : p))
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: it.id, equipment_arrival_dates: current })
+    })
+  }
+
+  // 「確認した」印をつける（自分の名前で記録）
+  const markChecked = async (it: DeliveryItem) => {
+    const name = assigneeFilter !== 'all' ? assigneeFilter : (it.assignee || '担当者')
+    const now = new Date().toISOString()
+    setItems(prev => prev.map(p => p.id === it.id ? { ...p, checked_by: name, checked_at: now } : p))
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: it.id, checked_by: name, checked_at: now })
+    })
+  }
+
+  // メモ保存（入力確定時=blur時にのみサーバーへ送る）
+  const saveMemo = async (it: DeliveryItem, memo: string) => {
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: it.id, dashboard_memo: memo })
+    })
+    load()
+  }
+
+  const assigneeOptions = Array.from(new Set(items.map(i => i.assignee).filter(Boolean))).sort()
+
+  const visibleItems = assigneeFilter === 'all'
+    ? items
+    : items.filter(i => i.assignee === assigneeFilter)
+
+  const overdue  = visibleItems.filter(i => getAlertLevel(i.delivery_due_date, i) === 'overdue')
+  const critical = visibleItems.filter(i => getAlertLevel(i.delivery_due_date, i) === 'critical')
+  const urgent   = visibleItems.filter(i => getAlertLevel(i.delivery_due_date, i) === 'urgent')
+
+  const importIsStale = stats?.lastImport
+    ? (Date.now() - new Date(stats.lastImport).getTime()) > 24 * 60 * 60 * 1000
+    : false
+  const hoursSinceImport = stats?.lastImport
+    ? Math.floor((Date.now() - new Date(stats.lastImport).getTime()) / (60 * 60 * 1000))
+    : null
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-4xl font-bold text-white">📦 IoT製品 納品予定アラート</h1>
+        <p className="text-slate-400 text-lg mt-1">納品予定日が近いものから自動で上位表示されます。「【管理】IoT製品納品一覧」のCSVを取り込んでください。</p>
+      </div>
+
+      {/* データステータスバー */}
+      <div className="flex flex-wrap gap-3 mb-4 text-base">
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
+          <span className="text-slate-400">📦 登録件数</span>
+          <span className="font-bold text-white">{stats ? `${stats.total}件` : '...'}</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
+          <span className="text-slate-400">🕐 最終取込</span>
+          <span className="font-bold text-white">
+            {stats?.lastImport
+              ? new Date(stats.lastImport).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+              : '...'}
+          </span>
+        </div>
+      </div>
+
+      {/* 取込漏れアラート（24時間以上未取込） */}
+      {importIsStale && (
+        <div className="mb-6 flex items-center gap-3 px-5 py-4 bg-amber-900/70 border border-amber-500 rounded-xl">
+          <span className="text-4xl">⏰</span>
+          <div className="flex-1">
+            <p className="font-bold text-amber-200 text-xl">
+              CSV取込が24時間以上されていません（最終取込から約{hoursSinceImport}時間経過）
+            </p>
+            <p className="text-amber-300 text-base">最新データを反映するため「📥 CSVで一括更新」から取り込んでください</p>
+          </div>
+        </div>
+      )}
+
+      {/* アラートサマリーバナー */}
+      {(overdue.length > 0 || critical.length > 0 || urgent.length > 0) && filter === 'alert' && (
+        <div className="mb-6 space-y-3">
+          {overdue.length > 0 && (
+            <div>
+              <button
+                onClick={() => setOpenBanner(openBanner === 'overdue' ? null : 'overdue')}
+                className="w-full text-left flex items-center gap-3 px-5 py-4 bg-red-950/80 border border-red-400 rounded-xl animate-pulse hover:brightness-110 transition"
+              >
+                <span className="text-4xl">🚨</span>
+                <div className="flex-1">
+                  <p className="font-bold text-red-200 text-xl">期限超過！{overdue.length}件が納品予定日に間に合わない（今すぐ発注しても遅延）</p>
+                  <p className="text-red-300 text-base">リードタイムを考慮済み。至急状況を確認してください（クリックで詳細）</p>
+                </div>
+                <span className="text-red-300 text-2xl">{openBanner === 'overdue' ? '▲' : '▼'}</span>
+              </button>
+              {openBanner === 'overdue' && (
+                <div className="mt-2 space-y-2 pl-2">
+                  {overdue.map(it => (
+                    <div key={it.id} className="px-4 py-3 bg-red-950/50 border border-red-500/50 rounded-lg">
+                      <p className="font-bold text-red-100 mb-1">{it.client_name}{it.product_name ? `（${it.product_name}）` : ''}</p>
+                      <div className="text-base text-red-200 leading-relaxed">{getAlertReason(it)}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          {critical.length > 0 && (
+            <div>
+              <button
+                onClick={() => setOpenBanner(openBanner === 'critical' ? null : 'critical')}
+                className="w-full text-left flex items-center gap-3 px-5 py-4 bg-red-900/80 border border-red-500 rounded-xl animate-pulse hover:brightness-110 transition"
+              >
+                <span className="text-4xl">🚨</span>
+                <div className="flex-1">
+                  <p className="font-bold text-red-200 text-xl">緊急！{critical.length}件が発注猶予3日以内（リードタイム込み・クリックで詳細）</p>
+                </div>
+                <span className="text-red-300 text-2xl">{openBanner === 'critical' ? '▲' : '▼'}</span>
+              </button>
+              {openBanner === 'critical' && (
+                <div className="mt-2 space-y-2 pl-2">
+                  {critical.map(it => (
+                    <div key={it.id} className="px-4 py-3 bg-red-900/50 border border-red-500/50 rounded-lg">
+                      <p className="font-bold text-red-100 mb-1">{it.client_name}{it.product_name ? `（${it.product_name}）` : ''}</p>
+                      <div className="text-base text-red-200 leading-relaxed">{getAlertReason(it)}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          {urgent.length > 0 && (
+            <div>
+              <button
+                onClick={() => setOpenBanner(openBanner === 'urgent' ? null : 'urgent')}
+                className="w-full text-left flex items-center gap-3 px-5 py-4 bg-orange-900/60 border border-orange-500 rounded-xl hover:brightness-110 transition"
+              >
+                <span className="text-4xl">⚠️</span>
+                <div className="flex-1">
+                  <p className="font-bold text-orange-200">{urgent.length}件が発注猶予1週間以内（リードタイム込み・クリックで詳細）</p>
+                </div>
+                <span className="text-orange-300 text-2xl">{openBanner === 'urgent' ? '▲' : '▼'}</span>
+              </button>
+              {openBanner === 'urgent' && (
+                <div className="mt-2 space-y-2 pl-2">
+                  {urgent.map(it => (
+                    <div key={it.id} className="px-4 py-3 bg-orange-900/40 border border-orange-500/50 rounded-lg">
+                      <p className="font-bold text-orange-100 mb-1">{it.client_name}{it.product_name ? `（${it.product_name}）` : ''}</p>
+                      <div className="text-base text-orange-200 leading-relaxed">{getAlertReason(it)}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* コントロール */}
+      <div className="flex gap-3 mb-5 flex-wrap">
+        <a
+          href="https://docs.google.com/spreadsheets/d/1FxK4x534LV2sGY54KKtbow1W6iLT0Z_YTzg_R8ba8Go/edit?gid=0#gid=0"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-5 py-2.5 rounded-lg text-base font-semibold transition-colors bg-green-600 text-white hover:bg-green-500 inline-flex items-center gap-1"
+        >
+          📊 管理スプレッドシートを開く
+        </a>
+        <button
+          onClick={async () => {
+            const res = await fetch('/api/delivery/check-alerts')
+            const d = await res.json()
+            setImportResult(d.slack_sent ? '✅ Slackに通知を送信しました' : '⚠️ 通知対象なし、またはSlack未設定です')
+          }}
+          className="px-5 py-2.5 rounded-lg text-base font-semibold transition-colors bg-sky-700 hover:bg-sky-600 text-white"
+        >
+          🔔 Slackに今すぐ通知
+        </button>
+        <select
+          value={assigneeFilter}
+          onChange={(e) => setAssigneeFilter(e.target.value)}
+          className="px-5 py-2.5 rounded-lg text-base font-semibold bg-slate-700 text-slate-200 border border-slate-600"
+        >
+          <option value="all">👤 担当者：全員</option>
+          {assigneeOptions.map(name => (
+            <option key={name} value={name}>👤 {name}</option>
+          ))}
+        </select>
+        <button
+          onClick={() => setFilter('alert')}
+          className={`px-5 py-2.5 rounded-lg text-base font-semibold transition-colors ${filter === 'alert' ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+        >
+          🔔 未納品のみ
+        </button>
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-5 py-2.5 rounded-lg text-base font-semibold transition-colors ${filter === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+        >
+          📋 全件表示
+        </button>
+        <button
+          onClick={() => setFilter('done')}
+          className={`px-5 py-2.5 rounded-lg text-base font-semibold transition-colors ${filter === 'done' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+        >
+          ✅ 納品完了分
+        </button>
+        <label className={`px-5 py-2.5 rounded-lg text-base font-semibold transition-colors cursor-pointer ml-auto ${importing ? 'bg-slate-600 text-slate-400' : 'bg-purple-700 hover:bg-purple-600 text-white'}`}>
+          {importing ? '⏳ 取込中...' : '📥 CSVで一括更新'}
+          <input
+            type="file"
+            accept=".csv"
+            className="hidden"
+            disabled={importing}
+            onChange={async (e) => {
+              const file = e.target.files?.[0]
+              if (!file) return
+              setImporting(true)
+              setImportResult(null)
+              const fd = new FormData()
+              fd.append('file', file)
+              const res = await fetch('/api/delivery/import-csv', { method: 'POST', body: fd })
+              const d = await res.json()
+              if (d.ok) {
+                setImportResult(`✅ 取込完了：${d.imported}件`)
+                loadStats()
+                load()
+              } else {
+                setImportResult(`❌ エラー：${d.error}`)
+              }
+              setImporting(false)
+              e.target.value = ''
+            }}
+          />
+        </label>
+      </div>
+
+      {importResult && (
+        <div className={`mb-3 px-4 py-3 rounded-lg text-base font-medium ${importResult.startsWith('✅') ? 'bg-green-900/60 border border-green-600 text-green-200' : 'bg-red-900/60 border border-red-600 text-red-200'}`}>
+          {importResult}
+          <span className="ml-2 text-sm text-slate-400">スプレッドシートをCSVでダウンロード → このボタンで再取込すれば常に最新状態になります</span>
+        </div>
+      )}
+
+      {/* 一覧 */}
+      {loading ? (
+        <div className="text-slate-400 text-center py-12">読み込み中...</div>
+      ) : visibleItems.length === 0 ? (
+        <div className="text-slate-400 text-center py-12">
+          <p className="text-4xl mb-3">✅</p>
+          <p>対象の案件はありません</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {visibleItems.map(it => {
+            const level = getAlertLevel(it.delivery_due_date, it)
+            const s = levelStyle[level]
+            const days = daysLeft(it.delivery_due_date)
+            const leadDays = getLeadTimeDays(it)
+            const buffer = orderBufferDays(it.delivery_due_date, it)
+            return (
+              <div key={it.id} className={`${s.bg} border ${s.border} rounded-xl p-4`}>
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="text-xl">{s.icon}</span>
+                      <span className="font-bold text-white text-lg">{it.client_name}</span>
+                      {it.status !== 'done' && <span className={`text-sm px-2 py-0.5 rounded-full font-medium ${s.badge}`}>{s.label}</span>}
+                      {it.status === 'done' && <span className="text-sm px-2 py-0.5 rounded-full bg-green-700 text-white font-medium">✅ 納品完了</span>}
+                      {it.progress && <span className="text-sm px-2 py-0.5 rounded-full bg-slate-600 text-slate-200">{it.progress}</span>}
+                    </div>
+                    <div className="text-lg text-slate-300 space-y-1">
+                      <p>📅 納品予定日: <span className={`font-bold ${level === 'overdue' || level === 'critical' ? 'text-red-300' : level === 'urgent' ? 'text-orange-300' : level === 'warning' ? 'text-yellow-300' : 'text-white'}`}>{it.delivery_due_date}</span>
+                        {it.status !== 'done' && <span className="text-slate-400"> （{days < 0 ? `${-days}日超過` : `残 ${days}日`}）</span>}
+                      </p>
+                      {it.product_name && <p>📦 製品: {it.product_name}{it.quantity ? ` × ${it.quantity}` : ''}</p>}
+                      {it.status !== 'done' && leadDays > 0 && (
+                        <p className="text-base">
+                          ⏳ 想定リードタイム: <span className="font-medium">{leadDays}日</span>
+                          <span className={`ml-2 font-bold ${buffer < 0 ? 'text-red-300' : buffer <= 3 ? 'text-red-300' : buffer <= 7 ? 'text-orange-300' : buffer <= 14 ? 'text-yellow-300' : 'text-slate-400'}`}>
+                            （発注猶予：{buffer < 0 ? `${-buffer}日超過` : `残 ${buffer}日`}）
+                          </span>
+                        </p>
+                      )}
+                      {it.status !== 'done' && level !== 'ok' && (
+                        <div className="text-base bg-black/20 rounded-lg px-3 py-2 mt-1 leading-relaxed">
+                          {getAlertReason(it)}
+                        </div>
+                      )}
+                      {it.install_address && <p className="text-slate-400 text-base">📍 {it.install_address}</p>}
+                      {it.assignee && <p>👤 担当: {it.assignee}</p>}
+                      {(it.contact_name || it.contact_tel1) && <p>☎️ {it.contact_name} {it.contact_tel1}</p>}
+                      {it.notes && <p className="text-slate-400">📝 {it.notes}</p>}
+
+                      {/* 長納期機器の発注済みチェック＋商品到着予定日（CSV再取込しても保持される） */}
+                      {it.status !== 'done' && getMatchedEquipment(it).length > 0 && (
+                        <div className="flex flex-col gap-1.5 pt-1">
+                          {getMatchedEquipment(it).map(m => {
+                            const ordered = isManuallyOrdered(it, m.label)
+                            const arrival = getArrivalDate(it, m.label)
+                            return (
+                              <div key={m.label} className="flex items-center gap-2 flex-wrap">
+                                <button
+                                  onClick={() => toggleOrdered(it, m.label)}
+                                  className={`text-sm px-2 py-1 rounded-full border transition-colors whitespace-nowrap ${ordered ? 'bg-green-700 border-green-500 text-white' : 'bg-slate-700/60 border-slate-600 text-slate-300 hover:bg-slate-600'}`}
+                                >
+                                  {ordered ? '✅' : '☐'} {m.label} 発注済み
+                                </button>
+                                <span className="text-sm text-slate-400">📦 到着予定:</span>
+                                <input
+                                  type="date"
+                                  defaultValue={arrival || ''}
+                                  onChange={(e) => setArrivalDate(it, m.label, e.target.value)}
+                                  className="text-sm px-2 py-1 bg-slate-900/60 border border-slate-700 rounded-lg text-slate-200"
+                                />
+                                {arrival && (
+                                  <button
+                                    onClick={() => setArrivalDate(it, m.label, '')}
+                                    className="text-sm text-slate-500 hover:text-slate-300"
+                                  >
+                                    ✕クリア
+                                  </button>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+
+                      {/* 確認済みマーク */}
+                      {it.checked_by && (
+                        <p className="text-sm text-slate-500 pt-1">
+                          👁️ {it.checked_by}が確認済み（{it.checked_at ? new Date(it.checked_at).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}）
+                        </p>
+                      )}
+
+                      {/* JITBOX配送情報（備考にJITBOXが含まれる場合） */}
+                      {hasJitbox(it) && (() => {
+                        const jit = getJitboxLeadDays(it.install_address)
+                        const _today = new Date(); _today.setHours(0,0,0,0)
+                        const _due = new Date(it.delivery_due_date); _due.setHours(0,0,0,0)
+                        const _deadline = new Date(_due)
+                        _deadline.setDate(_deadline.getDate() - jit.days - 1)
+                        const deadlineStr = _deadline.toISOString().slice(0,10)
+                        const daysToDeadline = Math.ceil((_deadline.getTime()-_today.getTime())/86400000)
+                        const isOverdue = daysToDeadline < 0
+                        const isUrgent = !isOverdue && daysToDeadline <= 3
+                        return (
+                          <div className={`flex flex-col gap-2 mt-2 pt-2 border-t ${isOverdue ? 'border-red-500' : isUrgent ? 'border-orange-500' : 'border-slate-700/50'}`}>
+                            <div className={`flex flex-col gap-1.5 px-3 py-2 rounded-lg ${isOverdue ? 'bg-red-950/50 border border-red-500' : isUrgent ? 'bg-orange-950/50 border border-orange-500' : 'bg-slate-800/60 border border-slate-700'}`}>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-lg font-bold text-white">🚚 JITBOX配送情報（大阪発）</span>
+                                {isOverdue && <span className="text-sm px-2 py-0.5 rounded-full bg-red-600 text-white font-bold">手配期限超過！</span>}
+                                {isUrgent && <span className="text-sm px-2 py-0.5 rounded-full bg-orange-500 text-white font-bold">手配期限まで{daysToDeadline}日</span>}
+                              </div>
+                              <div className="text-base text-slate-300 space-y-0.5">
+                                <p>📦 所要日数：<strong className="text-white">{jit.days}日</strong> <span className="text-slate-400 text-sm">（{jit.note}）</span></p>
+                                <p>⏰ 手配締め切り：<strong className={isOverdue ? 'text-red-300' : isUrgent ? 'text-orange-300' : 'text-white'}>{deadlineStr}</strong><span className="text-slate-400 ml-2 text-sm">（{isOverdue ? `${-daysToDeadline}日超過` : `残${daysToDeadline}日`} ／ 前日までに手配必要）</span></p>
+                                <p className="text-slate-400 text-sm">⚠️ 日祝またぎ・離島・2時間幅JIT指定は別途確認。時間外(18:01～20:00)は+3,000円前後。</p>
+                              </div>
+                              <button onClick={() => toggleJitboxOrdered(it)} disabled={!!it.locked} className={`self-start text-base px-4 py-1.5 rounded-full font-bold border transition-colors whitespace-nowrap ${it.jitbox_ordered ? 'bg-green-700 border-green-500 text-white' : 'bg-slate-700/60 border-slate-600 text-slate-300 hover:bg-slate-600'} ${it.locked ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                {it.jitbox_ordered ? '✅ JITBOX手配済み' : '☐ JITBOX手配済みにする'}
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })()}
+
+                      {/* ダッシュボード側メモ（CSV再取込しても保持される） */}
+                      <textarea
+                        defaultValue={it.dashboard_memo || ''}
+                        placeholder="📝 ダッシュボードメモ（CSV再取込しても消えません）"
+                        onBlur={(e) => saveMemo(it, e.target.value)}
+                        className="w-full mt-1 px-3 py-2 text-base bg-slate-900/60 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 resize-y min-h-[2.2rem]"
+                        rows={1}
+                      />
+                    </div>
+                  </div>
+                  {it.status !== 'done' && (
+                    <div className="flex flex-col gap-2 min-w-fit">
+                      <a
+                        href="https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=602309486#gid=602309486"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-base rounded-lg font-medium transition-colors whitespace-nowrap text-center"
+                      >
+                        🛠️ 工程管理表
+                      </a>
+                      <a
+                        href="https://docs.google.com/spreadsheets/d/1FxK4x534LV2sGY54KKtbow1W6iLT0Z_YTzg_R8ba8Go/edit?gid=0#gid=0"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-green-700 hover:bg-green-600 text-white text-base rounded-lg font-medium transition-colors whitespace-nowrap text-center"
+                      >
+                        📊 管理スプレッドシート
+                      </a>
+                      <button
+                        onClick={() => markChecked(it)}
+                        className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white text-base rounded-lg font-medium transition-colors whitespace-nowrap"
+                      >
+                        👁️ 確認済みにする
+                      </button>
+                      <button
+                        disabled={updating === it.id}
+                        onClick={() => markDone(it.id)}
+                        className="px-4 py-2 bg-green-700 hover:bg-green-600 text-white text-base rounded-lg font-medium transition-colors whitespace-nowrap"
+                      >
+                        ✅ 納品完了にする
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}

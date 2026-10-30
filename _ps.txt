@@ -1,0 +1,12 @@
+﻿backup: C:\GensparkClaw\kujira-support\src\components\Sidebar.tsx.bak_hydration_20261029_174506
+python.exe : Traceback (most recent call last):
+発生場所 行:1 文字:36
++ ... ra-support; & "C:\Users\fyone\anaconda3\python.exe" -X utf8 _patch_si ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\GensparkClaw\kujira-support\_patch_sidebar.py", line 46, in <module>
+    assert s.count(OLD2) == 1, "anchor2: %d" % s.count(OLD2)
+           ^^^^^^^^^^^^^^^^^^
+AssertionError: anchor2: 0

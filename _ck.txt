@@ -1,0 +1,40 @@
+﻿=== createKouteiCopy 縺ｮ蜑企勁蛻､螳・===
+function createKouteiCopy(p) {
+  var src = SpreadsheetApp.getActiveSpreadsheet();
+  var keep = {};
+  (p.cats || []).forEach(function (c) { keep[c] = true; });
+
+  var name = '\u5de5\u7a0b\u7ba1\u7406_' + (p.client || '') + '_' +
+    Utilities.formatDate(new Date(), 'JST', 'yyyyMMdd');
+  var copy = src.copy(name);
+  var sh = findKouteiSheet(copy);
+  var last = sh.getLastRow();
+  var vals = sh.getRange(1, 3, last, 1).getValues();
+
+  // 蜑企勁蟇ｾ雎｡縺ｮ陦後ｒ髮・ａ繧具ｼ井ｸ九°繧画ｶ医☆縺ｨ陦檎分蜿ｷ縺後ぜ繝ｬ縺ｪ縺・ｼ・
+  var del = [];
+  for (var i = 3; i < vals.length; i++) {
+    var c = String(vals[i][0] || '').trim();
+    if (!c) continue;                 // 蛹ｺ蛻・′遨ｺ縺ｮ陦後・谿九☆
+    if (!keep[c]) del.push(i + 1);
+  }
+
+  // 騾｣邯夊｡後・縺ｾ縺ｨ繧√※蜑企勁縺励※鬮倬溷喧縺吶ｋ
+  var removed = 0;
+  var i2 = del.length - 1;
+  while (i2 >= 0) {
+    var end = del[i2], start = end;
+    while (i2 > 0 && del[i2 - 1] === start - 1) { i2--; start = del[i2]; }
+    sh.deleteRows(start, end - start + 1);
+    removed += end - start + 1;
+    i2--;
+  }
+
+  // 譯井ｻｶ諠・ｱ繧貞ｷｮ縺苓ｾｼ繧・・-2陦檎岼・・
+  try {
+    if (p.client) sh.getRange(1, 7).setValue(p.client);
+    if (p.property) sh.getRange(2, 7).setValue(p.property);
+    if (p.due) sh.getRange(1, 6).setValue(p.due);
+  } catch (e) {}
+
+

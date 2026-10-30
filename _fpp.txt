@@ -1,0 +1,17 @@
+﻿hits: [1215, 1256, 1263]
+ 1213|                             onSave={(key, val) => saveTodoKey(it.id, it.dashboard_todos, key, val)}
+ 1214|                           />
+ 1215|                           {/* [PAYPAY_APPLY_V1 2026-10-29] PayPay蛻ｩ逕ｨ逕ｳ隲九Γ繝ｼ繝ｫ・郁・蜍募ｷｮ縺苓ｾｼ縺ｿ・・*/}
+ 1216|                           {name === 'PayPay' && (() => {
+ 1217|                             const PP_SUBJECT = `PayPayAPI謗･邯壼ｯｾ雎｡蠎苓・霑ｽ蜉縺ｮ縺比ｾ晞ｼ・医せ繝槭・繝医メ繧ｧ繝・け繧､繝ｳ繧ｷ繧ｹ繝・Β・会ｼ・{it.client_name || '笳鞘酪笳・}`
+ 1218|                             const tel = (it.dashboard_todos?.['app_tel'] as string)
+ 1219|                               || it.contact_tel1 || it.contact_tel2 || ''
+ 1220|                             const url = (it.dashboard_todos?.['hotel_url'] as string) || ''
+ 1221|                             const PP_BODY = `PayPay譬ｪ蠑丈ｼ夂､ｾ 螟ｩ譏取ｧ・
+ 1222| 
+ 1223| 縺・▽繧ゅ♀荳冶ｩｱ縺ｫ縺ｪ縺｣縺ｦ縺翫ｊ縺ｾ縺吶・
+ 1224| 譬ｪ蠑丈ｼ夂､ｾ繝・ヰ繧､繧ｹ繧ｨ繝ｼ繧ｸ繧ｧ繝ｳ繧ｷ繝ｼ縺ｮ笳鞘酪縺ｧ縺吶・
+ 1225| 
+ 1226| 莉･荳九・蠑顔､ｾ繧ｯ繝ｩ繧､繧｢繝ｳ繝域ｧ倥′譁ｰ隕上↓PayPay繧貞茜逕ｨ縺輔ｌ縺溘＞縺ｨ縺ｮ縺薙→縺ｧ縲√◆縺ｳ縺溘・縺頑焔謨ｰ縺翫°縺代＠縺ｾ縺吶′縲、PI謗･邯壹・縺頑焔邯壹″繧偵♀鬘倥＞縺励∪縺吶・
+ 1227| 
+ 1228| 豕穂ｺｺ蜷腔r蛟倶ｺｺ莠区･ｭ荳ｻ蜷阪${it.client_name || '笳鞘酪笳・}

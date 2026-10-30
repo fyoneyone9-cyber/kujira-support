@@ -1,0 +1,9 @@
+﻿app\(app)\purchase-orders\page.tsx:105| return `PO-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(no
+app\(app)\tasks\TasksClient.tsx:172| {ev.start.dateTime && <p className="text-xs font-bold text-white">{d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-dig
+components\BreakTimer.tsx:13| if (now.getHours() === 8 && now.getMinutes() === 55 && !sessionStorage.getItem(key)) {
+components\BreakTimer.tsx:97| const h = String(now.getHours()).padStart(2, '0')
+components\BreakTimer.tsx:98| const m = String(now.getMinutes()).padStart(2, '0')
+components\Sidebar.tsx:63| {viewYear}蟷ｴ {JP_MONTHS[viewMonth]}
+components\Sidebar.tsx:115| const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+components\WorkTimer.tsx:20| const h = now.getHours()
+components\WorkTimer.tsx:21| const m = now.getMinutes()

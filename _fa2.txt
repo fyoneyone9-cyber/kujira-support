@@ -1,0 +1,28 @@
+﻿ 1739|                                         email: (it.dashboard_todos?.['client_email'] as string)
+ 1740|                                           || (it.worker_contacts || []).map(w => w?.email).find(Boolean) || '',
+ 1741|                                         rooms: roomsRaw ? roomsRaw[1] : '',
+ 1742|                                         pms: pick(/PMS/i),
+ 1743|                                         cardkeyMaker: pick(/繧ｫ繝ｼ繝峨く繝ｼ|MIWA|GOAL|LEGEND|ASSA/i),
+ 1744|                                         lockMaker: pick(/繧ｹ繝槭・繝医Ο繝・け|EPIC|TTLock|KEYVOX|Baycom|SwitchBot/i),
+ 1745|                                         equips,
+ 1746|                                       }
+ 1747|                                       navigator.clipboard.writeText(JSON.stringify(cfg))
+ 1748|                                         .then(() => alert('笨・險ｭ螳壹ｒ繧ｳ繝斐・縺励∪縺励◆・域ｩ滓攝' + (equips.length - 1) + '莉ｶ・噂n\n繧ｹ繝励Ξ繝・ラ繧ｷ繝ｼ繝医・縲交沒・繝・
+ 1749|                                         .catch(() => alert('繧ｳ繝斐・螟ｱ謨・))
+ 1750|                                     }}
+ 1751|                                     className="text-sm px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-500 text-white fo
+ 1752|                                     title="縺薙・譯井ｻｶ縺ｮ諠・ｱ縺ｨ讖滓攝繝√ぉ繝・け繧偵∪縺ｨ繧√※繧ｳ繝斐・縺励∪縺・>
+ 1753|                                     搭 險ｭ螳壹ｒ繧ｳ繝斐・
+ 1754|                                   </button>
+ 1755|                                   <a href="/docs/hearing-gas.js" target="_blank" rel="noreferrer"
+ 1756|                                     className="text-sm px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 
+ 1757|                                     title="Apps Script縺ｫ雋ｼ繧贋ｻ倥￠繧九さ繝ｼ繝会ｼ亥・蝗槭・縺ｿ・・>
+ 1758|                                     糖 繧ｳ繝ｼ繝・gs
+ 1759|                                   </a>
+ 1760|                                   <a href="/docs/hearing-gas-dialog.html" target="_blank" rel="noreferrer"
+ 1761|                                     className="text-sm px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 
+ 1762|                                     title="Apps Script縺ｫ雋ｼ繧贋ｻ倥￠繧稀TML・亥・蝗槭・縺ｿ・・>
+ 1763|                                     糖 dialog.html
+ 1764|                                   </a>
+ 1765|                                 </div>
+ 1766|                                 {/* [HEARING_GAS_V2 2026-10-29] 險ｭ鄂ｮ謇矩・ｒ縺昴・蝣ｴ縺ｫ陦ｨ遉ｺ縺吶ｋ */}

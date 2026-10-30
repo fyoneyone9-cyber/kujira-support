@@ -1,0 +1,48 @@
+﻿
+===== my_koutei_url =====
+ 2381|                                           </div>
+ 2382|                                           <div className="flex gap-2 items-start">
+ 2383|                                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-600 text-white font-bold 
+ 2384|                                             <span className="flex items-center gap-2 flex-wrap">
+ 2385|                                               <span>閾ｪ蛻・・蟾･遞玖｡ｨ繧帝幕縺・<b className="text-amber-300">翌 蟾･遞狗ｮ｡逅・竊・蠢・ｦ√↑蟾･遞九□縺代さ繝斐・菴懈・</b></span>
+ 2386|                                               {((): React.ReactNode => {
+ 2387|                                                 const mine = (it.dashboard_todos?.['my_koutei_url'] as string) || ''
+ 2388|                                                 if (mine) return (
+ 2389|                                                   <a href={mine} target="_blank" rel="noreferrer" className="px-2.5 py-1 rounded b
+ 2390|                                                 )
+ 2391|                                                 return (
+ 2392|                                                   <button onClick={() => {
+ 2393|                                                     const u = prompt('閾ｪ蛻・′繧ｳ繝斐・縺励◆蟾･遞狗ｮ｡逅・｡ｨ縺ｮURL繧定ｲｼ繧贋ｻ倥￠縺ｦ縺上□縺輔＞')
+ 2394|                                                     if (u && u.startsWith('http')) saveTodoKey(it.id, it.dashboard_todos, 'my_kout
+ 2395|                                                   }} className="px-2.5 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200
+ 2396|                                                 )
+ 2397|                                               })()}
+ 2398|                                             </span>
+ 2399|                                           </div>
+ 2400|                                           <div className="flex gap-2 items-start">
+ 2401|                                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-600 text-white font-bold 
+
+===== my_sheet_url =====
+ 2132|                                               <p className="flex items-center gap-2 flex-wrap">
+ 2133|                                                 <span>
+ 2134|                                                   竭 閾ｪ蛻・・繧ｷ繝ｼ繝医ｒ髢九″縲√Γ繝九Η繝ｼ
+ 2135|                                                   <b className="text-amber-300"> 搭 繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝・/b>・医・繝ｫ繝励・蜿ｳ髫｣・・
+ 2136|                                                 </span>
+ 2137|                                                 {(() => {
+ 2138|                                                   const mine = (it.dashboard_todos?.['my_sheet_url'] as string) || ''
+ 2139|                                                   return mine ? (
+ 2140|                                                     <a href={mine} target="_blank" rel="noreferrer"
+ 2141|                                                       className="px-2.5 py-1 rounded bg-emerald-700 hover:bg-emerald-600 text-whit
+ 2142|                                                       塘 閾ｪ蛻・・繧ｷ繝ｼ繝医ｒ髢九￥
+ 2143|                                                     </a>
+ 2144|                                                   ) : (
+ 2145|                                                     <button onClick={() => {
+ 2146|                                                       const u = prompt('閾ｪ蛻・・繧ｳ繝斐・縺励◆繧ｹ繝励Ξ繝・ラ繧ｷ繝ｼ繝医・URL繧定ｲｼ繧贋ｻ倥￠縺ｦ縺上□縺輔＞\n・井ｸ蠎ｦ逋ｻ骭ｲ縺吶ｌ縺ｰ谺｡蝗槭°繧峨・繧ｿ繝ｳ縺ｧ髢九￠縺ｾ縺呻ｼ・)
+ 2147|                                                       if (u && u.startsWith('http')) saveTodoKey(it.id, it.dashboard_todos, 'my_sh
+ 2148|                                                     }}
+ 2149|                                                       className="px-2.5 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-20
+ 2150|                                                       筐・閾ｪ蛻・・繧ｷ繝ｼ繝・RL繧堤匳骭ｲ
+ 2151|                                                     </button>
+ 2152|                                                   )
+ 2153|                                                 })()}
+ 2154|                                               </p>

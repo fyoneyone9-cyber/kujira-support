@@ -1,0 +1,29 @@
+﻿const saveTodoKey = async (id: string, currentTodos: Record<string, unknown> | null | undefined, key: string, val: string) => {
+    if (items.find(it => it.id === id)?.locked) { alert('白 縺薙・譯井ｻｶ縺ｯ繝ｭ繝・け荳ｭ縺ｧ縺吶らｷｨ髮・☆繧九↓縺ｯ繝ｭ繝・け繧定ｧ｣髯､縺励※縺上□縺輔＞縲・); return }
+    const todos = { ...(currentTodos || {}), [key]: val || null }
+    // 讌ｽ隕ｳ逧・峩譁ｰ・井ｿ晏ｭ伜燕縺ｫUI縺ｫ蜊ｳ蜿肴丐・・
+    setItems(prev => prev.map(it => it.id === id ? { ...it, dashboard_todos: todos } : it))
+    await fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, dashboard_todos: todos })
+    })
+
+    // [SIBLING_SYNC_V1] 迴ｾ蝣ｴ蜈ｱ騾壹・鬆・岼縺ｪ繧峨∝酔縺倡樟蝣ｴ縺ｮ莉悶・陦後↓繧ょ酔縺伜､繧貞渚譏縺吶ｋ
+    if (!SIBLING_SHARED_KEY(key)) return
+    const me = items.find(x => x.id === id)
+    if (!me) return
+    const sibs = siblingsOf(me).filter(x => !x.locked)
+    if (!sibs.length) return
+    setItems(prev => prev.map(x => sibs.some(sx => sx.id === x.id)
+      ? { ...x, dashboard_todos: { ...(x.dashboard_todos || {}), [key]: val || null } }
+      : x))
+    await Promise.all(sibs.map(sx => fetch('/api/delivery/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: sx.id, dashboard_todos: { ...(sx.dashboard_todos || {}), [key]: val || null } })
+    }).catch(() => {})))
+    console.info('[SIBLING_SYNC_V1] %s=%s 繧貞酔荳迴ｾ蝣ｴ縺ｮ%d莉ｶ縺ｸ蜷梧悄', key, val, sibs.length)
+  }
+
+  const saveMemo = a

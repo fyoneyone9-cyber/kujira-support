@@ -118,7 +118,7 @@ export default function P400OrdersPage() {
         <h1 className="text-2xl font-bold text-white">P400注文書</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-base font-medium transition-colors"
         >
           {showForm ? '✕ 閉じる' : '＋ 新規作成'}
         </button>
@@ -130,78 +130,78 @@ export default function P400OrdersPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-slate-400 mb-1">注文日 *</label>
+              <label className="block text-sm text-slate-400 mb-1">注文日 *</label>
               <input type="date" required value={form.order_date}
                 onChange={e => setForm({ ...form, order_date: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">対象店舗名 *</label>
+              <label className="block text-sm text-slate-400 mb-1">対象店舗名 *</label>
               <input type="text" required value={form.store_name}
                 onChange={e => setForm({ ...form, store_name: e.target.value })}
                 placeholder="店舗名"
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">住所</label>
+              <label className="block text-sm text-slate-400 mb-1">住所</label>
               <input type="text" value={form.store_address}
                 onChange={e => setForm({ ...form, store_address: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">電話番号</label>
+              <label className="block text-sm text-slate-400 mb-1">電話番号</label>
               <input type="text" value={form.store_tel}
                 onChange={e => setForm({ ...form, store_tel: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">担当者名</label>
+              <label className="block text-sm text-slate-400 mb-1">担当者名</label>
               <input type="text" value={form.store_manager}
                 onChange={e => setForm({ ...form, store_manager: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">総括担当者名</label>
+              <label className="block text-sm text-slate-400 mb-1">総括担当者名</label>
               <input type="text" value={form.general_manager}
                 onChange={e => setForm({ ...form, general_manager: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">入荷場所</label>
+              <label className="block text-sm text-slate-400 mb-1">入荷場所</label>
               <input type="text" value={form.delivery_place}
                 onChange={e => setForm({ ...form, delivery_place: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">支払条件</label>
+              <label className="block text-sm text-slate-400 mb-1">支払条件</label>
               <input type="text" value={form.payment_terms}
                 onChange={e => setForm({ ...form, payment_terms: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1">備考</label>
+            <label className="block text-sm text-slate-400 mb-1">備考</label>
             <textarea value={form.notes} rows={2}
               onChange={e => setForm({ ...form, notes: e.target.value })}
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-base" />
           </div>
 
           {/* Items */}
           <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">品目数量</h3>
+            <h3 className="text-base font-medium text-slate-300 mb-2">品目数量</h3>
             <div className="space-y-2">
               {ITEMS.map(item => (
                 <div key={item.key} className="flex items-center gap-4">
-                  <span className="text-sm text-slate-300 w-64">{item.label}</span>
-                  <span className="text-xs text-slate-400 w-24">{item.price.toLocaleString()}円</span>
+                  <span className="text-base text-slate-300 w-64">{item.label}</span>
+                  <span className="text-sm text-slate-400 w-24">{item.price.toLocaleString()}円</span>
                   <input
                     type="number" min={0}
                     value={form[item.key]}
                     onChange={e => setForm({ ...form, [item.key]: parseInt(e.target.value) || 0 })}
-                    className="w-20 bg-slate-700 border border-slate-600 rounded-lg px-3 py-1 text-white text-sm text-center"
+                    className="w-20 bg-slate-700 border border-slate-600 rounded-lg px-3 py-1 text-white text-base text-center"
                   />
-                  <span className="text-sm text-slate-400">
+                  <span className="text-base text-slate-400">
                     = {((form[item.key] || 0) * item.price).toLocaleString()}円
                   </span>
                 </div>
@@ -210,7 +210,7 @@ export default function P400OrdersPage() {
           </div>
 
           {/* Totals */}
-          <div className="bg-slate-700/50 rounded-xl p-4 text-sm space-y-1">
+          <div className="bg-slate-700/50 rounded-xl p-4 text-base space-y-1">
             <div className="flex justify-between text-slate-300">
               <span>小計</span><span>{subtotal.toLocaleString()}円</span>
             </div>
@@ -224,11 +224,11 @@ export default function P400OrdersPage() {
 
           <div className="flex justify-end gap-3">
             <button type="button" onClick={() => setShowForm(false)}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm transition-colors">
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-base transition-colors">
               キャンセル
             </button>
             <button type="submit" disabled={submitting}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50">
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-base font-medium transition-colors disabled:opacity-50">
               {submitting ? '作成中...' : '作成'}
             </button>
           </div>
@@ -237,9 +237,9 @@ export default function P400OrdersPage() {
 
       {/* List */}
       <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
-        <table className="w-full text-sm">
+        <table className="w-full text-base">
           <thead>
-            <tr className="border-b border-slate-700 text-slate-400 text-xs">
+            <tr className="border-b border-slate-700 text-slate-400 text-sm">
               <th className="px-4 py-3 text-left">注文番号</th>
               <th className="px-4 py-3 text-left">注文日</th>
               <th className="px-4 py-3 text-left">対象店舗</th>
@@ -257,7 +257,7 @@ export default function P400OrdersPage() {
               const st = STATUS_LABELS[order.status] || STATUS_LABELS.draft
               return (
                 <tr key={order.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
-                  <td className="px-4 py-3 text-white font-mono text-xs">{order.order_no}</td>
+                  <td className="px-4 py-3 text-white font-mono text-sm">{order.order_no}</td>
                   <td className="px-4 py-3 text-slate-300">{order.order_date}</td>
                   <td className="px-4 py-3 text-slate-300">{order.store_name}</td>
                   <td className="px-4 py-3 text-right text-white">{order.total.toLocaleString()}円</td>
@@ -277,13 +277,13 @@ export default function P400OrdersPage() {
                     <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={() => handleExcel(order.id)}
-                        className="px-2 py-1 bg-green-700 hover:bg-green-600 text-white rounded-lg text-xs transition-colors"
+                        className="px-2 py-1 bg-green-700 hover:bg-green-600 text-white rounded-lg text-sm transition-colors"
                       >
                         📥 Excel
                       </button>
                       <button
                         onClick={() => handleDelete(order.id)}
-                        className="px-2 py-1 bg-red-800 hover:bg-red-700 text-white rounded-lg text-xs transition-colors"
+                        className="px-2 py-1 bg-red-800 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
                       >
                         🗑
                       </button>

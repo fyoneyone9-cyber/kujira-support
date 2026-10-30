@@ -1,0 +1,186 @@
+﻿   40|   hubspot_url?: string | null
+   41|   process_sheet_url?: string | null
+   42|   hearing_sheet_url?: string | null
+   43|   payment_received?: boolean | null
+   44|   missing_in_last_import?: boolean | null
+  337|   const TEMPLATE_URLS: Partial<Record<keyof DeliveryItem, string>> = {
+  338|     process_sheet_url: 'https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=159741708#gid=159741708',
+  339|     hearing_sheet_url: 'https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit?gid=849864762#gid=849864762',
+  340|   }
+  341|   const fields: { key: keyof DeliveryItem; label: string; color: string; alertable?: boolean }[] = [
+  343|     { key: 'hubspot_url',       label: 'HubSpot',    color: 'text-orange-400' },
+  344|     { key: 'process_sheet_url', label: '蟾･遞玖｡ｨ',     color: 'text-green-400',   alertable: true },
+  345|     { key: 'hearing_sheet_url', label: '繝偵い繝ｪ繝ｳ繧ｰ', color: 'text-purple-400',  alertable: true },
+  346|   ]
+  347|   const hasAny = fields.some(f => !!it[f.key])
+  379|                   <a href={TEMPLATE_URLS[f.key]} target="_blank" rel="noreferrer"
+  380|                     className="text-xs px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 flex-shrink-0 whitespace-nowrap">
+  381|                     塘 髮帛ｽ｢
+  382|                   </a>
+  383|                 )}
+  977|               if (!it.slack_url && !it.dashboard_todos?.['slack_url_skip']) ltWarnings.push('Slack繝ｪ繝ｳ繧ｯ縺袈RL繧ｻ繧ｯ繧ｷ繝ｧ繝ｳ縺ｫ譛ｪ逋ｻ骭ｲ')
+  978|               if (!it.process_sheet_url && !it.dashboard_todos?.['process_sheet_url_skip']) ltWarnings.push('蟾･遞玖｡ｨ繝ｪ繝ｳ繧ｯ縺梧悴逋ｻ骭ｲ')
+  979|               if (!it.hearing_sheet_url && !it.dashboard_todos?.['hearing_sheet_url_skip']) ltWarnings.push('繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医Μ繝ｳ繧ｯ縺梧悴逋ｻ骭ｲ')
+  980|               knownEquip.forEach(({ name }) => {
+  981|                 const lt = LEAD_TIME[name]; if (!lt) return
+ 1011|               if (payFirst && ps !== '蜈･驥醍｢ｺ隱肴ｸ医∩' && ps !== '蜈･驥台ｸ崎ｦ・ｼ育┌蜆滂ｼ・) cardAlerts.push({ label: '腸 蜈･驥第悴遒ｺ隱搾ｼ・ayCube/繧ｭ繝ｼ繝懊ャ繧ｯ繧ｹ逋ｺ豕ｨ荳榊庄・・, target: paySec })
+ 1012|               if (equipItems.some(e => e.name === 'PayCube' && hasQty(e.value)) && !['逋ｺ豕ｨ貂医∩','蜈･闕ｷ螻･豁ｴ','逋ｺ騾∵ｸ医∩','邏榊刀螳御ｺ・,'險ｭ螳壼ｮ御ｺ・].includes(getStatus('PayCube') || '')) cardAlerts.push({ label: '諜 Pay
+ 1013|               if (!it.hearing_sheet_url && !it.dashboard_todos?.['hearing_sheet_url_skip']) cardAlerts.push({ label: '搭 繝偵い繝ｪ繝ｳ繧ｰ譛ｪ逋ｻ骭ｲ', target: urlSec })
+ 1014|               if (!it.process_sheet_url && !it.dashboard_todos?.['process_sheet_url_skip']) cardAlerts.push({ label: '搭 蟾･遞玖｡ｨ譛ｪ逋ｻ骭ｲ', target: urlSec })
+ 1015|               if (!it.slack_url && !it.dashboard_todos?.['slack_url_skip']) cardAlerts.push({ label: '町 Slack譛ｪ逋ｻ骭ｲ', target: urlSec })
+ 1059|                     {ltWarnings.map((w, i) => {
+ 1060|                       const isProcess  = w.includes('蟾･遞玖｡ｨ')
+ 1061|                       const isHearing  = w.includes('繝偵い繝ｪ繝ｳ繧ｰ')
+ 1062|                       const tplUrl = isProcess
+ 1063|                         ? 'https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=159741708#gid=159741708'
+ 1078|                             <a href={tplUrl} target="_blank" rel="noreferrer"
+ 1079|                               className="text-xs px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded whitespace-nowrap flex-shrink-0">
+ 1080|                               塘 髮帛ｽ｢繧帝幕縺・
+ 1081|                             </a>
+ 1082|                           )}
+ 1176|                             onSave={(key, val) => saveTodoKey(it.id, it.dashboard_todos, key, val)}
+ 1177|                           />
+ 1178|                           {/* PayCube譛ｪ逋ｺ豕ｨ譎・ 逋ｺ豕ｨ譖ｸ髮帛ｽ｢繝ｻ遉ｾ髟ｷ謇ｿ隱阪Μ繝ｳ繧ｯ */}
+ 1179|                           {name === 'PayCube' && !['逋ｺ豕ｨ貂医∩','蜈･闕ｷ螻･豁ｴ','逋ｺ騾∵ｸ医∩','邏榊刀螳御ｺ・,'險ｭ螳壼ｮ御ｺ・].includes(getStatus('PayCube') || '') && (
+ 1180|                             <div className="flex items-center gap-2 flex-wrap mt-1 bg-red-950/30 border border-red-800/50 rounded px-2 py-1.5">
+ 1182|                               <a href="https://docs.google.com/spreadsheets/d/1PuPE7fOmgjuwk2bNQMqlfehLYZsa04iMZf1oeBK-Qo0/edit?gid=572546157#gid=572546157"
+ 1183|                                 target="_blank" rel="noreferrer"
+ 1184|                                 className="text-xs px-2 py-0.5 bg-blue-700 hover:bg-blue-600 text-blue-100 rounded whitespace-nowrap font-bold">塘 逋ｺ豕ｨ譖ｸ髮帛ｽ｢</a>
+ 1185|                               <a href="https://docs.google.com/spreadsheets/d/1kfl1Ajsa56qwOnjhrPmw1_PBi5M4p_FC8hHHNIgH6NY/edit?gid=1277566393#gid=1277566393"
+ 1186|                                 target="_blank" rel="noreferrer"
+ 1256|                           <a href="https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit?gid=849864762#gid=849864762"
+ 1257|                             target="_blank" rel="noreferrer"
+ 1258|                             className={`text-xs px-2 py-0.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-700 text-purple-300 rounded whitespace-nowrap ${it.hearing_sheet_url ? '
+ 1259|                             搭 繝偵い繝ｪ繝ｳ繧ｰ髮帛ｽ｢
+ 1260|                           </a>
+ 1261|                         )}
+ 1262|                         {/* 豁｣隕上ヲ繧｢繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝・RL縺悟・蜉帶ｸ医∩縺ｪ繧蛾幕縺上・繧ｿ繝ｳ */}
+ 1263|                         {it.hearing_sheet_url && (
+ 1264|                           <a href={it.hearing_sheet_url} target="_blank" rel="noreferrer"
+ 1265|                             className="ml-auto text-xs px-2 py-0.5 bg-blue-700 hover:bg-blue-600 border border-blue-500 text-blue-100 rounded whitespace-nowrap font-bold">
+ 1266|                             塘 繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医ｒ髢九￥
+ 1267|                           </a>
+ 1268|                         )}
+ 1271|                   }
+ 1272|                   // 繝ｩ繝吶Ν縺ｯ繧ｷ繝ｼ繝医・蛟､繧偵◎縺ｮ縺ｾ縺ｾ菴ｿ縺・ｼ・ame 縺ｨ value 繧堤ｵ仙粋縲・㍾隍・賜髯､・・
+ 1273|                   const joinLabel = (eq: Equipment) => {
+ 1274|                     const parts = [eq.name, eq.value].filter(Boolean)
+ 1275|                     // name 縺ｨ value 縺悟酔縺伜・螳ｹ繧貞性繧蝣ｴ蜷医・ value 縺縺台ｽｿ縺・
+ 1277|                     return parts.join('・・) + (parts.length > 1 ? '・・ : '')
+ 1278|                   }
+ 1279|                   const hearingUrl = it.hearing_sheet_url
+ 1280|                   const hearingSkip = it.dashboard_todos?.['hearing_sheet_url_skip']
+ 1281| 
+ 1282|                   // 讖滓攝縺九ｉ蠢・ｦ√↑繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医ｒ蛻､螳・
+ 1283|                   const equip = it.equipment || []
+ 1284|                   const LOCK_PAT2  = /繧ｹ繝槭・繝医Ο繝・け|smart.?lock|remotelock|ttlock|epic|bitlock|qrio|akerun|igloohome|lock/i
+ 1292|                   const hasCyli    = equip.some(e => CYLI_PAT.test(e.name || '')  || CYLI_PAT.test(e.value || ''))
+ 1293|                   const hasPms2    = equip.some(e => PMS_PAT2.test(e.name || '')  || PMS_PAT2.test(e.value || ''))
+ 1294|                   const hasP400    = equip.some(e => /p400/i.test(e.name || '')   || /p400/i.test(e.value || ''))
+ 1295|                   const hasPaycube = equip.some(e => /paycube|pay.?cube/i.test(e.name || '') || /paycube|pay.?cube/i.test(e.value || ''))
+ 1296|                   const hasPaypay  = equip.some(e => /paypay|pay.?pay/i.test(e.name || '')  || /paypay|pay.?pay/i.test(e.value || ''))
+ 1299| 
+ 1300|                   const TMPL = 'https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit'
+ 1301|                   const hearingSheets: { label: string; reason: string }[] = [
+ 1302|                     { label: '蠢・育｢ｺ隱坂蔵',       reason: '蜈ｨ迚ｩ莉ｶ蠢・・ },
+ 1303|                     { label: '蠢・育｢ｺ隱坂贈',       reason: '蜈ｨ迚ｩ莉ｶ蠢・茨ｼ亥渕譛ｬ諠・ｱ・・ },
+ 1304|                     { label: '蠢・育｢ｺ隱坂造',       reason: '蜈ｨ迚ｩ莉ｶ蠢・茨ｼ磯Κ螻区ュ蝣ｱ・・ },
+ 1305|                     ...(hasPms2    ? [{ label: 'PMS',              reason: 'PMS騾｣謳ｺ縺ゅｊ' }] : []),
+ 1306|                     ...(hasLock2   ? [{ label: '繧ｹ繝槭・繝医Ο繝・け竭', reason: '繧ｹ繝槭・繝医Ο繝・け縺ゅｊ' },
+ 1309|                     ...(hasCard    ? [{ label: '繧ｫ繝ｼ繝峨く繝ｼ',       reason: '繧ｫ繝ｼ繝峨く繝ｼ縺ゅｊ' }] : []),
+ 1310|                     ...(hasCyli    ? [{ label: '繧ｷ繝ｪ繝ｳ繝繝ｼ骭',     reason: '繧ｷ繝ｪ繝ｳ繝繝ｼ骭縺ゅｊ' }] : []),
+ 1311|                     ...(hasP400    ? [{ label: '遶ｯ譛ｫ繧ｫ繝ｼ繝画ｱｺ貂・,   reason: 'P400縺ゅｊ' }] : []),
+ 1312|                     ...(hasPaycube ? [{ label: '迴ｾ驥第ｱｺ貂・,         reason: 'PayCube縺ゅｊ' }] : []),
+ 1313|                     ...(hasPaypay  ? [{ label: '繧ｹ繝槭・繧ｫ繝ｼ繝画ｱｺ貂・, reason: 'PayPay縺ゅｊ' }] : []),
+ 1324|                     { label: '諡・ｽ楢・,     value: it.contact_name || '' },
+ 1325|                     { label: '陬ｽ蜩・,       value: equip.map(e => [e.name, e.value].filter(Boolean).join(' ')).join('縲・) },
+ 1326|                     { label: 'P400謨ｰ',     value: hasP400 ? (equip.find(e => /p400/i.test(e.name || ''))?.value || '荳肴・') : '' },
+ 1327|                     { label: 'PayCube謨ｰ',  value: hasPaycube ? (equip.find(e => /paycube/i.test(e.name || ''))?.value || '荳肴・') : '' },
+ 1328|                   ].filter(i => i.value)
+ 1331|                     <div id={`integ-sec-${it.id}`} className="rounded-lg border border-purple-800/40 bg-purple-950/20 border-l-4 border-l-purple-500 p-3 space-y-2 transition-all">
+ 1332|                       <p className="text-purple-300 font-bold text-sm">迫 繧ｷ繧ｹ繝・Β騾｣謳ｺ迥ｶ豕・/p>
+ 1333|                       {pmsEquip  && <IntegRow label={joinLabel(pmsEquip)}  field="pms_linked"       val={it.pms_linked ?? null} />}
+ 1334|                       {lockEquip && <IntegRow label={joinLabel(lockEquip)} field="smartlock_linked" val={it.smartlock_linked ?? null} />}
+ 1335| 
+ 1336|                       {/* 繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医リ繝難ｼ域釜繧翫◆縺溘∩・・*/}
+ 1337|                       <div className={`rounded-lg border ${hearingUrl ? 'border-purple-800' : 'border-slate-600'}`}>
+ 1338|                         <div
+ 1339|                           role="button"
+ 1340|                           onClick={() => toggleSection(`hearing_${it.id}`)}
+ 1341|                           className={`flex items-center gap-2 px-3 py-2 cursor-pointer rounded-lg ${hearingUrl ? 'bg-purple-950/40 hover:bg-purple-950/60' : 'bg-slate-800/50 hover:bg-slate-8
+ 1342|                         >
+ 1343|                           <span className="text-sm text-slate-300 font-bold">搭 繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝・/span>
+ 1344|                           {hearingUrl
+ 1345|                             ? <span className="text-purple-300 text-xs">逋ｻ骭ｲ貂医∩</span>
+ 1346|                             : hearingSkip
+ 1347|                               ? <span className="text-xs text-slate-500">繧ｹ繧ｭ繝・・貂医∩</span>
+ 1348|                               : <span className="text-xs text-orange-300 font-bold animate-pulse">笞・・譛ｪ逋ｻ骭ｲ</span>
+ 1349|                           }
+ 1350|                           {/* 逋ｻ骭ｲ貂医∩縺ｪ繧画悽逡ｪ繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医ｒ髢九￥繝懊ち繝ｳ・医・繝・ム縺ｫ蟶ｸ譎り｡ｨ遉ｺ・・*/}
+ 1351|                           {hearingUrl && (
+ 1352|                             <a href={hearingUrl} target="_blank" rel="noreferrer"
+ 1353|                               onClick={(e) => e.stopPropagation()}
+ 1354|                               className="text-xs px-2 py-0.5 bg-purple-700 hover:bg-purple-600 border border-purple-400 text-white rounded whitespace-nowrap font-bold">
+ 1356|                             </a>
+ 1357|                           )}
+ 1358|                           <span className="ml-auto text-slate-500 text-xs">{openSections[`hearing_${it.id}`] ? '笆ｲ 髢峨§繧・ : '笆ｼ 髢九￥'}</span>
+ 1359|                         </div>
+ 1360|                         {openSections[`hearing_${it.id}`] && <div className="px-3 pb-3 space-y-2">
+ 1361|                         <div className="flex items-center gap-2 flex-wrap pt-1">
+ 1362|                           {hearingUrl && <a href={hearingUrl} target="_blank" rel="noreferrer" className="text-purple-300 hover:underline text-sm font-bold">搭 髢九￥</a>}
+ 1363|                           <a href={TMPL} target="_blank" rel="noreferrer"
+ 1364|                             className="text-xs px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded whitespace-nowrap">塘 髮帛ｽ｢</a>
+ 1365|                         </div>
+ 1366| 
+ 1382|                           <p className="text-xs text-slate-400 font-bold">東 蠢・ｦ√↑繧ｷ繝ｼ繝茨ｼ域ｩ滓攝縺九ｉ閾ｪ蜍募愛螳夲ｼ・/p>
+ 1383|                           <div className="flex flex-wrap gap-1.5">
+ 1384|                             {hearingSheets.map(s => (
+ 1385|                               <div key={s.label} className="flex flex-col items-start">
+ 1386|                                 <span className="text-xs px-2 py-0.5 bg-purple-900/60 border border-purple-700 text-purple-200 rounded whitespace-nowrap">{s.label}</span>
+ 1391|                         </div>
+ 1392| 
+ 1393|                         {/* Gemini繝励Ο繝ｳ繝励ヨ逕滓・ / 荳崎ｦ・繝懊ち繝ｳ */}
+ 1394|                         {(() => {
+ 1395|                           const navSkip = it.dashboard_todos?.['hearing_nav_skip']
+ 1396|                           if (navSkip) return (
+ 1397|                             <div className="flex items-center gap-2">
+ 1398|                               <span className="text-xs text-slate-500">繝翫ン繧ｲ繝ｼ繝井ｸ崎ｦ√↓險ｭ螳壽ｸ医∩</span>
+ 1399|                               <button onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'hearing_nav_skip', '')}
+ 1400|                                 className="text-xs text-slate-500 hover:text-slate-300 underline">蜿悶ｊ豸医☆</button>
+ 1401|                             </div>
+ 1427| 4. DMS・医メ繧ｧ繝・け繧､繝ｳ邂｡逅・す繧ｹ繝・Β・峨い繧ｫ繧ｦ繝ｳ繝郁ｨｭ螳・
+ 1428|    - 繧｢繧ｫ繧ｦ繝ｳ繝井ｽ懈・蠕後↓螻翫￥蛻晄悄繝代せ繝ｯ繝ｼ繝峨ｒ蠑顔､ｾ縺ｸ蜈ｱ譛・
+ 1429|    - 繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医∈縺ｮ險伜・
+ 1430| 
+ 1431| 5. 逕ｻ蜒冗ｴ譚舌・謠蝉ｾ・
+ 1434| 
+ 1435| 6. 險ｭ鄂ｮ蠖捺律縺ｮ貅門ｙ${hasPaycube ? `
+ 1436|    - 迴ｾ驥醍ｲｾ邂玲ｩ溘ユ繧ｹ繝育畑驥｣驫ｭ・・蜀・・6譫壹・蜀・・7譫壹・0蜀・・6譫壹・0蜀・・6譫壹・00蜀・・6譫壹・00蜀・・6譫壹・000蜀・・0譫夲ｼ荏 : ''}${hasP400 ? `
+ 1437|    - P400・医き繝ｼ繝画ｱｺ貂育ｫｯ譛ｫ・峨・蜉逶溷ｺ礼分蜿ｷ繧担B payment遉ｾ縺九ｉ蜿門ｾ輿 : ''}
+ 1438| 
+ 1439| 蠢・ｦ√↑繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝・ ${hearingSheets.map(s => s.label).join('縲・)}
+ 1440| 
+ 1441| 蜷・ｺ門ｙ莠矩・↓縺､縺・※縲√♀螳｢讒倥′蜈ｷ菴鍋噪縺ｫ菴輔ｒ縺吶ｌ縺ｰ繧医＞縺九ｒ逡ｪ蜿ｷ莉倥″縺ｧ繧上°繧翫ｄ縺吶￥譯亥・縺励※縺上□縺輔＞縲Ａ
+ 1446|                                 onClick={() => {
+ 1447|                                   navigator.clipboard.writeText(promptText)
+ 1448|                                     .then(() => alert('Gemini繝励Ο繝ｳ繝励ヨ繧偵け繝ｪ繝・・繝懊・繝峨↓繧ｳ繝斐・縺励∪縺励◆・―nGemini ( https://gemini.google.com ) 縺ｫ雋ｼ繧贋ｻ倥￠縺ｦ縺上□縺輔＞縲・))
+ 1449|                                     .catch(() => alert('繧ｳ繝斐・螟ｱ謨励よ焔蜍輔〒繧ｳ繝斐・縺励※縺上□縺輔＞縲・))
+ 1450|                                 }}
+ 1451|                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white text-xs rounded-lg font-bold transition-colors"
+ 1452|                               >
+ 1453|                                 ､・Gemini繝励Ο繝ｳ繝励ヨ逕滓・繝ｻ繧ｳ繝斐・
+ 1454|                               </button>
+ 1455|                               <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer"
+ 1456|                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-600 text-white text-xs rounded-lg font-bold transition-colors">
+ 1457|                                 笨ｨ Gemini繧帝幕縺・
+ 1458|                               </a>
+ 1459|                               <button
+ 1460|                                 onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'hearing_nav_skip', '1')}
+ 1461|                                 className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-400 text-xs rounded-lg transition-colors"
+ 1462|                               >
+ 1466|                           )
+ 1467|                         })()}
+ 1468|                         </div>}{/* /hearing謚倥ｊ縺溘◆縺ｿ蜀・*/}
+ 1469|                       </div>{/* /hearing謚倥ｊ縺溘◆縺ｿ螟匁棧 */}
+ 1470|                     </div>
+ 1471|                   )

@@ -1,0 +1,43 @@
+﻿function fillInfo(ss, p) {
+  var sh = ss.getSheetByName('蠢・育｢ｺ隱坂贈');
+  if (!sh) return;
+  var zip = '', addr = p.property || '';
+  var m = addr.match(/縲・\s*(\d{3}-?\d{4})/);
+  if (m) { zip = m[1]; addr = addr.replace(m[0], '').trim(); }
+
+  var MAP = [
+    ['邨・ｹ泌錐', p.client],
+    ['DMS縺ｫ繝ｭ繧ｰ繧､繝ｳ縺輔ｌ繧区婿縺ｮ縺雁錐蜑・, p.contact],
+    ['迚ｩ莉ｶ蜷・, addr],
+    ['迚ｩ莉ｶ縺ｮ菴乗園', addr],
+    ['迚ｩ莉ｶ縺ｮ驛ｵ萓ｿ逡ｪ蜿ｷ', zip],
+    ['縺企崕隧ｱ逡ｪ蜿ｷ', p.tel]
+  ];
+
+  var last = sh.getLastRow();
+  var values = sh.getRange(1, 1, last, sh.getLastColumn()).getValues();
+
+  // 縲後＃蝗樒ｭ疲ｬ・阪・蛻励ｒ迚ｹ螳・
+  var ansCol = 0;
+  for (var r = 0; r < Math.min(6, values.length); r++) {
+    for (var c = 0; c < values[r].length; c++) {
+      if (String(values[r][c]).indexOf('縺泌屓遲疲ｬ・) >= 0) { ansCol = c + 1; break; }
+    }
+    if (ansCol) break;
+  }
+  if (!ansCol) return;
+
+  for (var r2 = 0; r2 < values.length; r2++) {
+    var rowText = values[r2].join(' ');
+    for (var i = 0; i < MAP.length; i++) {
+      var key = MAP[i][0], val = MAP[i][1];
+      if (!val) continue;
+      if (rowText.indexOf(key) >= 0) {
+        var cur = sh.getRange(r2 + 1, ansCol).getValue();
+        if (!cur) sh.getRange(r2 + 1, ansCol).setValue(val);
+        break;
+      }
+    }
+  }
+}
+

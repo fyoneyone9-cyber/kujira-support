@@ -664,10 +664,20 @@ if __name__ == "__main__":
             _pos = _d.get("positive_prompt", "")
             print(f"キャラID     : {_d.get('dbg_char_template_id') or '⚠️ 未記録'}")
             print(f"positive先頭 : {_pos[:150]}")
-            _cid = (_d.get("dbg_char_template_id") or "").lower()
-            if _cid and _cid.replace("_", " ").split("_")[-1] not in _pos.lower():
-                _diag_extra = f"🚨 [CHAR_PROMPT_MISSING] char_id={_cid} がpositiveに未反映"
-                print(_diag_extra)
+            # [LOGCHECK_CPM_FIX_V2 2026-10-27] 旧判定は replace("_"," ") 後に
+            # split("_") していたため常にID全文を検索=恒常誤警報だった。
+            # char_prompt の先頭5タグ(重み括弧除去)のいずれかが最終posに
+            # 含まれていればOKとする（API側診断V2と同等ロジック）。
+            import re as _re_lc
+            _cp = _d.get("char_prompt") or ""
+            if _cp:
+                _lc_tags = []
+                for _t in _cp.split(",")[:5]:
+                    _t = _re_lc.sub(r"[():]|\d+\.\d+", "", _t).strip().lower()
+                    if len(_t) > 3:
+                        _lc_tags.append(_t)
+                if _lc_tags and not any(_t in _pos.lower() for _t in _lc_tags):
+                    print(f"🚨 [CHAR_PROMPT_MISSING] キャラ先頭タグ群がpositiveに未反映: {_lc_tags[:3]}")
             for _dg in (_d.get("diagnostics") or []):
                 print(" ", _dg)
             print(f"WF/ckpt      : {_d.get('wf_file_used','')} / {_d.get('checkpoint_used','')}")

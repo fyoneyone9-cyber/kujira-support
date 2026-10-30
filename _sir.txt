@@ -1,0 +1,53 @@
+﻿ 1036|                   }
+ 1037|                   {it.progress && !(it.status !== 'done' && ['邏榊刀螳御ｺ・, '險ｭ螳壼ｮ御ｺ・].includes(it.progress)) && <span className="text-xs px-2 py-0.5 rounded-full bg-slate-600 text-slate-200">{it.progress}</span>}
+ 1038|                   {it.missing_in_last_import && <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-800 text-yellow-200">蜑榊屓蜿冶ｾｼ縺ｪ縺・/span>}
+ 1039|                   <button onClick={() => patch(it.id, { locked: !isLocked })}
+ 1040|                     className={`ml-auto px-2 py-0.5 text-xs rounded-lg font-medium transition-colors !pointer-events-auto ${isLocked ? 'bg-red-800 text-red-200 hover:bg-red-700' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}>
+ 1041|                     {isLocked ? '白 繝ｭ繝・け荳ｭ・医け繝ｪ繝・け縺ｧ隗｣髯､・・ : '箔 繝ｭ繝・け'}
+ 1042|                   </button>
+ 1043|                 </div>
+ 1044| 
+ 1045|                 {/* [CARD_ALERTS_V1] 邱丞粋繧｢繝ｩ繝ｼ繝医ヰ繝ｼ・医さ繝樔ｸ企Κ繝ｻ繧ｯ繝ｪ繝・け縺ｧ隧ｲ蠖鍋ｮ・園縺ｸ繧ｸ繝｣繝ｳ繝暦ｼ・*/}
+ 1046|                 {cardAlerts.length > 0 && (
+ 1047|                   <div className="bg-red-900/40 border border-red-600 rounded-lg px-3 py-2 flex items-center gap-2 flex-wrap">
+ 1048|                     <span className="text-xs font-bold text-red-300">笞・・隕∝ｯｾ蠢・</span>
+ 1049|                     {cardAlerts.map((a, i) => (
+ 1050|                       a.target
+ 1051|                         ? <button key={i} onClick={() => jumpToSection(a.target)}
+ 1052|                             className="text-xs px-2 py-0.5 rounded-full bg-red-800/80 hover:bg-red-600 text-red-100 font-bold cursor-pointer transition-colors">{a.label} 竊・/button>
+ 1053|                         : <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-red-800/80 text-red-100 font-bold">{a.label}</span>
+ 1054|                     ))}
+ 1055|                   </div>
+ 1056|                 )}
+ 1057| 
+ 1058|                 {ltWarnings.length > 0 && (
+ 1059|                   <div className="bg-red-950/80 border border-red-500 rounded-lg px-3 py-2 space-y-1.5">
+ 1060|                     {ltWarnings.map((w, i) => {
+ 1061|                       const isProcess  = w.includes('蟾･遞玖｡ｨ')
+......
+ 1236|                   if (!pmsEquip && !lockEquip) return null
+ 1237|                   const days21 = it.delivery_due_date ? Math.ceil((new Date(it.delivery_due_date).getTime() - new Date().setHours(0,0,0,0)) / 86400000) : null
+ 1238|                   const IntegRow = ({ label, field, val }: { label: string; field: 'pms_linked' | 'smartlock_linked'; val: boolean | null | undefined }) => {
+ 1239|                     const warn = val === null && days21 !== null && days21 <= 21 && days21 > 0
+ 1240|                     const over = val === null && days21 !== null && days21 <= 0
+ 1241|                     return (
+ 1242|                       <div className={`flex items-center gap-3 flex-wrap rounded-lg px-3 py-2 ${val === true ? 'bg-green-950/40 border border-green-800' : warn ? 'bg-orange-950/50 border border-orange-700' : 'bg-slate-800/50 border border-slate-700'}`}>
+ 1243|                         <span className="text-sm text-slate-300 font-medium">{label}:</span>
+ 1244|                         {([
+ 1245|                           { v: null,  txt: '笶・譛ｪ騾｣謳ｺ',  cls: 'bg-slate-600 text-slate-300 hover:bg-slate-500' },
+ 1246|                           { v: true,  txt: '笨・騾｣謳ｺ貂医∩', cls: 'bg-green-700 text-green-100 hover:bg-green-600' },
+ 1247|                           { v: false, txt: '筐・荳崎ｦ・,    cls: 'bg-slate-700 text-slate-400 hover:bg-slate-600' },
+ 1248|                         ] as { v: boolean|null; txt: string; cls: string }[]).map(({ v, txt, cls }) => {
+ 1249|                           const active = val === v
+ 1250|                           return <button key={txt} onClick={() => patch(it.id, { [field]: v })}
+ 1251|                             className={`px-3 py-1 text-xs rounded-lg font-bold transition-colors border ${active ? `${cls} border-current` : 'bg-transparent border-slate-700 text-slate-500 hover:border-slate-500 hover:text-slate-300'}`}>{txt}</button>
+ 1252|                         })}
+ 1253|                         {val === null && warn && <span className="text-xs text-orange-300 animate-pulse font-bold">笞・・谿宮days21}譌･ 窶・騾｣謳ｺ險ｭ螳壹ｒ諤･縺・〒縺上□縺輔＞</span>}
+ 1254|                         {val === null && over  && <span className="text-xs text-red-300 animate-pulse font-bold">圷 譛滄剞雜・℃ 窶・騾｣謳ｺ譛ｪ螳御ｺ・/span>}
+ 1255|                         {val === null && days21 !== null && days21 > 30 && <span className="text-xs text-slate-500">谿宮days21}譌･・・0譌･蜑阪°繧峨い繝ｩ繝ｼ繝茨ｼ・/span>}
+ 1256|                         {val === null && (
+ 1257|                           <a href="https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit?gid=849864762#gid=849864762"
+ 1258|                             target="_blank" rel="noreferrer"
+ 1259|                             className={`text-xs px-2 py-0.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-700 text-purple-300 rounded whitespace-nowrap ${it.hearing_sheet_url ? '' : 'ml-auto'}`}>
+ 1260|                             搭 繝偵い繝ｪ繝ｳ繧ｰ髮帛ｽ｢
+ 1261|                           </a>

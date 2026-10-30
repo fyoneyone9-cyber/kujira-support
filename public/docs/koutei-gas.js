@@ -1,0 +1,173 @@
+/**
+ * 工程管理表 必要な工程だけコピー作成  [KOUTEI_GAS_V1 2026-10-29]
+ * ------------------------------------------------------------------
+ * 原本スプレッドシートを丸ごとコピーし、不要な行を削除する方式。
+ * 書式・色・条件付き書式・入力規則がそのまま残るので完全に一致する。
+ *
+ * ヒアリングシートと同じ仕組み。
+ *   dialog_koutei.html とセットで使うこと（片方だけ貼ると動かない）
+ *
+ * 【設置方法】
+ *   1. 工程管理表スプレッドシートを開く（自分のコピー）
+ *   2. 拡張機能 → Apps Script
+ *   3. コードを貼り付け、HTMLファイル dialog_koutei も作る
+ *   4. 保存 → スプレッドシートを再読み込み
+ */
+
+var KOUTEI_VERSION = 'K2 2026-10-29';
+
+/** 区分 -> 機材キー。区分列(C)の値で判定する。 */
+var CAT_KEYS = {
+  '01.\u5171\u901a': 'always',                       // 共通
+  '02.\u88dc\u52a9\u91d1': 'hojokin',                // 補助金
+  '03.\u30c1\u30a7\u30c3\u30af\u30a4\u30f3\u30b7\u30b9\u30c6\u30e0': 'always',
+  '04.PMS': 'pms',
+  '05.\u30ab\u30fc\u30c9\u30ad\u30fc': 'cardkey',
+  '06.\u30b9\u30de\u30fc\u30c8\u30ed\u30c3\u30af': 'smartlock',
+  '07.\u30ad\u30fc\u30dc\u30c3\u30af\u30b9': 'keybox',
+  '08.KIOSK': 'kiosk',
+  '09.\u5353\u4e0a KIOSK': 'kiosk_desk',
+  '09.\u5353\u4e0aKIOSK': 'kiosk_desk',
+  '10.\u30eb\u30fc\u30e0\u30bf\u30d6\u30ec\u30c3\u30c8': 'roomtablet',
+  '11.Surface': 'surface',
+  '12.\u30bf\u30d6\u30ec\u30c3\u30c8': 'tablet',
+  '13.P400': 'p400',
+  '14.PayCube': 'paycube',
+  '15.PayPay': 'paypay',
+  '16.\u30b9\u30de\u30db\u30ab\u30fc\u30c9\u6c7a\u6e08': 'sumaho',
+  '17.\u30d1\u30b9\u30dd\u30fc\u30c8\u30ea\u30fc\u30c0\u30fc': 'passport'
+};
+
+/** 区分の表記ゆれに備えたキーワード判定（CAT_KEYS に無い場合の保険） */
+var CAT_KEYWORDS = [
+  ['\u5171\u901a', 'always'],
+  ['\u30c1\u30a7\u30c3\u30af\u30a4\u30f3\u30b7\u30b9\u30c6\u30e0', 'always'],
+  ['\u88dc\u52a9\u91d1', 'hojokin'],
+  ['PMS', 'pms'],
+  ['\u30ab\u30fc\u30c9\u30ad\u30fc', 'cardkey'],
+  ['\u30b9\u30de\u30fc\u30c8\u30ed\u30c3\u30af', 'smartlock'],
+  ['\u30ad\u30fc\u30dc\u30c3\u30af\u30b9', 'keybox'],
+  ['\u5353\u4e0a', 'kiosk_desk'],
+  ['KIOSK', 'kiosk'],
+  ['\u30eb\u30fc\u30e0\u30bf\u30d6\u30ec\u30c3\u30c8', 'roomtablet'],
+  ['Surface', 'surface'],
+  ['\u30bf\u30d6\u30ec\u30c3\u30c8', 'tablet'],
+  ['P400', 'p400'],
+  ['PayCube', 'paycube'],
+  ['PayPay', 'paypay'],
+  ['\u30b9\u30de\u30db\u30ab\u30fc\u30c9', 'sumaho'],
+  ['\u30d1\u30b9\u30dd\u30fc\u30c8', 'passport']
+];
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('\ud83d\uddc2 \u5de5\u7a0b\u7ba1\u7406')
+    .addItem('\u5fc5\u8981\u306a\u5de5\u7a0b\u3060\u3051\u30b3\u30d4\u30fc\u4f5c\u6210', 'showKouteiDialog')
+    .addSeparator()
+    .addItem('\ud83d\udd11 \u6a29\u9650\u3092\u627f\u8a8d\u3059\u308b\uff08\u521d\u56de\u306e\u307f\uff09', 'checkKouteiAuth')
+    .addToUi();
+}
+
+function getKouteiVersion() {
+  return KOUTEI_VERSION;
+}
+
+function checkKouteiAuth() {
+  var ui = SpreadsheetApp.getUi();
+  var n = SpreadsheetApp.getActiveSpreadsheet().getSheets().length;
+  ui.alert('\u6a29\u9650\u306e\u72b6\u614b',
+    'version: ' + KOUTEI_VERSION + '\nsheets: ' + n, ui.ButtonSet.OK);
+}
+
+function showKouteiDialog() {
+  var html = HtmlService.createHtmlOutputFromFile('dialog_koutei')
+    .setWidth(440).setHeight(600);
+  SpreadsheetApp.getUi().showModalDialog(html,
+    '\u5fc5\u8981\u306a\u5de5\u7a0b\u3060\u3051\u30b3\u30d4\u30fc\u4f5c\u6210');
+}
+
+/** 区分の文字列から機材キーを求める */
+function catToKey(cat) {
+  if (!cat) return null;
+  var c = String(cat).trim();
+  if (CAT_KEYS[c]) return CAT_KEYS[c];
+  for (var i = 0; i < CAT_KEYWORDS.length; i++) {
+    if (c.indexOf(CAT_KEYWORDS[i][0]) >= 0) return CAT_KEYWORDS[i][1];
+  }
+  return null;   // 未知の区分は残す（消して困るより残して確認）
+}
+
+/** 工程シートを探す（名前に「工程」を含む最初のシート） */
+function findKouteiSheet(ss) {
+  var sheets = ss.getSheets();
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].getName().indexOf('\u5de5\u7a0b') >= 0) return sheets[i];
+  }
+  return sheets[0];
+}
+
+/** この原本にある区分の一覧を返す（ダイアログが表示に使う） */
+function getKouteiCategories() {
+  var sh = findKouteiSheet(SpreadsheetApp.getActiveSpreadsheet());
+  var last = sh.getLastRow();
+  if (last < 4) return [];
+  var vals = sh.getRange(1, 3, last, 1).getValues();   // C列
+  var seen = {}, out = [];
+  for (var i = 3; i < vals.length; i++) {
+    var c = String(vals[i][0] || '').trim();
+    if (!c || seen[c]) continue;
+    seen[c] = true;
+    out.push({ name: c, key: catToKey(c) });
+  }
+  return out;
+}
+
+/**
+ * 必要な工程だけ残したコピーを作る。
+ * @param {Object} p {title, client, property, due, cats:[残す区分名...]}
+ */
+function createKouteiCopy(p) {
+  var src = SpreadsheetApp.getActiveSpreadsheet();
+  var keep = {};
+  (p.cats || []).forEach(function (c) { keep[c] = true; });
+
+  var name = '\u5de5\u7a0b\u7ba1\u7406_' + (p.client || '') + '_' +
+    Utilities.formatDate(new Date(), 'JST', 'yyyyMMdd');
+  var copy = src.copy(name);
+  var sh = findKouteiSheet(copy);
+  var last = sh.getLastRow();
+  var vals = sh.getRange(1, 3, last, 1).getValues();
+
+  // [V3] 削除対象の行番号を集める（1始まり）
+  //   区分が空の行はヘッダや区切りなので残す。
+  var del = [];
+  for (var i = 3; i < vals.length; i++) {
+    var c = String(vals[i][0] || '').trim();
+    if (!c) continue;
+    if (!keep[c]) del.push(i + 1);
+  }
+
+  // [V3] 下から1行ずつ確実に削除する。
+  //   以前は連続行をまとめていたが、インデックス操作を誤って
+  //   1行おきに取りこぼしていた（キーボックス等が残る原因）。
+  //   100行程度なので速度より確実性を優先する。
+  var removed = 0;
+  for (var k = del.length - 1; k >= 0; k--) {
+    sh.deleteRow(del[k]);
+    removed++;
+  }
+
+  // 案件情報を差し込む（1-2行目）
+  try {
+    if (p.client) sh.getRange(1, 7).setValue(p.client);
+    if (p.property) sh.getRange(2, 7).setValue(p.property);
+    if (p.due) sh.getRange(1, 6).setValue(p.due);
+  } catch (e) {}
+
+  return {
+    url: copy.getUrl(),
+    name: name,
+    kept: sh.getLastRow() - 3,
+    removed: removed
+  };
+}

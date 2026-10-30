@@ -1,0 +1,42 @@
+﻿  770|             {rebuildState === 'success' && '笨・蜿肴丐螳御ｺ・}
+  771|             {rebuildState === 'failed' && '笶・繝薙Ν繝牙､ｱ謨・}
+  772|             {rebuildState === 'idle' && '肌 譖ｴ譁ｰ繧貞渚譏'}
+  773|           </button>
+  774|           {isStale && <span className="text-xs text-amber-400 font-bold animate-pulse">笞・・譛ｪ蜿肴丐縺ｮ螟画峩縺ゅｊ</span>}
+  775|           <a href="https://dms.and-iot.jp/admin/support/login/" target="_blank" rel="noreferrer"
+  776|             className="px-3 py-1 text-sm font-medium bg-sky-700 hover:bg-sky-600 text-white rounded-lg transition-colors">
+  777|             迫 DMS繝ｭ繧ｰ繧､繝ｳ
+  778|           </a>
+  779|           <a href="https://docs.google.com/spreadsheets/d/1FxK4x534LV2sGY54KKtbow1W6iLT0Z_YTzg_R8ba8Go/edit?gid=1821350545#gid=1821350545" target="_blank" rel="
+  780|             className="px-3 py-1 text-sm font-medium bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg transition-colors">
+  781|             投 IoT繧ｹ繝励Ξ繝・ラ繧ｷ繝ｼ繝・
+  782|           </a>
+  783|         </div>
+  784|         <p className="text-slate-400 text-base mt-1">邏榊刀莠亥ｮ壽律縺瑚ｿ代＞繧ゅ・縺九ｉ閾ｪ蜍輔〒荳贋ｽ崎｡ｨ遉ｺ縲・SV繧貞叙繧願ｾｼ繧薙〒譛譁ｰ蛹悶＠縺ｦ縺上□縺輔＞縲・/p>
+  785|       </div>
+  786| 
+  787|       <div className="flex flex-wrap gap-3 mb-4 text-sm">
+  788|         <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
+  789|           <span className="text-slate-400">逋ｻ骭ｲ莉ｶ謨ｰ</span>
+  790|           <span className="font-bold text-white">{stats ? `${stats.total}莉ｶ` : '...'}</span>
+  791|         </div>
+  792|         {(() => {
+  793|           const hoursAgo = stats?.lastImport ? (Date.now() - new Date(stats.lastImport).getTime()) / 3600000 : null
+  794|           const isAlert = hoursAgo !== null && hoursAgo >= 24
+  795|           return (
+  796|             <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${isAlert ? 'bg-red-950/80 border-red-400 animate-pulse' : 'bg-slate-800 border
+  797|               {isAlert && <span className="text-lg">笞・・/span>}
+  798|               <span className={isAlert ? 'text-red-300' : 'text-slate-400'}>譛邨ょ叙霎ｼ</span>
+  799|               <span className={`font-bold ${isAlert ? 'text-red-200' : 'text-white'}`}>
+  800|                 {stats?.lastImport ? new Date(stats.lastImport).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
+  801|               </span>
+  802|               {isAlert && <span className="text-red-300 text-xs font-medium">{Math.floor(hoursAgo)}譎る俣譛ｪ蜿冶ｾｼ</span>}
+  803|             </div>
+  804|           )
+  805|         })()}
+  806|       </div>
+  807| 
+  808|       {(overdue.length > 0 || critical.length > 0 || urgent.length > 0) && filter === 'alert' && (
+  809|         <div className="mb-6 space-y-3">
+  810|           {overdue.length > 0 && (
+  811|             <div className="flex items-center gap-3 px-5 py-4 bg-red-950/80 border border-red-400 rounded-xl animate-pulse">

@@ -1,0 +1,63 @@
+﻿=== ltWarnings.push / cardAlerts.push ===
+  978| if (!it.slack_url && !it.dashboard_todos?.['slack_url_skip']) ltWarnings.push('Slack繝ｪ繝ｳ繧ｯ縺袈RL繧ｻ繧ｯ繧ｷ繝ｧ繝ｳ縺ｫ譛ｪ逋ｻ骭ｲ')
+  979| if (!it.process_sheet_url && !it.dashboard_todos?.['process_sheet_url_skip']) ltWarnings.push('蟾･遞玖｡ｨ繝ｪ繝ｳ繧ｯ縺梧悴逋ｻ骭ｲ')
+  980| if (!it.hearing_sheet_url && !it.dashboard_todos?.['hearing_sheet_url_skip']) ltWarnings.push('繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医Μ繝ｳ繧ｯ縺梧悴逋ｻ骭ｲ')
+  987| if (days < 0) ltWarnings.push(`${name}・壽悄髯占ｶ・℃・医Μ繝ｼ繝峨ち繧､繝${lt}譌･・荏)
+  988| else if (days < lt) ltWarnings.push(`${name}・壽ｮ・{days}譌･ 窶・繝ｪ繝ｼ繝峨ち繧､繝${lt}譌･縲∽ｻ翫☆縺千匱豕ｨ繧蛋)
+  992| if (days < 0) ltWarnings.push(`JIT繝懊ャ繧ｯ繧ｹ・壽悄髯占ｶ・℃・医Μ繝ｼ繝峨ち繧､繝${jitDays}譌･・荏)
+  993| else if (days < jitDays) ltWarnings.push(`JIT繝懊ャ繧ｯ繧ｹ・壽ｮ・{days}譌･ 窶・隘ｿ豼・ｼｸ騾・{jitDays}譌･縲∽ｻ翫☆縺千匱豕ｨ繧蛋)
+ 1002| if (days < 0) cardAlerts.push({ label: `圷 邏肴悄${-days}譌･雜・℃`, target: '' })
+ 1003| else if (days <= 3) cardAlerts.push({ label: `竢ｰ 邏肴悄縺ｾ縺ｧ谿・{days}譌･`, target: '' })
+ 1004| if (it.jitbox_ordered === null || it.jitbox_ordered === undefined) cardAlerts.push({ label: '逃 JIT繝懊ャ繧ｯ繧ｹ譛ｪ逋ｺ豕ｨ', target: jitSec })
+ 1008| if (wmiss) cardAlerts.push({ label: '孫 菴懈･ｭ蜩｡諠・ｱ 譛ｪ蜈･蜉・, target: workerSec })
+ 1012| if (payFirst && ps !== '蜈･驥醍｢ｺ隱肴ｸ医∩' && ps !== '蜈･驥台ｸ崎ｦ・ｼ育┌蜆滂ｼ・) cardAlerts.push({ label: '腸 蜈･驥第悴遒ｺ隱搾ｼ・ayCube/繧ｭ繝ｼ繝懊ャ繧ｯ繧ｹ逋ｺ豕ｨ荳榊庄・・, target: paySec })
+ 1013| if (equipItems.some(e => e.name === 'PayCube' && hasQty(e.value)) && !['逋ｺ豕ｨ貂医∩','蜈･闕ｷ螻･豁ｴ','逋ｺ騾∵ｸ医∩','邏榊刀螳御ｺ・,'險ｭ螳壼ｮ御ｺ・].includes(getStatus('PayCube') || '')) cardAlerts.push({ label: '諜 Pa
+ 1014| if (!it.hearing_sheet_url && !it.dashboard_todos?.['hearing_sheet_url_skip']) cardAlerts.push({ label: '搭 繝偵い繝ｪ繝ｳ繧ｰ譛ｪ逋ｻ骭ｲ', target: urlSec })
+ 1015| if (!it.process_sheet_url && !it.dashboard_todos?.['process_sheet_url_skip']) cardAlerts.push({ label: '搭 蟾･遞玖｡ｨ譛ｪ逋ｻ骭ｲ', target: urlSec })
+ 1016| if (!it.slack_url && !it.dashboard_todos?.['slack_url_skip']) cardAlerts.push({ label: '町 Slack譛ｪ逋ｻ骭ｲ', target: urlSec })
+ 1017| if (equipItems.some(e => /pms|airhost|螳ｿ豕掛繝帙ユ繝ｫ邂｡逅・i.test(e.name || '') || /pms|airhost/i.test(e.value || '')) && it.pms_linked === null) cardAlerts.push({ label: '妾 PMS譛ｪ騾｣謳ｺ', targ
+ 1018| if (equipItems.some(e => /繧ｹ繝槭・繝医Ο繝・け|smart.?lock|lock/i.test(e.name || '')) && it.smartlock_linked === null) cardAlerts.push({ label: '柏 繧ｹ繝槭・繝医Ο繝・け譛ｪ騾｣謳ｺ', target: integSec })
+
+=== ltWarnings 謠冗判驛ｨ ===
+ 1058|                 {ltWarnings.length > 0 && (
+ 1059|                   <div className="bg-red-950/80 border border-red-500 rounded-lg px-3 py-2 space-y-1.5">
+ 1060|                     {ltWarnings.map((w, i) => {
+ 1061|                       const isProcess  = w.includes('蟾･遞玖｡ｨ')
+ 1062|                       const isHearing  = w.includes('繝偵い繝ｪ繝ｳ繧ｰ')
+ 1063|                       const tplUrl = isProcess
+ 1064|                         ? 'https://docs.google.com/spreadsheets/d/1GiEvK-KLB7rl1lrCn-Llgl9H6W4m2PuZJXby2RqIuMc/edit?gid=159741708#gid=159741708'
+ 1065|                         : isHearing
+ 1066|                         ? 'https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit?gid=849864762#gid=849864762'
+ 1067|                         : null
+ 1068|                       const isLinkWarn = w.includes('Slack') || isProcess || isHearing
+ 1069|                       return (
+ 1070|                         <div key={i} className="flex items-center gap-2 flex-wrap">
+ 1071|                           <p className="text-red-300 text-sm font-bold animate-pulse">圷 {w}</p>
+ 1072|                           {isLinkWarn && (
+ 1073|                             <button onClick={() => jumpToUrlSection(it.id)}
+ 1074|                               className="text-xs px-2 py-0.5 bg-blue-700 hover:bg-blue-600 text-blue-100 rounded whitespace-nowrap flex-shrink-0 font-bold">
+ 1075|                               桃 蜈･蜉帙∈繧ｸ繝｣繝ｳ繝・
+ 1076|                             </button>
+ 1077|                           )}
+ 1078|                           {tplUrl && (
+ 1079|                             <a href={tplUrl} target="_blank" rel="noreferrer"
+ 1080|                               className="text-xs px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded whitespace-nowrap flex-shrink-0">
+ 1081|                               塘 髮帛ｽ｢繧帝幕縺・
+ 1082|                             </a>
+ 1083|                           )}
+ 1084|                         </div>
+ 1085|                       )
+ 1086|                     })}
+ 1087|                   </div>
+ 1088|                 )}
+ 1089| 
+ 1090|                 <div className="text-base text-slate-300 space-y-1">
+ 1091|                   <p>邏榊刀莠亥ｮ壽律:{' '}
+ 1092|                     <span className={`font-bold ${level === 'overdue' || level === 'critical' ? 'text-red-300' : level === 'urgent' ? 'text-orange-300' : level === 'warning' ?
+ 1093|                       {it.delivery_due_date}
+ 1094|                     </span>
+ 1095|                     {it.status !== 'done' && <span className="text-slate-400"> ・・days < 0 ? `${-days}譌･雜・℃` : `谿・${days}譌･`}・・/span>}
+ 1096|                   </p>
+ 1097|                   {/* 菴懈･ｭ蜩｡菴懈･ｭ譌･: 菴懈･ｭ蜩｡縺悟ｿ・ｦ√↑譯井ｻｶ縺ｮ縺ｿ陦ｨ遉ｺ・井ｸ崎ｦ√↑繧牙・縺輔↑縺・ｼ・*/}
+ 1098|                   {workerNeeded && (
+ 1099|                     <p>孫 菴懈･ｭ蜩｡菴懈･ｭ譌･:{' '}

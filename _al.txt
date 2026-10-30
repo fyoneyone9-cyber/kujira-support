@@ -1,0 +1,32 @@
+﻿ 1288|                             className={`px-3 py-1 text-xs rounded-lg font-bold transition-colors border ${active ? `${cls} border-current` : 'bg-transparent bor
+ 1289|                         })}
+ 1290|                         {val === null && warn && <span className="text-xs text-orange-300 animate-pulse font-bold">笞・・谿宮days21}譌･ 窶・騾｣謳ｺ險ｭ螳壹ｒ諤･縺・〒縺上□縺輔＞</span>}
+ 1291|                         {val === null && over  && <span className="text-xs text-red-300 animate-pulse font-bold">圷 譛滄剞雜・℃ 窶・騾｣謳ｺ譛ｪ螳御ｺ・/span>}
+ 1292|                         {val === null && days21 !== null && days21 > 30 && <span className="text-xs text-slate-500">谿宮days21}譌･・・0譌･蜑阪°繧峨い繝ｩ繝ｼ繝茨ｼ・/span>}
+ 1293|                         {val === null && (
+ 1294|                           <a href="https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit?gid=849864762#gid=849864762"
+ 1295|                             target="_blank" rel="noreferrer"
+ 1296|                             className={`text-xs px-2 py-0.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-700 text-purple-300 rounded whitespace-now
+ 1297|                             搭 繝偵い繝ｪ繝ｳ繧ｰ髮帛ｽ｢
+ 1298|                           </a>
+ 1299|                         )}
+ 1300|                         {/* 豁｣隕上ヲ繧｢繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝・RL縺悟・蜉帶ｸ医∩縺ｪ繧蛾幕縺上・繧ｿ繝ｳ */}
+ 1301|                         {it.hearing_sheet_url && (
+ 1302|                           <a href={it.hearing_sheet_url} target="_blank" rel="noreferrer"
+ 1303|                             className="ml-auto text-xs px-2 py-0.5 bg-blue-700 hover:bg-blue-600 border border-blue-500 text-blue-100 rounded whitespace-nowrap 
+ 1304|                             塘 繝偵い繝ｪ繝ｳ繧ｰ繧ｷ繝ｼ繝医ｒ髢九￥
+ 1305|                           </a>
+ 1306|                         )}
+ 1307|                       </div>
+ 1308|                     )
+ 1309|                   }
+ 1310|                   // 繝ｩ繝吶Ν縺ｯ繧ｷ繝ｼ繝医・蛟､繧偵◎縺ｮ縺ｾ縺ｾ菴ｿ縺・ｼ・ame 縺ｨ value 繧堤ｵ仙粋縲・㍾隍・賜髯､・・
+ 1311|                   const joinLabel = (eq: Equipment) => {
+ 1312|                     const parts = [eq.name, eq.value].filter(Boolean)
+ 1313|                     // name 縺ｨ value 縺悟酔縺伜・螳ｹ繧貞性繧蝣ｴ蜷医・ value 縺縺台ｽｿ縺・
+ 1314|                     if (parts.length === 2 && (parts[0]!.includes(parts[1]!) || parts[1]!.includes(parts[0]!))) return parts[1]!
+ 1315|                     return parts.join('・・) + (parts.length > 1 ? '・・ : '')
+ 1316|                   }
+ 1317|                   const hearingUrl = it.hearing_sheet_url
+ 1318|                   const hearingSkip = it.dashboard_todos?.['hearing_sheet_url_skip']
+ 1319| 

@@ -7,6 +7,14 @@
   --background-start-rgb: 10, 15, 30;
 }
 
+/* 全体的に文字が小さいとの声が多かったため、ルートのフォントサイズを底上げする。
+   Tailwindのtextユーティリティはすべてremベースなので、ここを上げるだけで
+   text-xs〜text-4xl等、サイト全体のテキストが比例して大きくなる（個別クラスを
+   一つずつ直す必要がなく、一貫したスケールを保てる）。 */
+html {
+  font-size: 18px; /* デフォルト16px→18px（約1.125倍） */
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-start-rgb));

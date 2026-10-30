@@ -1,0 +1,4 @@
+[2026/10/23 11:08:18.83] Rebuild started 
+[2026/10/23 11:08:45.13] Build finished with exit code 0 
+[2026/10/23 11:08:45.13] Build succeeded. Restarting server... 
+[2026/10/23 11:08:46.08] Restart triggered. 

@@ -13,7 +13,7 @@ export default async function DashboardPage() {
       <PayCubeAlertBanner />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">ダッシュボード</h1>
-        <p className="text-slate-400 text-sm mt-1">ようこそ、{user?.email}</p>
+        <p className="text-slate-400 text-base mt-1">ようこそ、{user?.email}</p>
       </div>
 
 
@@ -26,27 +26,27 @@ export default async function DashboardPage() {
         <a href="https://attendance-app-prod-716327310989.asia-northeast1.run.app/login" target="_blank" rel="noopener noreferrer"
           className="flex flex-col items-center gap-1.5 px-4 py-4 bg-green-700 hover:bg-green-600 border border-green-500 rounded-2xl transition-colors group">
           <span className="text-2xl">🕐</span>
-          <span className="text-sm font-bold text-white">勤怠管理</span>
+          <span className="text-base font-bold text-white">勤怠管理</span>
         </a>
         <a href="https://mdjack.maildealer.jp/index.php" target="_blank" rel="noopener noreferrer"
           className="flex flex-col items-center gap-1.5 px-4 py-4 bg-blue-700 hover:bg-blue-600 border border-blue-500 rounded-2xl transition-colors group">
           <span className="text-2xl">📨</span>
-          <span className="text-sm font-bold text-white">MailDealer</span>
+          <span className="text-base font-bold text-white">MailDealer</span>
         </a>
         <a href="https://movfax.lcloud.jp/" target="_blank" rel="noopener noreferrer"
           className="flex flex-col items-center gap-1.5 px-4 py-4 bg-slate-600 hover:bg-slate-500 border border-slate-500 rounded-2xl transition-colors group">
           <span className="text-2xl">📠</span>
-          <span className="text-sm font-bold text-white">MOVfax</span>
+          <span className="text-base font-bold text-white">MOVfax</span>
         </a>
         <a href="https://d1zlma8f7wwwsg.cloudfront.net/login" target="_blank" rel="noopener noreferrer"
           className="flex flex-col items-center gap-1.5 px-4 py-4 bg-cyan-700 hover:bg-cyan-600 border border-cyan-500 rounded-2xl transition-colors group">
           <span className="text-2xl">🐋</span>
-          <span className="text-sm font-bold text-white">くじらCRM</span>
+          <span className="text-base font-bold text-white">くじらCRM</span>
         </a>
         <a href="https://mail.google.com/mail/u/0/#inbox" target="_blank" rel="noopener noreferrer"
           className="flex flex-col items-center gap-1.5 px-4 py-4 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-2xl transition-colors group">
           <span className="text-2xl">📧</span>
-          <span className="text-sm font-bold text-white">Gmail</span>
+          <span className="text-base font-bold text-white">Gmail</span>
         </a>
       </div>
 
@@ -55,86 +55,86 @@ export default async function DashboardPage() {
         <a href="https://personal-support-mocha.vercel.app/dashboard" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-purple-500 rounded-xl transition-colors group">
           <span className="text-lg">🧑‍💼</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">パーソナル</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">パーソナル</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="/teleapo"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-500 rounded-xl transition-colors group">
           <span className="text-lg">📞</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">テレアポ</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">テレアポ</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://app.slack.com/client/TB82LHSPM/CB82LJ1B5" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-purple-500 rounded-xl transition-colors group">
           <span className="text-lg">💬</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Slack（くじら）</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">Slack（くじら）</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://app.slack.com/client/T07G6EHESKG/C07GD3LRMD0" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-purple-500 rounded-xl transition-colors group">
           <span className="text-lg">💬</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Slack（個人）</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">Slack（個人）</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://vercel.com/nextralabos" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-white rounded-xl transition-colors group">
           <span className="text-lg">▲</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Vercel</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">Vercel</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-blue-400 rounded-xl transition-colors group">
           <span className="text-lg">✨</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Gemini</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">Gemini</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://claude.ai/new" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-400 rounded-xl transition-colors group">
           <span className="text-lg">🤖</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Claude</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">Claude</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-green-400 rounded-xl transition-colors group">
           <span className="text-lg">💡</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">ChatGPT</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">ChatGPT</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://www.genspark.ai/agents?type=ai_chat" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-pink-400 rounded-xl transition-colors group">
           <span className="text-lg">⚡</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Genspark</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">Genspark</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://docs.google.com/spreadsheets/d/146Tv1ZzNAH3qqjb4WdVZCxdZI4edQ0U5pr3UrYZdiXU/edit?gid=33099426#gid=33099426" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-green-400 rounded-xl transition-colors group">
           <span className="text-lg">🗝️</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">カードキー物件一覧</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">カードキー物件一覧</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://kujira-device-agency.notion.site/2164918ccaa6802fa6fccae9c06eda4c" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-yellow-400 rounded-xl transition-colors group">
           <span className="text-lg">🔧</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">トラブルシューティング</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">トラブルシューティング</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://docs.google.com/spreadsheets/d/1Da59fLXoe2YW8WjI3YAKLMiXUU0xZquB0cSreRsPZGQ/edit?gid=1606037974#gid=1606037974" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-teal-400 rounded-xl transition-colors group">
           <span className="text-lg">📦</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">【管理】スマート宅配ボックス</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">【管理】スマート宅配ボックス</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://docs.google.com/spreadsheets/d/1m8m61SvXsChDYmKUIlHG_IBsIlDQduXqCOQ91N7_QU4/edit?gid=580414831#gid=580414831" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-400 rounded-xl transition-colors group">
           <span className="text-lg">📋</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">顧客契約管理</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">顧客契約管理</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
         <a href="https://docs.google.com/spreadsheets/d/1inJUZKGhj_1kQPN7EXtAkhptsvmOaxaDzobubuUUN58/edit?gid=924515289#gid=924515289" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-cyan-400 rounded-xl transition-colors group">
           <span className="text-lg">🚚</span>
-          <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">発送・集荷</span>
-          <span className="text-slate-500 text-xs">↗</span>
+          <span className="text-base font-medium text-slate-300 group-hover:text-white transition-colors">発送・集荷</span>
+          <span className="text-slate-500 text-sm">↗</span>
         </a>
       </div>
 
@@ -161,7 +161,7 @@ export default async function DashboardPage() {
             >
               <span className="text-xl">{link.icon}</span>
               <span className="text-base text-slate-200 group-hover:text-white transition-colors font-medium">{link.label}</span>
-              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-xs">↗</span>
+              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-sm">↗</span>
             </a>
           ))}
         </div>
@@ -187,7 +187,7 @@ export default async function DashboardPage() {
             >
               <span className="text-xl">{link.icon}</span>
               <span className="text-base text-slate-200 group-hover:text-white transition-colors font-medium">{link.label}</span>
-              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-xs">↗</span>
+              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-sm">↗</span>
             </a>
           ))}
         </div>
@@ -213,7 +213,7 @@ export default async function DashboardPage() {
             >
               <span className="text-xl">{link.icon}</span>
               <span className="text-base text-slate-200 group-hover:text-white transition-colors font-medium">{link.label}</span>
-              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-xs">↗</span>
+              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-sm">↗</span>
             </a>
           ))}
         </div>
@@ -242,7 +242,7 @@ export default async function DashboardPage() {
             >
               <span className="text-3xl">{link.icon}</span>
               <span className="text-base text-slate-200 group-hover:text-white transition-colors font-semibold">{link.label}</span>
-              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-sm">↗</span>
+              <span className="ml-auto text-slate-500 group-hover:text-slate-300 transition-colors text-base">↗</span>
             </a>
           ))}
         </div>

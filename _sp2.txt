@@ -1,0 +1,3 @@
+﻿const TABLET_PAT = /繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ|room.?tablet/i
+const PRINTER_PAT= /繝励Μ繝ｳ繧ｿ|printer/i
+   const TABLET_PAT = /繝ｫ繝ｼ繝繧ｿ繝悶Ξ繝・ヨ|room.?tablet/i

@@ -1,0 +1,10 @@
+﻿TMPL螳夂ｾｩ:
+TMPL = 'https://docs.google.com/spreadsheets/d/16uW0WLwx-H-KWpCl2zHDstRuQsfcnFyLyLxbRV-_s5E/edit'
+                  const hearingSheets: { label: string; reason: string }[] = [
+   
+
+copy繝ｪ繝ｳ繧ｯ:
+e font-bold flex items-center justify-center text-xs">1</span>
+                                              <span>
+                                                <a href={TMPL.replace(/\/edit.*$/, '/copy')} target="_blank" rel="noreferrer"
+                  

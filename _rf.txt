@@ -1,0 +1,4 @@
+﻿(1) hearing-gas.js: frontci 蜑企勁
+(2) dialog: 繝√ぉ繝・け繝懊ャ繧ｯ繧ｹ縺ｨKEYS縺九ｉ蜑企勁
+(3) page.tsx: equips 縺九ｉ蜑企勁
+(4) hearingSheetDefs.ts: 蜑企勁縲よｮ九ｊ 16 繧ｷ繝ｼ繝・

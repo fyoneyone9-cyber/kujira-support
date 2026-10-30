@@ -1,0 +1,15 @@
+﻿python.exe : Traceback (most recent call last):
+発生場所 行:1 文字:36
++ ... ra-support; & "C:\Users\fyone\anaconda3\python.exe" -X utf8 _test_del ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\GensparkClaw\kujira-support\_test_del2.py", line 12, in <module>
+    rows = json.loads(body)
+  File "C:\Users\fyone\anaconda3\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Users\fyone\anaconda3\Lib\json\decoder.py", line 348, in decode
+    raise JSONDecodeError("Extra data", s, end)
+json.decoder.JSONDecodeError: Extra data: line 1378 column 1 (char 16921)

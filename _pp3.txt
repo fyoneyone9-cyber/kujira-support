@@ -1,0 +1,31 @@
+﻿start: [1797]
+ 1797| 30| {/* [PAYPAY_APPLY_LOG_V2 2026-10-30] PayPay逕ｳ隲九・譛臥┌縺ｨ譌･莉倥よｩ滓攝蜷阪↓ PayPay 縺檎┌縺・◆繧∵ｩ滓攝谺・〒縺ｯ縺ｪ縺丞ｸｸ譎り｡ｨ遉ｺ縺吶ｋ縲・
+ 1798| 34| PayPay縺ｯ螂醍ｴ・↓1繝ｶ譛亥濠縺九°繧九・縺ｧ縲√＞縺､逕ｳ隲九＠縺溘°縺檎ｴ肴悄縺ｫ逶ｴ邨舌☆繧九・*/}
+ 1799| 30| {(() => {
+ 1800| 32| const td = it.dashboard_todos || {}
+ 1801| 32| const at = (td['paypay_applied_at'] as string) || ''
+ 1802| 32| const mid = (td['paypay_mid'] as string) || ''
+ 1803| 32| const memo = (td['paypay_apply_memo'] as string) || ''
+ 1804| 32| const today = () => new Date().toISOString().slice(0, 10)
+ 1805| 32| let days = -1
+ 1806| 32| if (at) {
+ 1807| 34| const dt = new Date(at)
+ 1808| 34| if (!isNaN(dt.getTime())) days = Math.floor((Date.now() - dt.getTime()) / 86400000)
+ 1809| 32| }
+ 1810| 32| return (
+ 1811| 34| <div className={`mb-1.5 rounded px-2 py-1.5 border-2 ${at ? 'bg-emerald-950/40 border-emerald-6
+ 1812| 36| <div className="flex items-center gap-2 flex-wrap">
+ 1813| 38| <span className="text-sm font-bold">PayPay逕ｳ隲・/span>
+ 1814| 38| {at ? (
+ 1815| 40| <>
+ 1816| 42| <span className="text-sm px-2 py-0.5 rounded bg-emerald-600 text-white font-bold">笨・逕ｳ隲区ｸ・/span>
+ 1817| 42| <span className="text-sm text-slate-200">
+ 1818| 44| {at}
+ 1819| 44| {days >= 0 && (
+ 1820| 46| <span className={days >= 45 ? 'text-emerald-400 ml-1' : 'text-amber-300 ml-1'}>
+ 1821| 48| ・・days}譌･邨碁℃{days < 45 ? ` / 逶ｮ螳・5譌･縺ｾ縺ｧ縺ゅ→${45 - days}譌･` : ' 繝ｻ螳御ｺ・ｦ玖ｾｼ縺ｿ'}・・
+ 1822| 46| </span>
+ 1823| 44| )}
+ 1824| 42| </span>
+ 1825| 40| </>
+ 1826| 38| ) : (

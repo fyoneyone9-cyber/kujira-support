@@ -4,19 +4,20 @@ import Link from 'next/link'
 export default async function ManualsPage({
   searchParams,
 }: {
-  searchParams: { q?: string; category?: string }
+  searchParams: Promise<{ q?: string; category?: string }>
 }) {
+  const { q, category } = await searchParams
   const supabase = await createClient()
   let query = supabase
     .from('manuals')
     .select('id, title, category, created_at, updated_at')
     .order('updated_at', { ascending: false })
 
-  if (searchParams.q) {
-    query = query.ilike('title', `%${searchParams.q}%`)
+  if (q) {
+    query = query.ilike('title', `%${q}%`)
   }
-  if (searchParams.category) {
-    query = query.eq('category', searchParams.category)
+  if (category) {
+    query = query.eq('category', category)
   }
 
   const { data: manuals } = await query
@@ -49,14 +50,14 @@ export default async function ManualsPage({
         <form method="GET" className="flex gap-3 flex-1">
           <input
             name="q"
-            defaultValue={searchParams.q}
+            defaultValue={q}
             placeholder="マニュアルを検索..."
             className="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
           {uniqueCategories.length > 0 && (
             <select
               name="category"
-              defaultValue={searchParams.category}
+              defaultValue={category}
               className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             >
               <option value="">すべてのカテゴリ</option>

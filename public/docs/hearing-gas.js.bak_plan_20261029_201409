@@ -1,0 +1,174 @@
+/**
+ * ヒアリングシート 必要シートだけコピー作成
+ * ------------------------------------------------------------------
+ * 雛形スプレッドシートを丸ごとコピーし、不要なシートを削除する方式。
+ * 書式・結合・色・列幅がすべて original のまま残るので完全に一致する。
+ *
+ * 【設置方法】
+ *   1. 雛形スプレッドシートを開く
+ *   2. 拡張機能 → Apps Script
+ *   3. 中身を全部消してこのコードを貼り付け
+ *   4. 保存（💾）
+ *   5. 雛形を再読み込み → メニューに「📋 ヒアリングシート」が出る
+ */
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('📋 ヒアリングシート')
+    .addItem('必要シートだけコピー作成', 'showDialog')
+    .addToUi();
+}
+
+/** 機材 → 必要シート の対応。ダッシュボードの判定と同じ。 */
+var EQUIP_SHEETS = {
+  pms:        ['PMS'],
+  smartlock:  ['スマートロック①', 'スマートロック②'],
+  cardkey:    ['カードキー'],
+  cylinder:   ['シリンダー錠'],
+  cash:       ['現金決済'],
+  p400:       ['端末カード決済'],
+  sumaho:     ['スマホカード決済'],
+  paypay:     ['PayPay決済'],
+  printer:    ['プリンタ'],
+  roomtablet: ['ルームタブレット'],
+  frontci:    ['フロントチェックイン'],
+  precheckin: ['事前チェックイン']
+};
+
+/** 常に残すシート */
+var ALWAYS = ['必須確認①', '必須確認②', '必須確認③'];
+
+function showDialog() {
+  var html = HtmlService.createHtmlOutputFromFile('dialog')
+    .setWidth(420).setHeight(560);
+  SpreadsheetApp.getUi().showModalDialog(html, '必要シートだけコピー作成');
+}
+
+/**
+ * 実際にコピーを作る。
+ * @param {Object} p {client, property, contact, due, equips:[key...]}
+ */
+function createCopy(p) {
+  var src = SpreadsheetApp.getActiveSpreadsheet();
+
+  // 残すシート名を決める
+  var keep = {};
+  ALWAYS.forEach(function (n) { keep[n] = true; });
+  (p.equips || []).forEach(function (k) {
+    (EQUIP_SHEETS[k] || []).forEach(function (n) { keep[n] = true; });
+  });
+
+  // 雛形を丸ごとコピー（書式・結合・色がそのまま残る）
+  var name = 'ヒアリングシート_' + (p.client || '') + '_' +
+    Utilities.formatDate(new Date(), 'JST', 'yyyyMMdd');
+  var copy = src.copy(name);
+
+  // 不要シートを削除
+  var removed = [];
+  copy.getSheets().forEach(function (sh) {
+    var n = sh.getName();
+    if (!keep[n]) {
+      try { copy.deleteSheet(sh); removed.push(n); } catch (e) {}
+    }
+  });
+
+  // 案件情報を自動入力（全シート）
+  var filled = 0;
+  try { filled = fillInfo(copy, p) || 0; } catch (e) {}
+
+  return {
+    url: copy.getUrl(),
+    name: name,
+    kept: Object.keys(keep).filter(function (n) {
+      return copy.getSheetByName(n) !== null;
+    }),
+    removed: removed,
+    filled: filled
+  };
+}
+
+/**
+ * 分かっている情報を全シートに書き込む。
+ * 「項目名を含む行」を探し、その行の回答欄に値を入れる。
+ * 既に値がある場合は上書きしない。
+ */
+function fillInfo(ss, p) {
+  var zip = '', addr = p.property || '';
+  var m = addr.match(/〒?\s*(\d{3}-?\d{4})/);
+  if (m) { zip = m[1]; addr = addr.replace(m[0], '').trim(); }
+
+  // シート名 -> [[項目名に含まれる語, 入れる値], ...]
+  // 上にあるものから順に照合し、最初に当たったものを使う。
+  var PLAN = {
+    '必須確認②': [
+      ['組織名',                         p.client],
+      ['メールアドレス（代表）',           p.email],
+      ['お電話番号（代表）',              p.tel],
+      ['DMSにログインされる方のお名前',    p.contact],
+      ['DMSにログインされる方のメールアドレス', p.email],
+      ['物件名',                         p.propertyName || addr],
+      ['物件の住所',                      addr],
+      ['物件の郵便番号',                  zip],
+      ['領収書に印字する電話番号',         p.tel],
+      ['緊急連絡先電話番号',              p.tel],
+      ['物件内にあるお部屋の総数',         p.rooms]
+    ],
+    '必須確認③': [
+      ['お部屋の総数', p.rooms]
+    ],
+    'PMS': [
+      ['PMSの名称', p.pms],
+      ['ご利用のPMS', p.pms]
+    ],
+    'カードキー': [
+      ['メーカーをご回答',  p.cardkeyMaker],
+      ['お名前',           p.contact],
+      ['携帯電話番号',      p.tel],
+      ['メールアドレス',    p.email]
+    ],
+    'PayPay決済': [
+      ['お名前',        p.contact],
+      ['メールアドレス', p.email]
+    ],
+    'スマートロック①': [
+      ['メーカー', p.lockMaker]
+    ]
+  };
+
+  var filled = 0;
+  for (var sheetName in PLAN) {
+    var sh = ss.getSheetByName(sheetName);
+    if (!sh) continue;
+    var last = sh.getLastRow(), lastCol = sh.getLastColumn();
+    if (last < 1 || lastCol < 1) continue;
+    var values = sh.getRange(1, 1, last, lastCol).getValues();
+
+    // 『ご回答欄』の列を探す（シートごとに違う）
+    var ansCol = 0;
+    for (var r = 0; r < Math.min(6, values.length); r++) {
+      for (var c = 0; c < values[r].length; c++) {
+        if (String(values[r][c]).indexOf('ご回答欄') >= 0) { ansCol = c + 1; break; }
+      }
+      if (ansCol) break;
+    }
+    if (!ansCol) continue;
+
+    var plan = PLAN[sheetName];
+    var usedRow = {};
+    for (var pi = 0; pi < plan.length; pi++) {
+      var key = plan[pi][0], val = plan[pi][1];
+      if (!val) continue;
+      for (var r2 = 0; r2 < values.length; r2++) {
+        if (usedRow[r2]) continue;
+        if (values[r2].join(' ').indexOf(key) < 0) continue;
+        var cell = sh.getRange(r2 + 1, ansCol);
+        if (!cell.getValue()) { cell.setValue(val); filled++; }
+        usedRow[r2] = true;
+        break;
+      }
+    }
+  }
+  return filled;
+}
+
+/** 旧版の名前での呼び出しにも対応 */

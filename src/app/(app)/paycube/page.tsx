@@ -162,7 +162,7 @@ export default function PayCubePage() {
       </div>
 
       {/* データステータスバー */}
-      <div className="flex flex-wrap gap-3 mb-4 text-sm">
+      <div className="flex flex-wrap gap-3 mb-4 text-base">
         <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
           <span className="text-slate-400">📦 登録件数</span>
           <span className="font-bold text-white">{stats ? `${stats.total}件` : '...'}</span>
@@ -197,7 +197,7 @@ export default function PayCubePage() {
               <span className="text-2xl">🚨</span>
               <div>
                 <p className="font-bold text-red-200 text-lg">緊急！{critical.length}件が2週間以内に期限切れ</p>
-                <p className="text-red-300 text-sm">即座に顧客連絡・保守システムへの更新登録が必要です</p>
+                <p className="text-red-300 text-base">即座に顧客連絡・保守システムへの更新登録が必要です</p>
               </div>
             </div>
           )}
@@ -206,7 +206,7 @@ export default function PayCubePage() {
               <span className="text-2xl">⚠️</span>
               <div>
                 <p className="font-bold text-orange-200">{urgent.length}件が1ヶ月以内に期限切れ</p>
-                <p className="text-orange-300 text-sm">顧客への連絡を開始してください</p>
+                <p className="text-orange-300 text-base">顧客への連絡を開始してください</p>
               </div>
             </div>
           )}
@@ -215,7 +215,7 @@ export default function PayCubePage() {
               <span className="text-2xl">📋</span>
               <div>
                 <p className="font-bold text-yellow-200">{warning.length}件が2ヶ月以内に期限切れ</p>
-                <p className="text-yellow-300 text-sm">準備を進めてください（無償保守の場合は顧客確認が必要）</p>
+                <p className="text-yellow-300 text-base">準備を進めてください（無償保守の場合は顧客確認が必要）</p>
               </div>
             </div>
           )}
@@ -226,29 +226,29 @@ export default function PayCubePage() {
       <div className="flex gap-3 mb-5 flex-wrap">
         <button
           onClick={() => setFilter('alert')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'alert' ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+          className={`px-4 py-2 rounded-lg text-base font-medium transition-colors ${filter === 'alert' ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
         >
           🔔 アラート対象のみ ({loading ? '...' : contracts.filter(c => getAlertLevel(c.end_date) !== 'ok').length})
         </button>
         <button
           onClick={() => setFilter('review')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'review' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+          className={`px-4 py-2 rounded-lg text-base font-medium transition-colors ${filter === 'review' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
         >
           🔍 要確認物件 (36)
         </button>
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+          className={`px-4 py-2 rounded-lg text-base font-medium transition-colors ${filter === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
         >
           📋 全件表示
         </button>
         <button
           onClick={() => fetch('/api/paycube/check-alerts').then(() => load())}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
+          className="px-4 py-2 rounded-lg text-base font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
         >
           🔄 手動チェック実行
         </button>
-        <label className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ml-auto ${importing ? 'bg-slate-600 text-slate-400' : 'bg-purple-700 hover:bg-purple-600 text-white'}`}>
+        <label className={`px-4 py-2 rounded-lg text-base font-medium transition-colors cursor-pointer ml-auto ${importing ? 'bg-slate-600 text-slate-400' : 'bg-purple-700 hover:bg-purple-600 text-white'}`}>
           {importing ? '⏳ 取込中...' : '📥 CSVで一括更新'}
           <input
             type="file"
@@ -278,13 +278,13 @@ export default function PayCubePage() {
         </label>
         <button
           onClick={() => exportCSV(contracts, filter)}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-teal-700 text-white hover:bg-teal-600 transition-colors"
+          className="px-4 py-2 rounded-lg text-base font-medium bg-teal-700 text-white hover:bg-teal-600 transition-colors"
         >
           📤 CSVエクスポート
         </button>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-green-700 text-white hover:bg-green-600 transition-colors"
+          className="px-4 py-2 rounded-lg text-base font-medium bg-green-700 text-white hover:bg-green-600 transition-colors"
         >
           ＋ 契約登録
         </button>
@@ -292,9 +292,9 @@ export default function PayCubePage() {
 
       {/* 取込結果 */}
       {importResult && (
-        <div className={`mb-3 px-4 py-3 rounded-lg text-sm font-medium ${importResult.startsWith('✅') ? 'bg-green-900/60 border border-green-600 text-green-200' : 'bg-red-900/60 border border-red-600 text-red-200'}`}>
+        <div className={`mb-3 px-4 py-3 rounded-lg text-base font-medium ${importResult.startsWith('✅') ? 'bg-green-900/60 border border-green-600 text-green-200' : 'bg-red-900/60 border border-red-600 text-red-200'}`}>
           {importResult}
-          <span className="ml-2 text-xs text-slate-400">スプレッドシートをCSVでダウンロード → このボタンで再取込すれば常に最新状態になります</span>
+          <span className="ml-2 text-sm text-slate-400">スプレッドシートをCSVでダウンロード → このボタンで再取込すれば常に最新状態になります</span>
         </div>
       )}
 
@@ -314,40 +314,40 @@ export default function PayCubePage() {
               { key: 'serial_no_bill', label: '紙幣ユニットシリアルNo.', type: 'text' },
             ].map(({ key, label, type, required, placeholder }) => (
               <div key={key}>
-                <label className="text-xs text-slate-400 mb-1 block">{label}</label>
+                <label className="text-sm text-slate-400 mb-1 block">{label}</label>
                 <input
                   type={type}
                   value={(form as Record<string, string>)[key]}
                   placeholder={placeholder}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-base focus:border-blue-500 focus:outline-none"
                 />
               </div>
             ))}
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">保守種別</label>
+              <label className="text-sm text-slate-400 mb-1 block">保守種別</label>
               <select
                 value={form.plan_type}
                 onChange={e => setForm(f => ({ ...f, plan_type: e.target.value }))}
-                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-base"
               >
                 <option value="paid">有償保守</option>
                 <option value="free">無償保守</option>
               </select>
             </div>
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">備考</label>
+              <label className="text-sm text-slate-400 mb-1 block">備考</label>
               <input
                 type="text"
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-base"
               />
             </div>
           </div>
           <div className="flex gap-3 mt-4">
-            <button onClick={addContract} className="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium">登録</button>
-            <button onClick={() => setShowAdd(false)} className="px-5 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg text-sm font-medium">キャンセル</button>
+            <button onClick={addContract} className="px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-base font-medium">登録</button>
+            <button onClick={() => setShowAdd(false)} className="px-5 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg text-base font-medium">キャンセル</button>
           </div>
         </div>
       )}
@@ -393,7 +393,7 @@ export default function PayCubePage() {
                       <button
                         disabled={updating === c.id}
                         onClick={() => updateStatus(c.id, 'contacted')}
-                        className="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white text-sm rounded-lg font-medium transition-colors whitespace-nowrap"
+                        className="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white text-base rounded-lg font-medium transition-colors whitespace-nowrap"
                       >
                         📞 連絡済みにする
                       </button>
@@ -402,7 +402,7 @@ export default function PayCubePage() {
                       <button
                         disabled={updating === c.id}
                         onClick={() => updateStatus(c.id, 'renewed')}
-                        className="px-4 py-2 bg-green-700 hover:bg-green-600 text-white text-sm rounded-lg font-medium transition-colors whitespace-nowrap"
+                        className="px-4 py-2 bg-green-700 hover:bg-green-600 text-white text-base rounded-lg font-medium transition-colors whitespace-nowrap"
                       >
                         ✅ 更新完了
                       </button>
@@ -411,7 +411,7 @@ export default function PayCubePage() {
                       href="https://dist.paycube-service.com/paycube/customer_detail.php"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm rounded-lg font-medium transition-colors text-center whitespace-nowrap"
+                      className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white text-base rounded-lg font-medium transition-colors text-center whitespace-nowrap"
                     >
                       🔗 保守システム
                     </a>
@@ -444,10 +444,10 @@ export default function PayCubePage() {
           >
             <span className="text-2xl">{link.icon}</span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">{link.label}</p>
-              <p className="text-xs text-slate-500">{link.desc}</p>
+              <p className="text-base font-medium text-slate-200 group-hover:text-white transition-colors">{link.label}</p>
+              <p className="text-sm text-slate-500">{link.desc}</p>
             </div>
-            <span className="text-slate-500 text-xs">↗</span>
+            <span className="text-slate-500 text-sm">↗</span>
           </a>
         ))}
       </div>
@@ -455,17 +455,17 @@ export default function PayCubePage() {
       {/* ログイン情報 */}
       <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
         <h3 className="font-bold text-white mb-3">🔐 保守システム ログイン情報</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-base">
           <div className="bg-slate-700/50 rounded-lg px-4 py-3">
-            <p className="text-slate-400 text-xs mb-1">URL</p>
+            <p className="text-slate-400 text-sm mb-1">URL</p>
             <a href="https://dist.paycube-service.com/paycube/index.php" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline break-all">https://dist.paycube-service.com/paycube/index.php</a>
           </div>
           <div className="bg-slate-700/50 rounded-lg px-4 py-3">
-            <p className="text-slate-400 text-xs mb-1">ログインID</p>
+            <p className="text-slate-400 text-sm mb-1">ログインID</p>
             <p className="text-white font-mono font-bold text-lg">devicee</p>
           </div>
           <div className="bg-slate-700/50 rounded-lg px-4 py-3">
-            <p className="text-slate-400 text-xs mb-1">パスワード</p>
+            <p className="text-slate-400 text-sm mb-1">パスワード</p>
             <p className="text-white font-mono font-bold text-lg">devicee</p>
           </div>
         </div>
@@ -475,7 +475,7 @@ export default function PayCubePage() {
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="p-5 bg-slate-800 border border-blue-800 rounded-xl">
           <h3 className="font-bold text-white mb-3">🔄 保守更新フロー</h3>
-          <ol className="space-y-2 text-sm text-slate-300">
+          <ol className="space-y-2 text-base text-slate-300">
             {[
               'ログイン後、画面下部「保守期限」セクションを確認',
               '「今月」「来月」「再来月」の3タブを全部チェック（漏れ防止）',
@@ -493,12 +493,12 @@ export default function PayCubePage() {
             ))}
           </ol>
           <div className="mt-4 space-y-2">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">プラン別対応</p>
-            <div className="flex gap-2 text-xs">
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-wide">プラン別対応</p>
+            <div className="flex gap-2 text-sm">
               <span className="px-2 py-1 bg-green-900 text-green-200 rounded">有償保守</span>
               <span className="text-slate-400">顧客連絡不要 → 同プランで期間延長</span>
             </div>
-            <div className="flex gap-2 text-xs">
+            <div className="flex gap-2 text-sm">
               <span className="px-2 py-1 bg-purple-900 text-purple-200 rounded">無償保守</span>
               <span className="text-slate-400">顧客連絡必須 → 加入意思・希望プランを確認してから登録</span>
             </div>
@@ -507,7 +507,7 @@ export default function PayCubePage() {
 
         <div className="p-5 bg-slate-800 border border-green-800 rounded-xl">
           <h3 className="font-bold text-white mb-3">➕ 新規登録フロー</h3>
-          <ol className="space-y-2 text-sm text-slate-300">
+          <ol className="space-y-2 text-base text-slate-300">
             {[
               'メニューから「新規登録」を選択',
               '不明な項目は進捗管理シートを参照して補完',
@@ -523,7 +523,7 @@ export default function PayCubePage() {
               </li>
             ))}
           </ol>
-          <div className="mt-4 p-3 bg-yellow-900/40 border border-yellow-700 rounded-lg text-xs text-yellow-200">
+          <div className="mt-4 p-3 bg-yellow-900/40 border border-yellow-700 rounded-lg text-sm text-yellow-200">
             ⚠️ シリアルNo.不明の場合は <span className="font-mono font-bold">999999999</span>（9桁）を入力
           </div>
         </div>
@@ -532,26 +532,26 @@ export default function PayCubePage() {
       {/* エスカレーション */}
       <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
         <h3 className="font-bold text-white mb-3">🚨 エスカレーション基準</h3>
-        <div className="space-y-2 text-sm">
+        <div className="space-y-2 text-base">
           <div className="flex items-start gap-3 p-3 bg-red-950/50 border border-red-800 rounded-lg">
             <span>🔴</span>
-            <div><p className="text-red-300 font-medium">保守期間が切れた状態での再加入</p><p className="text-slate-400 text-xs mt-0.5">システム登録不可 → 直ちに吉井さんへエスカレーション</p></div>
+            <div><p className="text-red-300 font-medium">保守期間が切れた状態での再加入</p><p className="text-slate-400 text-sm mt-0.5">システム登録不可 → 直ちに吉井さんへエスカレーション</p></div>
           </div>
           <div className="flex items-start gap-3 p-3 bg-yellow-950/50 border border-yellow-800 rounded-lg">
             <span>🟡</span>
-            <div><p className="text-yellow-300 font-medium">保守の途中解約・別プランへの切り替え</p><p className="text-slate-400 text-xs mt-0.5">自己判断せず → 吉井さんへエスカレーション</p></div>
+            <div><p className="text-yellow-300 font-medium">保守の途中解約・別プランへの切り替え</p><p className="text-slate-400 text-sm mt-0.5">自己判断せず → 吉井さんへエスカレーション</p></div>
           </div>
           <div className="flex items-start gap-3 p-3 bg-green-950/50 border border-green-800 rounded-lg">
             <span>✅</span>
-            <div><p className="text-green-300 font-medium">通常の更新・新規登録</p><p className="text-slate-400 text-xs mt-0.5">進捗管理シート記入 → 野田さんへ連絡</p></div>
+            <div><p className="text-green-300 font-medium">通常の更新・新規登録</p><p className="text-slate-400 text-sm mt-0.5">進捗管理シート記入 → 野田さんへ連絡</p></div>
           </div>
         </div>
       </div>
       {/* 要確認バナー */}
       {filter === 'review' && contracts.length > 0 && (
-        <div className="mb-4 p-4 bg-purple-950/60 border border-purple-600 rounded-xl text-sm text-purple-200">
+        <div className="mb-4 p-4 bg-purple-950/60 border border-purple-600 rounded-xl text-base text-purple-200">
           <p className="font-bold mb-1">🔍 要確認物件とは</p>
-          <p className="text-purple-300 text-xs">保守終了日データなし、または保守期限切れの物件です。保守システムで現状を確認し、対応を判断してください。期限切れ後の再加入は<strong>吉井さんへエスカレーション</strong>が必要です。</p>
+          <p className="text-purple-300 text-sm">保守終了日データなし、または保守期限切れの物件です。保守システムで現状を確認し、対応を判断してください。期限切れ後の再加入は<strong>吉井さんへエスカレーション</strong>が必要です。</p>
         </div>
       )}
 
@@ -561,22 +561,22 @@ export default function PayCubePage() {
 
         {/* 現在のプラン分岐 */}
         <div className="mb-5">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">STEP 1 ── 現在のプランを確認する</p>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-wide mb-3">STEP 1 ── 現在のプランを確認する</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="p-4 bg-green-950/50 border border-green-700 rounded-xl">
               <p className="font-bold text-green-300 mb-2">✅ 有償保守の場合</p>
-              <ul className="text-sm text-slate-300 space-y-1">
+              <ul className="text-base text-slate-300 space-y-1">
                 <li>→ 顧客への連絡 <span className="text-green-400 font-medium">不要</span></li>
                 <li>→ 同プランで期間延長して登録するだけ</li>
-                <li className="text-slate-500 text-xs mt-1">※ STEP 3（システム登録）へ進む</li>
+                <li className="text-slate-500 text-sm mt-1">※ STEP 3（システム登録）へ進む</li>
               </ul>
             </div>
             <div className="p-4 bg-purple-950/50 border border-purple-700 rounded-xl">
               <p className="font-bold text-purple-300 mb-2">⚠️ 無償保守の場合</p>
-              <ul className="text-sm text-slate-300 space-y-1">
+              <ul className="text-base text-slate-300 space-y-1">
                 <li>→ 顧客への連絡 <span className="text-red-400 font-medium">必須</span></li>
                 <li>→ 加入意思と希望プランを確認してから登録</li>
-                <li className="text-slate-500 text-xs mt-1">※ STEP 2（顧客連絡）へ進む</li>
+                <li className="text-slate-500 text-sm mt-1">※ STEP 2（顧客連絡）へ進む</li>
               </ul>
             </div>
           </div>
@@ -584,35 +584,35 @@ export default function PayCubePage() {
 
         {/* STEP 2 無償保守のみ */}
         <div className="mb-5 pl-4 border-l-2 border-purple-700">
-          <p className="text-xs font-bold text-purple-400 uppercase tracking-wide mb-3">STEP 2 ── 顧客へ連絡（無償保守のみ）</p>
-          <div className="space-y-2 text-sm text-slate-300">
+          <p className="text-sm font-bold text-purple-400 uppercase tracking-wide mb-3">STEP 2 ── 顧客へ連絡（無償保守のみ）</p>
+          <div className="space-y-2 text-base text-slate-300">
             <div className="flex gap-3 items-start">
               <span className="text-purple-400 font-bold min-w-[24px]">①</span>
               <div>
                 <p>MailDealer or Zoom Phone で顧客へ連絡</p>
-                <p className="text-xs text-slate-500 mt-0.5">「無償保証期間が〇月〇日に終了します。有償保守への移行についてご案内いたします」</p>
+                <p className="text-sm text-slate-500 mt-0.5">「無償保証期間が〇月〇日に終了します。有償保守への移行についてご案内いたします」</p>
               </div>
             </div>
             <div className="flex gap-3 items-start">
               <span className="text-purple-400 font-bold min-w-[24px]">②</span>
               <div>
                 <p>希望プランの確認（下記料金表を参考に案内）</p>
-                <p className="text-xs text-slate-500 mt-0.5">コールセンターのみ ¥28,800 / オンサイト込 ¥57,600 / 全部入り ¥81,600</p>
+                <p className="text-sm text-slate-500 mt-0.5">コールセンターのみ ¥28,800 / オンサイト込 ¥57,600 / 全部入り ¥81,600</p>
               </div>
             </div>
             <div className="flex gap-3 items-start">
               <span className="text-purple-400 font-bold min-w-[24px]">③</span>
               <div>
                 <p>見積書PDFを添付してメール送付</p>
-                <p className="text-xs text-slate-500 mt-0.5">↓ 下のメールテンプレートを使用</p>
+                <p className="text-sm text-slate-500 mt-0.5">↓ 下のメールテンプレートを使用</p>
               </div>
             </div>
             <div className="flex gap-3 items-start">
               <span className="text-purple-400 font-bold min-w-[24px]">④</span>
               <div>
                 <p>クラウドサインから申込書を送付</p>
-                <a href="https://app.cloudsign.jp/" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline">→ クラウドサインを開く</a>
-                <p className="text-xs text-slate-500 mt-0.5">顧客に電子署名してもらう</p>
+                <a href="https://app.cloudsign.jp/" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-400 hover:underline">→ クラウドサインを開く</a>
+                <p className="text-sm text-slate-500 mt-0.5">顧客に電子署名してもらう</p>
               </div>
             </div>
             <div className="flex gap-3 items-start">
@@ -624,8 +624,8 @@ export default function PayCubePage() {
 
         {/* STEP 3 システム登録 */}
         <div className="mb-5 pl-4 border-l-2 border-blue-700">
-          <p className="text-xs font-bold text-blue-400 uppercase tracking-wide mb-3">STEP 3 ── 保守システムで更新登録</p>
-          <div className="space-y-2 text-sm text-slate-300">
+          <p className="text-sm font-bold text-blue-400 uppercase tracking-wide mb-3">STEP 3 ── 保守システムで更新登録</p>
+          <div className="space-y-2 text-base text-slate-300">
             {[
               { n:'①', t:'PayCube保守システムにログイン', s:'https://dist.paycube-service.com/paycube/index.php (ID/PW: devicee)' },
               { n:'②', t:'「保守期限」から対象の設置先名をクリック' },
@@ -636,7 +636,7 @@ export default function PayCubePage() {
                 <span className="text-blue-400 font-bold min-w-[24px]">{r.n}</span>
                 <div>
                   <p>{r.t}</p>
-                  {r.s && <p className="text-xs text-slate-500 mt-0.5">{r.s}</p>}
+                  {r.s && <p className="text-sm text-slate-500 mt-0.5">{r.s}</p>}
                 </div>
               </div>
             ))}
@@ -645,13 +645,13 @@ export default function PayCubePage() {
 
         {/* STEP 4 完了処理 */}
         <div className="mb-5 pl-4 border-l-2 border-orange-700">
-          <p className="text-xs font-bold text-orange-400 uppercase tracking-wide mb-3">STEP 4 ── 完了処理（必須）</p>
-          <div className="space-y-2 text-sm text-slate-300">
+          <p className="text-sm font-bold text-orange-400 uppercase tracking-wide mb-3">STEP 4 ── 完了処理（必須）</p>
+          <div className="space-y-2 text-base text-slate-300">
             <div className="flex gap-3 items-start">
               <span className="text-orange-400 font-bold min-w-[24px]">①</span>
               <div>
                 <p>進捗管理シートの <span className="font-bold text-white">K列まで</span> 入力する</p>
-                <a href="https://docs.google.com/spreadsheets/d/107wEIMY-wiIcPg0K_cDfyVGajKoFmluto8wJdSbqeOg/edit?gid=849544635#gid=849544635" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline">→ 進捗管理シートを開く</a>
+                <a href="https://docs.google.com/spreadsheets/d/107wEIMY-wiIcPg0K_cDfyVGajKoFmluto8wJdSbqeOg/edit?gid=849544635#gid=849544635" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-400 hover:underline">→ 進捗管理シートを開く</a>
               </div>
             </div>
             <div className="flex gap-3 items-start">
@@ -668,7 +668,7 @@ export default function PayCubePage() {
         {/* 例外フロー */}
         <div className="p-4 bg-red-950/50 border border-red-700 rounded-xl">
           <p className="font-bold text-red-300 mb-2">🔴 例外ケース → 吉井さんへ即エスカレーション</p>
-          <ul className="text-sm text-slate-300 space-y-1">
+          <ul className="text-base text-slate-300 space-y-1">
             <li>• 保守期間が <span className="text-red-400 font-medium">すでに切れている</span> 状態での再加入依頼（システム登録不可）</li>
             <li>• 途中解約・別プランへの切り替え希望</li>
             <li>• 上記2ケースは自己判断せず必ず吉井さんへ連絡すること</li>
@@ -694,27 +694,27 @@ export default function PayCubePage() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span>{r.icon}</span>
-                  <p className="font-medium text-white text-sm">{r.title}</p>
+                  <p className="font-medium text-white text-base">{r.title}</p>
                 </div>
-                <p className="text-sm text-slate-300 mt-0.5 ml-6">{r.desc}</p>
-                {r.note && <p className="text-xs text-yellow-400 mt-0.5 ml-6">⚠️ {r.note}</p>}
+                <p className="text-base text-slate-300 mt-0.5 ml-6">{r.desc}</p>
+                {r.note && <p className="text-sm text-yellow-400 mt-0.5 ml-6">⚠️ {r.note}</p>}
               </div>
             </div>
           ))}
         </div>
 
         <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="p-3 bg-slate-700/50 rounded-lg text-sm">
-            <p className="text-xs font-bold text-slate-400 mb-2">📌 よく使う連絡先</p>
+          <div className="p-3 bg-slate-700/50 rounded-lg text-base">
+            <p className="text-sm font-bold text-slate-400 mb-2">📌 よく使う連絡先</p>
             <ul className="space-y-1 text-slate-300">
               <li>🏦 請求書発行：岡田さん（総務）</li>
               <li>📞 保守登録：コンラックス吉井さん <span className="font-mono text-white">090-3567-7162</span></li>
               <li>✅ 最終確認：野田さん</li>
             </ul>
           </div>
-          <div className="p-3 bg-slate-700/50 rounded-lg text-sm">
-            <p className="text-xs font-bold text-slate-400 mb-2">⚠️ 注意事項</p>
-            <ul className="space-y-1 text-slate-300 text-xs">
+          <div className="p-3 bg-slate-700/50 rounded-lg text-base">
+            <p className="text-sm font-bold text-slate-400 mb-2">⚠️ 注意事項</p>
+            <ul className="space-y-1 text-slate-300 text-sm">
               <li>• 料金はすべて<span className="text-yellow-300 font-medium">税別</span></li>
               <li>• 吉井さんが確認なしで手続きを勝手に進める場合あり → 事前に釘を刺す</li>
               <li>• コンラックスへの入金は月末 → 請求書発行は早めに</li>
@@ -727,21 +727,21 @@ export default function PayCubePage() {
       {/* コンラックスからの請求構造 */}
       <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
         <h3 className="font-bold text-white mb-1">🧾 コンラックス（仕入）請求の仕組み</h3>
-        <p className="text-xs text-slate-500 mb-4">出典：2026年3月分請求書（株式会社日本コンラックス → デバイスエージェンシー）</p>
+        <p className="text-sm text-slate-500 mb-4">出典：2026年3月分請求書（株式会社日本コンラックス → デバイスエージェンシー）</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <p className="text-xs font-bold text-slate-400 mb-2">📌 請求フロー</p>
-            <div className="space-y-2 text-sm text-slate-300">
+            <p className="text-sm font-bold text-slate-400 mb-2">📌 請求フロー</p>
+            <div className="space-y-2 text-base text-slate-300">
               <div className="flex gap-2 items-center">
-                <span className="px-2 py-0.5 bg-blue-800 text-blue-200 rounded text-xs">コンラックス</span>
+                <span className="px-2 py-0.5 bg-blue-800 text-blue-200 rounded text-sm">コンラックス</span>
                 <span className="text-slate-500">→</span>
-                <span className="px-2 py-0.5 bg-slate-600 text-slate-200 rounded text-xs">デバイスエージェンシー</span>
+                <span className="px-2 py-0.5 bg-slate-600 text-slate-200 rounded text-sm">デバイスエージェンシー</span>
                 <span className="text-slate-500">→</span>
-                <span className="px-2 py-0.5 bg-green-800 text-green-200 rounded text-xs">顧客</span>
+                <span className="px-2 py-0.5 bg-green-800 text-green-200 rounded text-sm">顧客</span>
               </div>
-              <p className="text-xs text-slate-400">コンラックスへの支払は月末。顧客への請求は月末を基本に先方と調整。</p>
+              <p className="text-sm text-slate-400">コンラックスへの支払は月末。顧客への請求は月末を基本に先方と調整。</p>
             </div>
-            <div className="mt-3 space-y-1 text-xs text-slate-300">
+            <div className="mt-3 space-y-1 text-sm text-slate-300">
               <p className="font-bold text-slate-400">振込先（コンラックス）</p>
               <p>三井住友銀行 日比谷支店 当座 6732482</p>
               <p>みずほ銀行 芝支店 当座 0104220</p>
@@ -749,8 +749,8 @@ export default function PayCubePage() {
             </div>
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400 mb-2">💴 仕入価格（コンラックスからの請求単価）</p>
-            <table className="w-full text-xs">
+            <p className="text-sm font-bold text-slate-400 mb-2">💴 仕入価格（コンラックスからの請求単価）</p>
+            <table className="w-full text-sm">
               <tbody className="divide-y divide-slate-700">
                 {[
                   { plan: 'オンサイト＋部品代込パック（年間）', price: '¥46,400' },
@@ -762,14 +762,14 @@ export default function PayCubePage() {
                 ))}
               </tbody>
             </table>
-            <p className="text-xs text-yellow-400 mt-2">⚠️ 顧客への売値（¥81,600）と仕入価格（¥46,400）は別。差額が利益。</p>
+            <p className="text-sm text-yellow-400 mt-2">⚠️ 顧客への売値（¥81,600）と仕入価格（¥46,400）は別。差額が利益。</p>
           </div>
         </div>
 
         {/* 申込書重要事項 */}
         <div className="mt-4 p-3 bg-slate-700/50 rounded-lg">
-          <p className="text-xs font-bold text-slate-300 mb-2">📋 申込書 重要事項（顧客への説明必須）</p>
-          <ul className="text-xs text-slate-400 space-y-1">
+          <p className="text-sm font-bold text-slate-300 mb-2">📋 申込書 重要事項（顧客への説明必須）</p>
+          <ul className="text-sm text-slate-400 space-y-1">
             <li>• 支払確認後に有償保守プランが適用（前払い）</li>
             <li>• 契約最低期間は<span className="text-white">1年間</span>。中途解約でも残期間の料金が発生</li>
             <li>• 契約は<span className="text-white">1年ごと自動更新</span>。翌年分は更新日の1ヶ月前までに支払いが必要</li>
@@ -783,9 +783,9 @@ export default function PayCubePage() {
       {/* 保守プラン料金表 */}
       <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
         <h3 className="font-bold text-white mb-1">💴 保守プラン料金表</h3>
-        <p className="text-xs text-slate-500 mb-4">出典：PayCube保守対応のご提案（株式会社デバイスエージェンシー）</p>
+        <p className="text-sm text-slate-500 mb-4">出典：PayCube保守対応のご提案（株式会社デバイスエージェンシー）</p>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead>
               <tr className="border-b border-slate-600">
                 <th className="text-left py-2 px-3 text-slate-400 font-medium">プラン</th>
@@ -806,7 +806,7 @@ export default function PayCubePage() {
                 <tr key={i} className="hover:bg-slate-700/40 transition-colors">
                   <td className="py-2.5 px-3 text-slate-200">{r.plan}</td>
                   <td className="py-2.5 px-3 text-right font-mono font-bold text-white">{r.price}</td>
-                  <td className="py-2.5 px-3 text-slate-400 text-xs">{r.note}</td>
+                  <td className="py-2.5 px-3 text-slate-400 text-sm">{r.note}</td>
                 </tr>
               ))}
             </tbody>
@@ -814,13 +814,13 @@ export default function PayCubePage() {
         </div>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-3 bg-slate-700/50 rounded-lg">
-            <p className="text-xs font-bold text-slate-300 mb-2">📦 無償保守期間</p>
-            <p className="text-sm text-slate-300">設置日または稼働日から <span className="text-white font-bold">6ヶ月間</span></p>
-            <p className="text-xs text-slate-500 mt-1">オンサイト保守＋部品代 無償</p>
+            <p className="text-sm font-bold text-slate-300 mb-2">📦 無償保守期間</p>
+            <p className="text-base text-slate-300">設置日または稼働日から <span className="text-white font-bold">6ヶ月間</span></p>
+            <p className="text-sm text-slate-500 mt-1">オンサイト保守＋部品代 無償</p>
           </div>
           <div className="p-3 bg-slate-700/50 rounded-lg">
-            <p className="text-xs font-bold text-slate-300 mb-2">⚠️ 注意事項</p>
-            <ul className="text-xs text-slate-400 space-y-1">
+            <p className="text-sm font-bold text-slate-300 mb-2">⚠️ 注意事項</p>
+            <ul className="text-sm text-slate-400 space-y-1">
               <li>• 部品代込プランの対象外：電源・本体基盤</li>
               <li>• 離島：別途交通費等が発生</li>
               <li>• 改造品・仕様変更品はオンサイト除外</li>
@@ -874,7 +874,7 @@ ${myName || '【署名】'}
     <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold text-white">📧 顧客送付メールテンプレート</h3>
-        <div className="flex items-center gap-2 text-xs text-slate-400">
+        <div className="flex items-center gap-2 text-sm text-slate-400">
           <span>件名：</span>
           <span className="text-slate-300 font-medium">現金精算機PayCube 有償保守サービスのお見積書送付の件</span>
         </div>
@@ -891,13 +891,13 @@ ${myName || '【署名】'}
           { key: 'deadline',  label: '申込期限',     val: deadline,  set: setDeadline,  placeholder: '例：2026年9月20日' },
         ].map(({ key, label, val, set, placeholder }) => (
           <div key={key}>
-            <label className="text-xs text-slate-400 mb-1 block">{label}</label>
+            <label className="text-sm text-slate-400 mb-1 block">{label}</label>
             <input
               type="text"
               value={val}
               placeholder={placeholder}
               onChange={e => set(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-base focus:border-blue-500 focus:outline-none"
             />
           </div>
         ))}
@@ -905,15 +905,15 @@ ${myName || '【署名】'}
 
       {/* プレビュー */}
       <div className="relative">
-        <pre className="w-full p-4 bg-slate-900 border border-slate-600 rounded-lg text-sm text-slate-200 whitespace-pre-wrap font-sans leading-relaxed">{body}</pre>
+        <pre className="w-full p-4 bg-slate-900 border border-slate-600 rounded-lg text-base text-slate-200 whitespace-pre-wrap font-sans leading-relaxed">{body}</pre>
         <button
           onClick={copy}
-          className={`absolute top-3 right-3 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-slate-600 hover:bg-slate-500 text-white'}`}
+          className={`absolute top-3 right-3 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-slate-600 hover:bg-slate-500 text-white'}`}
         >
           {copied ? '✅ コピー済み' : '📋 コピー'}
         </button>
       </div>
-      <p className="text-xs text-slate-500 mt-2">※ 添付ファイル：御見積書PDF（別途作成）／ 内容は自由にアレンジ可</p>
+      <p className="text-sm text-slate-500 mt-2">※ 添付ファイル：御見積書PDF（別途作成）／ 内容は自由にアレンジ可</p>
     </div>
   )
 }
@@ -977,7 +977,7 @@ ${myName || '【署名】'}
     <div className="mt-4 p-5 bg-slate-800 border border-slate-700 rounded-xl">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold text-white">🔄 更新案内メールテンプレート（有償保守）</h3>
-        <div className="flex items-center gap-2 text-xs text-slate-400">
+        <div className="flex items-center gap-2 text-sm text-slate-400">
           <span>件名：</span>
           <span className="text-slate-300 font-medium">現金精算機PayCube 保守サービス更新のご案内</span>
         </div>
@@ -992,22 +992,22 @@ ${myName || '【署名】'}
           { label: '返信期限',     val: deadline,  set: setDeadline,  placeholder: '例：2026年8月18日' },
         ].map(({ label, val, set, placeholder }) => (
           <div key={label}>
-            <label className="text-xs text-slate-400 mb-1 block">{label}</label>
+            <label className="text-sm text-slate-400 mb-1 block">{label}</label>
             <input
               type="text"
               value={val}
               placeholder={placeholder}
               onChange={e => set(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-base focus:border-blue-500 focus:outline-none"
             />
           </div>
         ))}
       </div>
       <div className="relative">
-        <pre className="w-full p-4 bg-slate-900 border border-slate-600 rounded-lg text-sm text-slate-200 whitespace-pre-wrap font-sans leading-relaxed">{body}</pre>
+        <pre className="w-full p-4 bg-slate-900 border border-slate-600 rounded-lg text-base text-slate-200 whitespace-pre-wrap font-sans leading-relaxed">{body}</pre>
         <button
           onClick={copy}
-          className={`absolute top-3 right-3 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-slate-600 hover:bg-slate-500 text-white'}`}
+          className={`absolute top-3 right-3 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-slate-600 hover:bg-slate-500 text-white'}`}
         >
           {copied ? '✅ コピー済み' : '📋 コピー'}
         </button>

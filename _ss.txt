@@ -1,0 +1,90 @@
+﻿===== L1-40 =====
+   1| 'use client'
+   2| 
+   3| import Link from 'next/link'
+   4| import { usePathname } from 'next/navigation'
+   5| import { createClient } from '@/lib/supabase/client'
+   6| import { useRouter } from 'next/navigation'
+   7| import { useState, useEffect } from 'react'
+   8| 
+   9| const navItems: { href: string; label: string; icon: string; alert?: boolean; external?: boolean }[] = [
+  10|   { href: '/dashboard', label: '繝繝・す繝･繝懊・繝・, icon: '匠' },
+  11|   { href: '/paycube', label: 'PayCube菫晏ｮ・, icon: '粕', alert: true },
+  12|   { href: '/delivery', label: 'IoT陬ｽ蜩∫ｴ榊刀繧｢繝ｩ繝ｼ繝・, icon: '逃', alert: true },
+  13|   { href: '/inventory', label: '蝨ｨ蠎ｫ邂｡逅・, icon: '投', alert: true },
+  14|   { href: '/ai-summary', label: 'AI隕∫ｴ・ｼ玖ｿｷ諠大愛螳・, icon: '､・ },
+  15|   { href: '/troubleshooting', label: '繝医Λ繝悶Ν繧ｷ繝･繝ｼ繝・ぅ繝ｳ繧ｰ', icon: '肌' },
+  16|   { href: '/keybox', label: '繧ｭ繝ｼ繝懊ャ繧ｯ繧ｹ邂｡逅・, icon: '理・・ },
+  17|   { href: '/entrance', label: '邇・未髮・粋讖溘・NW邂｡逅・, icon: '召' },
+  18|   { href: '/onboarding', label: '譁ｰ莠ｺ謨呵ご', icon: '雌' },
+  19|   { href: '/manuals', label: '繝槭ル繝･繧｢繝ｫ', icon: '搭' },
+  20|   { href: '/nippou', label: '譌･蝣ｱ菴懈・', icon: '統' },
+  21|   { href: '/teleapo', label: '繝・Ξ繧｢繝・, icon: '到' },
+  22|   { href: '/automations', label: '閾ｪ蜍募喧', icon: '笞｡' },
+  23|   { href: '/mail-templates', label: '繝｡繝ｼ繝ｫ繝・Φ繝励Ξ繝ｼ繝・, icon: '透' },
+  24|   { href: '/purchase-orders', label: '逋ｺ豕ｨ譖ｸ', icon: '搭' },
+  25|   { href: '/p400-orders', label: 'P400豕ｨ譁・嶌', icon: '諜' },
+  26|   { href: '/assignment', label: '蠑輔″蠖薙※繧ｷ繝ｼ繝・, icon: '闘' },
+  27|   { href: '/rentacar', label: '繝ｬ繝ｳ繧ｿ繧ｫ繝ｼ', icon: '囓' },
+  28|   { href: '/tasks', label: '繧ｿ繧ｹ繧ｯ', icon: '笨・ },
+  29|   { href: '/admin', label: '繝｡繝ｳ繝舌・邂｡逅・, icon: '則' },
+  30| ]
+  31| 
+  32| const JP_DAYS = ['譌･', '譛・, '轣ｫ', '豌ｴ', '譛ｨ', '驥・, '蝨・]
+  33| const JP_MONTHS = ['1譛・, '2譛・, '3譛・, '4譛・, '5譛・, '6譛・, '7譛・, '8譛・, '9譛・, '10譛・, '11譛・, '12譛・]
+  34| 
+  35| function MiniCalendar() {
+  36|   const today = new Date()
+  37|   const [viewYear, setViewYear] = useState(today.getFullYear())
+  38|   const [viewMonth, setViewMonth] = useState(today.getMonth())
+  39| 
+
+===== L55-70 =====
+  55|   for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+  56| 
+  57|   return (
+  58|     <div className="px-3 py-3 border-b border-slate-700">
+  59|       {/* 繝倥ャ繝繝ｼ・壽怦遘ｻ蜍・*/}
+  60|       <div className="flex items-center justify-between mb-2">
+  61|         <button onClick={prev} className="text-slate-400 hover:text-white px-1 text-sm">窶ｹ</button>
+  62|         <span className="text-slate-300 text-xs font-bold">
+  63|           {viewYear}蟷ｴ {JP_MONTHS[viewMonth]}
+  64|         </span>
+  65|         <button onClick={next} className="text-slate-400 hover:text-white px-1 text-sm">窶ｺ</button>
+  66|       </div>
+  67|       {/* 譖懈律繝倥ャ繝繝ｼ */}
+  68|       <div className="grid grid-cols-7 mb-1">
+  69|         {JP_DAYS.map((d, i) => (
+
+===== L105-135 =====
+ 105|     return () => clearInterval(t)
+ 106|   }, [])
+ 107| 
+ 108|   const handleLogout = async () => {
+ 109|     const supabase = createClient()
+ 110|     await supabase.auth.signOut()
+ 111|     router.push('/login')
+ 112|   }
+ 113| 
+ 114|   const dateStr = `${now.getMonth() + 1}/${now.getDate()}・・{JP_DAYS[now.getDay()]}・荏
+ 115|   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+ 116| 
+ 117|   return (
+ 118|     <aside className="w-64 min-h-screen bg-slate-800 border-r border-slate-700 flex flex-col">
+ 119|       {/* Logo + 譌･莉・*/}
+ 120|       <div className="p-6 border-b border-slate-700">
+ 121|         <div className="flex items-center gap-3">
+ 122|           <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl">
+ 123|             遂
+ 124|           </div>
+ 125|           <div>
+ 126|             <p className="font-bold text-white text-base">KUJIRA</p>
+ 127|             <p className="text-slate-400 text-sm">繧ｵ繝昴・繝医す繧ｹ繝・Β</p>
+ 128|           </div>
+ 129|         </div>
+ 130|         {/* 譌･莉倥・譎ょ綾 */}
+ 131|         <div className="mt-3 space-y-0.5">
+ 132|           <div className="text-white font-bold text-xl">{dateStr}</div>
+ 133|           <div className="text-slate-300 text-lg font-semibold">{timeStr}</div>
+ 134|         </div>
+
