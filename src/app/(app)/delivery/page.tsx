@@ -2751,8 +2751,12 @@ https://x.gd/9H5wK
                             return (
                               <button key={st}
                                 onClick={() => saveTodoKey(it.id, it.dashboard_todos, 'worker_estimate_status', cur === st ? '未発注' : st)}
-                                className={`px-2 py-0.5 text-xs rounded font-medium transition-colors ${
-                                  cur === st ? (st === '未発注' ? 'bg-slate-500 text-white' : 'bg-blue-600 text-white') : 'bg-slate-700 text-slate-300 hover:bg-slate-500'
+                                className={`px-3 py-1.5 text-sm rounded-lg font-bold transition-colors ${
+                                  cur === st
+                                    ? (st === '未発注' ? 'bg-slate-500 text-white ring-2 ring-slate-400'
+                                      : st === '作業完了' ? 'bg-emerald-600 text-white ring-2 ring-emerald-400'
+                                      : 'bg-blue-600 text-white ring-2 ring-blue-400')
+                                    : 'bg-slate-700 text-slate-300 hover:bg-slate-500'
                                 }`}>{st}</button>
                             )
                           })}
