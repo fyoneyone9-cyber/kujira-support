@@ -600,7 +600,7 @@ export default function DeliveryPage() {
     // [CLIENT_EMAIL_V1] お客様メールは同じ現場なら同一のはずなので同期する
     k === 'client_email' ||
     // [PAYPAY_APPLY_LOG_V1] PayPay申請は現場に1回なので同期する
-    k === 'paypay_applied_at' || k === 'paypay_mid' || k === 'paypay_apply_memo')
+    k === 'paypay_applied_at' || k === 'paypay_mid' || k === 'paypay_apply_memo' || k === 'paypay_not_needed')
 
   // 同じ現場(会社名+設置先住所)の他の行を返す
   const siblingsOf = (it: DeliveryItem) =>
@@ -1838,95 +1838,6 @@ ${knownInfo.map(k => `　　・${k.label}: ${k.value}`).join('\n')}
                                   </div>
                                 )
                               })()}
-                              {/* [PAYPAY_APPLY_LOG_V3 2026-10-30] PayPay申請の状態。
-                                  機材名に PayPay が無いため機材欄ではなく常時表示する。
-                                  PayPayは契約に1ヶ月半かかるので、いつ申請したかが納期に直結する。
-                                  使わない案件も多いので「不要」を用意する。 */}
-                              {(() => {
-                                const td = it.dashboard_todos || {}
-                                const at = (td['paypay_applied_at'] as string) || ''
-                                const mid = (td['paypay_mid'] as string) || ''
-                                const memo = (td['paypay_apply_memo'] as string) || ''
-                                const nn = !!td['paypay_not_needed']
-                                const today = () => new Date().toISOString().slice(0, 10)
-                                let days = -1
-                                if (at) {
-                                  const dt = new Date(at)
-                                  if (!isNaN(dt.getTime())) days = Math.floor((Date.now() - dt.getTime()) / 86400000)
-                                }
-                                const save = (k: string, v: string) => saveTodoKey(it.id, it.dashboard_todos, k, v)
-                                return (
-                                  <div className={`mb-1.5 rounded px-2 py-1.5 border-2 ${
-                                    nn ? 'bg-slate-900/40 border-slate-600/50'
-                                    : at ? 'bg-emerald-950/40 border-emerald-600/60'
-                                         : 'bg-amber-950/40 border-amber-600/60'}`}>
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="text-sm font-bold">PayPay申請</span>
-                              
-                                      {nn && (
-                                        <>
-                                          <span className="text-sm px-2 py-0.5 rounded bg-slate-600 text-white font-bold">－ 不要</span>
-                                          <span className="text-sm text-slate-400">この案件ではPayPayを使いません</span>
-                                          <button onClick={() => save('paypay_not_needed', '')}
-                                            className="text-sm px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold">↩ 戻す</button>
-                                        </>
-                                      )}
-                              
-                                      {!nn && at && (
-                                        <>
-                                          <span className="text-sm px-2 py-0.5 rounded bg-emerald-600 text-white font-bold">✅ 申請済</span>
-                                          <span className="text-sm text-slate-200">
-                                            {at}
-                                            {days >= 0 && (
-                                              <span className={days >= 45 ? 'text-emerald-400 ml-1' : 'text-amber-300 ml-1'}>
-                                                （{days}日経過{days < 45 ? ` / 目安45日まであと${45 - days}日` : ' ・完了見込み'}）
-                                              </span>
-                                            )}
-                                          </span>
-                                          <button onClick={() => {
-                                            const v = prompt('PayPayを申請した日（YYYY-MM-DD）\n空にすると「未申請」に戻します', at)
-                                            if (v === null) return
-                                            save('paypay_applied_at', v.trim())
-                                          }} className="text-sm px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold">✏ 日付を変更</button>
-                                        </>
-                                      )}
-                              
-                                      {!nn && !at && (
-                                        <>
-                                          <span className="text-sm px-2 py-0.5 rounded bg-amber-600 text-white font-bold">⚠ 未申請</span>
-                                          <button onClick={() => save('paypay_applied_at', today())}
-                                            className="text-sm px-2 py-0.5 rounded bg-emerald-700 hover:bg-emerald-600 text-white font-bold">✅ 今日申請した</button>
-                                          <button onClick={() => {
-                                            const v = prompt('PayPayを申請した日（YYYY-MM-DD）', today())
-                                            if (v === null || !v.trim()) return
-                                            save('paypay_applied_at', v.trim())
-                                          }} className="text-sm px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold">📅 日付を指定</button>
-                                          <button onClick={() => save('paypay_not_needed', '1')}
-                                            className="text-sm px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold">－ 不要</button>
-                                        </>
-                                      )}
-                                    </div>
-                              
-                                    {!nn && at && (
-                                      <div className="mt-1 flex items-center gap-2 flex-wrap text-sm">
-                                        <span className="text-slate-400">加盟店ID:</span>
-                                        <span className="text-slate-100 font-mono">{mid || '－'}</span>
-                                        <button onClick={() => {
-                                          const v = prompt('PayPayの加盟店ID(MID)', mid)
-                                          if (v === null) return
-                                          save('paypay_mid', v.trim())
-                                        }} className="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200">✏</button>
-                                        {memo && <span className="text-slate-400">／ {memo}</span>}
-                                        <button onClick={() => {
-                                          const v = prompt('備考（進捗や連絡内容など）', memo)
-                                          if (v === null) return
-                                          save('paypay_apply_memo', v.trim())
-                                        }} className="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200">📝 備考</button>
-                                      </div>
-                                    )}
-                                  </div>
-                                )
-                              })()}
                               {/* [CLIENT_EMAIL_V1 2026-10-29] お客様メールアドレス。
                                   dashboard_todos に保存するので再取込で消えない。 */}
                               <div className="w-full flex items-center gap-2 mb-2">
@@ -2568,6 +2479,93 @@ https://x.gd/9H5wK
                         })()}
                         </div>}{/* /hearing折りたたみ内 */}
                       </div>{/* /hearing折りたたみ外枠 */}
+                    </div>
+                  )
+                })()}
+
+                {/* [PAYPAY_SECTION_V4 2026-10-30] PayPayセクション: ヒアリングの外に常時表示 */}
+                {/* [PAYPAY_APPLY_LOG_V3 2026-10-30] PayPay申請の状態。
+                    機材名に PayPay が無いため機材欄ではなく常時表示する。
+                    PayPayは契約に1ヶ月半かかるので、いつ申請したかが納期に直結する。
+                    使わない案件も多いので「不要」を用意する。 */}
+                {(() => {
+                  const td = it.dashboard_todos || {}
+                  const at = (td['paypay_applied_at'] as string) || ''
+                  const mid = (td['paypay_mid'] as string) || ''
+                  const memo = (td['paypay_apply_memo'] as string) || ''
+                  const nn = !!td['paypay_not_needed']
+                  const today = () => new Date().toISOString().slice(0, 10)
+                  let days = -1
+                  if (at) {
+                    const dt = new Date(at)
+                    if (!isNaN(dt.getTime())) days = Math.floor((Date.now() - dt.getTime()) / 86400000)
+                  }
+                  const save = (k: string, v: string) => saveTodoKey(it.id, it.dashboard_todos, k, v)
+                  return (
+                    <div className={`mb-1.5 rounded px-2 py-1.5 border-2 ${
+                      nn ? 'bg-slate-900/40 border-slate-600/50'
+                      : at ? 'bg-emerald-950/40 border-emerald-600/60'
+                           : 'bg-amber-950/40 border-amber-600/60'}`}>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold">PayPay申請</span>
+                                         {nn && (
+                          <>
+                            <span className="text-sm px-2 py-0.5 rounded bg-slate-600 text-white font-bold">－ 不要</span>
+                            <span className="text-sm text-slate-400">この案件ではPayPayを使いません</span>
+                            <button onClick={() => save('paypay_not_needed', '')}
+                              className="text-sm px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold">↩ 戻す</button>
+                          </>
+                        )}
+                                         {!nn && at && (
+                          <>
+                            <span className="text-sm px-2 py-0.5 rounded bg-emerald-600 text-white font-bold">✅ 申請済</span>
+                            <span className="text-sm text-slate-200">
+                              {at}
+                              {days >= 0 && (
+                                <span className={days >= 45 ? 'text-emerald-400 ml-1' : 'text-amber-300 ml-1'}>
+                                  （{days}日経過{days < 45 ? ` / 目安45日まであと${45 - days}日` : ' ・完了見込み'}）
+                                </span>
+                              )}
+                            </span>
+                            <button onClick={() => {
+                              const v = prompt('PayPayを申請した日（YYYY-MM-DD）\n空にすると「未申請」に戻します', at)
+                              if (v === null) return
+                              save('paypay_applied_at', v.trim())
+                            }} className="text-sm px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold">✏ 日付を変更</button>
+                          </>
+                        )}
+                                         {!nn && !at && (
+                          <>
+                            <span className="text-sm px-2 py-0.5 rounded bg-amber-600 text-white font-bold">⚠ 未申請</span>
+                            <button onClick={() => save('paypay_applied_at', today())}
+                              className="text-sm px-2 py-0.5 rounded bg-emerald-700 hover:bg-emerald-600 text-white font-bold">✅ 今日申請した</button>
+                            <button onClick={() => {
+                              const v = prompt('PayPayを申請した日（YYYY-MM-DD）', today())
+                              if (v === null || !v.trim()) return
+                              save('paypay_applied_at', v.trim())
+                            }} className="text-sm px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold">📅 日付を指定</button>
+                            <button onClick={() => save('paypay_not_needed', '1')}
+                              className="text-sm px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold">－ 不要</button>
+                          </>
+                        )}
+                      </div>
+                                       {!nn && at && (
+                        <div className="mt-1 flex items-center gap-2 flex-wrap text-sm">
+                          <span className="text-slate-400">加盟店ID:</span>
+                          <span className="text-slate-100 font-mono">{mid || '－'}</span>
+                          <button onClick={() => {
+                            const v = prompt('PayPayの加盟店ID(MID)', mid)
+                            if (v === null) return
+                            save('paypay_mid', v.trim())
+                          }} className="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200">✏</button>
+                          {memo && <span className="text-slate-400">／ {memo}</span>}
+                          <button onClick={() => {
+                            const v = prompt('備考（進捗や連絡内容など）', memo)
+                            if (v === null) return
+                            save('paypay_apply_memo', v.trim())
+                          }} className="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200">📝 備考</button>
+                        </div>
+                      )}
                     </div>
                   )
                 })()}
