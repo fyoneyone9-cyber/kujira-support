@@ -1313,8 +1313,9 @@ export default function DeliveryPage() {
                           {it.status !== 'done' && (
                             <div className="flex flex-wrap gap-1">
                               {(name === 'PayCube' ? ['未発注', '社長承認待ち', '発注済み', '入荷履歴', '発送済み', '納品完了', '設定完了'] : EQUIP_STATUSES).map(st => (
-                                <button key={st} disabled={updating === it.id}
+                                <button key={st} disabled={updating === it.id || !!it.locked}
                                   onClick={() => {
+                                    if (it.locked) { alert('🔒 この案件はロック中です。編集するにはロックを解除してください。'); return }
                                     // PayCube・キーボックスは入金確認できていないと発注系ステータスにできない
                                     if ((name === 'PayCube' || name === 'キーボックス') && ['発注済み','入荷履歴','発送済み','納品完了','設定完了'].includes(st)) {
                                       const ps = (it.dashboard_todos?.['payment_status'] as string) || ''
@@ -1332,7 +1333,7 @@ export default function DeliveryPage() {
                                       saveTodoKey(it.id, it.dashboard_todos, todoKey, current === st ? '' : st)
                                     }
                                   }}
-                                  className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${current === st ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-500'}`}>
+                                  className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${it.locked ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : current === st ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-500'}`}>
                                   {st}
                                 </button>
                               ))}
